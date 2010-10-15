@@ -1,0 +1,10 @@
+Für alle 4 Klassen im UDP als auch im TCPpaket können runs erzeugt werden
+
+-->Run-->Runconfiguration-->Java Application --> New
+
+Sinnvoll benennen z.B. TCP-Sender für client im tcp-package
+Die richtige Klasse auswählen. Speichern (Apply)
+
+Dann zuerst immer Server starten (serv oder clientZwei) danach den passenden Sender starten.
+
+Zum starten aus den runconfigurations die angelegte Konfiguration auswählen und dann auf Run klicken
