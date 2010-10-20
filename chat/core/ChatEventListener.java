@@ -1,5 +1,5 @@
 package core;
-
+//testblub
 public interface ChatEventListener {
 
     public void onMessage(String username, String message);
