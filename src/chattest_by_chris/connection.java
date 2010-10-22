@@ -33,7 +33,7 @@ class connection extends Thread
 	}
 
 
-	//Run-Methode empängt ständig alle Nachrichten und schickt sie an alle Verbindungen heraus
+	//Run-Methode empfängt ständig alle Nachrichten und schickt sie an alle Verbindungen heraus
 	public void run()
 	{
 		String text;
