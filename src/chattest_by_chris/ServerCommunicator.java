@@ -76,7 +76,7 @@ public class ServerCommunicator extends Thread implements Runnable {
 		}
 
 		//Liste für Verbidungen wird erstellt
-		connections = new ArrayList();
+		connections = new ArrayList(); //ArrayList durch Vector ersetzen, da nicht threadsave !!!!!!!!!!!!!!!
 
 		//Thread wird erstellt
 		thread = new Thread(this);
