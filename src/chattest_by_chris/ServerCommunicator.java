@@ -6,10 +6,10 @@ import java.io.*; //Ein und Ausgaben, etc
 import java.util.*; //Listen, etc
 
 //alte improts
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
+//import java.util.ArrayList;
+//import java.util.Enumeration;
+//import java.util.Map.Entry;
+//import java.util.concurrent.ConcurrentHashMap;
 
 //imports welche inkludiert werden müssen
 /*import org.apache.commons.logging.Log;
