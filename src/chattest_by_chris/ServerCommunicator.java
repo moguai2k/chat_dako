@@ -25,7 +25,7 @@ import chatsession.pdu.ChatMessage;
 import chatsession.pdu.ChatUserList;*/
 
 //ServerCommunicator-Klasse soll als eigenst‰ndiger Thread laufen, daher runnable
-public class ServerCommunicator extends Thread implements Runnable {
+public class ServerCommunicator implements Runnable {
 	//Variablen
 	public static final int PORT = 8205; //unser PORT
 	private ServerSocket serverSocket; //Server-Socket (Verbindungslauscher)
@@ -95,9 +95,9 @@ public class ServerCommunicator extends Thread implements Runnable {
 
 	}
 	
-	//Es wird st‰ndig gecheckt ob Verbindungsanfragen vorhanden sind (endlos)
-	//Bei Eingang wird ein Objekt erzeugt. Ein neuer Thread.
-	public void listener()
+	//Es wird st‰ndig gecheckt ob Verbindungsanfragen vorhanden sind (endlos Listener)
+	//Bei Eingang wird ein Objekt erzeugt. Ein neuer Thread. Muss run heiﬂen wegen runnable.
+	public void run()
 	{
 		try
 		{
@@ -142,8 +142,6 @@ public class ServerCommunicator extends Thread implements Runnable {
 	}
 
 
-
-	
 	//User-Liste aktualisieren - nicht editiert
 /*	public void sendUserlistUpdate() {
 		Enumeration<String> keys = sessions.keys();
