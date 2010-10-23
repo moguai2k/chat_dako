@@ -29,7 +29,7 @@ public class ServerCommunicator extends Thread implements Runnable {
 	//Variablen
 	public static final int PORT = 8205; //unser PORT
 	private ServerSocket serverSocket; //Server-Socket (Verbindungslauscher)
-	private ArrayList connections; //darin werden die Verbindungen gelistet
+	private Vector connections; //darin werden die Verbindungen gelistet, Vector anstelle ArrayList, da threadsafe
 	Thread thread; //speichert den Thread der Klasse
 	
 	//unwichtige Variablen?
@@ -76,7 +76,7 @@ public class ServerCommunicator extends Thread implements Runnable {
 		}
 
 		//Liste für Verbidungen wird erstellt
-		connections = new ArrayList(); //ArrayList durch Vector ersetzen, da nicht threadsave !!!!!!!!!!!!!!!
+		connections = new Vector();
 
 		//Thread wird erstellt
 		thread = new Thread(this);
@@ -106,7 +106,7 @@ public class ServerCommunicator extends Thread implements Runnable {
 				Socket client = serverSocket.accept(); //accept() =   Listens for a connection to be made to this socket and accepts it.
 
 				connection ev = new connection(this, client); //Erstellt ein neues Objekt aka Verbindung
-				connections.add(ev); //Fügt die Verbindung der Liste hinzu.
+				connections.addElement(ev); //Fügt die Verbindung der Liste hinzu.
 			}
 		} catch (IOException e)
 		{
@@ -122,7 +122,7 @@ public class ServerCommunicator extends Thread implements Runnable {
 
 		for (int i = 0; i < connections.size(); i++)
 		{
-			event = (connection) connections.get(i);
+			event = (connection) connections.elementAt(i);
 			event.out.println(message);
 		}
 		
