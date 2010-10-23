@@ -29,7 +29,7 @@ public class ServerCommunicator implements Runnable {
 	//Variablen
 	public static final int PORT = 8205; //unser PORT
 	private ServerSocket serverSocket; //Server-Socket (Verbindungslauscher)
-	private Vector connections; //darin werden die Verbindungen gelistet, Vector anstelle ArrayList, da threadsafe
+	private Vector connections; //darin werden die Verbindungen gelistet, Vector anstelle ArrayList, da threadsafe -> synchronized
 	Thread thread; //speichert den Thread der Klasse
 	
 	//unwichtige Variablen?
