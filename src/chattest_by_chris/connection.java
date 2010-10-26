@@ -6,6 +6,7 @@ import java.io.*;
 //Da Objekt wieder als eigenständiger Thread laufen soll -> extends
 class connection extends Thread
 {
+	private String username;
 	private Socket client; //Chat-Server Socket
 	private ServerCommunicator server; //Zugriff auf Chat-Server-Obj
 	public PrintStream out; //Ausgangsstream, anstelle ObjectOutputStream, da PrintStream Strings ausgeben kann
@@ -50,6 +51,11 @@ class connection extends Thread
 		{
 			System.out.println("Fehler:" + e);
 		}
+	}
+
+
+	public String getUsername() {
+		return username;
 	}
 }
 

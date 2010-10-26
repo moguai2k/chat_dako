@@ -5,65 +5,25 @@ import java.net.*; //Socket, etc
 import java.io.*; //Ein und Ausgaben, etc
 import java.util.*; //Listen, etc
 
-//alte improts
-//import java.util.ArrayList;
-//import java.util.Enumeration;
-//import java.util.Map.Entry;
-//import java.util.concurrent.ConcurrentHashMap;
-
-//imports welche inkludiert werden müssen
-/*import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.PropertyConfigurator;
-import chatsession.ChatServerService;
-import chatsession.ChatServerServiceFactory;
-import chatsession.ex.ChatServiceException;
-import chatsession.impl.ChatServerServiceFactoryImpl;
-import chatsession.listener.ChatServerListener;
-import chatsession.pdu.ChatAction;
-import chatsession.pdu.ChatMessage;
-import chatsession.pdu.ChatUserList;*/
 
 //ServerCommunicator-Klasse soll als eigenständiger Thread laufen, daher runnable
 public class ServerCommunicator implements Runnable {
+	
 	//Variablen
 	public static final int PORT = 8205; //unser PORT
+    //String[] userList; //selbsterklärend, für Client zum Abruf
 	private ServerSocket serverSocket; //Server-Socket (Verbindungslauscher)
-	private Vector connections; //darin werden die Verbindungen gelistet, Vector anstelle ArrayList, da threadsafe -> synchronized
+	private Vector<connection> connections; //darin werden die Verbindungen gelistet, Vector anstelle ArrayList, da threadsafe -> synchronized
 	Thread thread; //speichert den Thread der Klasse
 	
-	//unwichtige Variablen?
-/*	private static Log log = LogFactory.getLog(ServerCommunicator.class);
-	private static ChatServerServiceFactory factory;
-	private static ConcurrentHashMap<String, ChatServerService> sessions = new ConcurrentHashMap<String, ChatServerService>();
-	private ChatServerService chatServerService;*/
-
 	
 	//Main-Methode
 	public static void main(String args[]) {
-		//alter Code, dieses wurde nun in den Ctor geschrieben
-/*		try {
-			PropertyConfigurator.configureAndWatch("log4j.properties",60 * 1000);
-			if (args != null) PORT = Integer.parseInt((args[0]));
-			factory = new ChatServerServiceFactoryImpl();
-			factory.register(PORT);
-			System.out.println("ServerCommunicator waiting for clients...");
-
-			while (true) {
-				ChatServerService service = factory.getSession();
-
-				ServerCommunicator communicator = new ServerCommunicator(
-						service);
-
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}*/
 		new ServerCommunicator(); //neue Instanz unserer Klasse -> Ctor wird aufgerufen
 	}
 
 	//Ctor
-	public ServerCommunicator() { //vorher paramter ChatServerService chatServerService
+	public ServerCommunicator() {
 		//Socket für PORT wird eröffnet
 		try
 		{
@@ -76,22 +36,12 @@ public class ServerCommunicator implements Runnable {
 		}
 
 		//Liste für Verbidungen wird erstellt
-		connections = new Vector();
+		connections = new Vector<connection>();
 
 		//Thread wird erstellt
 		thread = new Thread(this);
 		//Thread wird gestartet
 		thread.start();
-
-		
-		//alter Ctor
-/*		this.chatServerService = chatServerService;
-		try {
-			onLogin(chatServerService.getUserName());
-			chatServerService.registerChatSessionListener(this);
-		} catch (ChatServiceException e) {
-			log.error(e);
-		}*/
 
 	}
 	
@@ -107,6 +57,7 @@ public class ServerCommunicator implements Runnable {
 
 				connection ev = new connection(this, client); //Erstellt ein neues Objekt aka Verbindung
 				connections.addElement(ev); //Fügt die Verbindung der Liste hinzu.
+				//TODO: onLogin()
 			}
 		} catch (IOException e)
 		{
@@ -127,19 +78,43 @@ public class ServerCommunicator implements Runnable {
 		}
 		
 		
-		//Alter Code
-/*		Enumeration<String> keys = sessions.keys();
-		for (Entry<String, ChatServerService> entry : sessions.entrySet()) {
-			String user = entry.getKey();
-			try {
-				entry.getValue().sendMessage(message);
-			} catch (ChatServiceException e) {
-				// Session ist nicht mehr valide --> ausloggen
-				log.error("Error sending to " + user + ", logging out " + user);
-				onLogout(user);
-			}
-		}*/
 	}
+	
+	//Login-Methode
+	public void onLogin(connection conn) { //vllt auch über "String username" arbeiten..
+		if (connections.size() != 0) { //min. ein User soll eingeloggt sein 
+			
+			for (int i = 0; i < connections.size() - 1; i++) { //checken ob username schon vorhanden
+				if (conn.getUsername().equals(connections.elementAt(i).getUsername())) {
+					try {
+						//connections.elementAt(i).disconnect(); //TODO: Methode um denjenigen zu Kicken noch schreiben
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					connections.removeElement(conn); 
+					//nochmal unter anderem nick einloggen plz
+				}
+			}
+		}
+		return;
+	}
+	
+	//Logout-Methode
+	public void onLogout(String username) {
+
+		for (int i = 0; i < connections.size(); i++) { //Username suchen, Verbindung dazu trennen + löschen aus Vector
+			if (username.equals(connections.elementAt(i).getUsername())) {
+				try {
+					//connections.elementAt(i).disconnect(); //TODO: Methode um denjenigen zu Kicken noch schreiben
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				connections.removeElementAt(i);
+				break;
+			}
+		}
+	}
+
 
 
 	//User-Liste aktualisieren - nicht editiert
@@ -167,7 +142,7 @@ public class ServerCommunicator implements Runnable {
 
 /*	@Override
 	public void onActionEvent(ChatAction action) {
-		// TODO bisher noch keine Actions definiert
+		//bisher noch keine Actions definiert
 
 	}*/
 
