@@ -2,7 +2,6 @@ package core.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import core.ChatEventListener;
 import chatsession.ChatClientService;
 import chatsession.ex.ChatServiceException;
@@ -14,20 +13,25 @@ import chatsession.pdu.ChatUserList;
 
 public class ClientCommunicator implements ChatClientListener {
 	private static Log log = LogFactory.getLog(ClientCommunicator.class);
-
 	private static Integer startPort = 51000;
 	private ChatEventListener chatEventListener;
-
 	private ChatClientService chatClientService;
 	private int currentPort;
 
 	public ClientCommunicator(ChatEventListener chatEventListener) {
-		int nextPort = startPort;
+		
+		 try {
+			 chatClientService.registerChatSessionListener(this);
+			} catch (ChatServiceException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		
+		/*int nextPort = startPort;
 		boolean connected = false;
 		while (!connected) {
 			try {
-				chatClientService = new ChatClientServiceFactoryImpl()
-						.register(nextPort);
+				chatClientService = new ChatClientServiceFactoryImpl().register(nextPort);
 				chatClientService.registerChatSessionListener(this);
 				registerChatEventListener(chatEventListener);
 				currentPort = nextPort;
@@ -37,7 +41,7 @@ public class ClientCommunicator implements ChatClientListener {
 				continue;
 			}
 			connected = true;
-		}
+		}*/
 	}
 
 	public void registerChatEventListener(ChatEventListener listener) {

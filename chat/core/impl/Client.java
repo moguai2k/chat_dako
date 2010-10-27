@@ -2,8 +2,8 @@ package core.impl;
 
 import java.awt.BorderLayout;
 import java.awt.Button;
-import java.awt.FlowLayout;
 import java.awt.Frame;
+import java.awt.GridLayout;
 import java.awt.Label;
 import java.awt.List;
 import java.awt.Panel;
@@ -13,9 +13,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Arrays;
 import java.util.Vector;
-
-import org.apache.log4j.PropertyConfigurator;
-
 import core.ChatEventListener;
 import chatsession.pdu.ChatAction;
 
@@ -25,21 +22,30 @@ public class Client implements ChatEventListener {
     private Frame loginFrame, chatFrame;
     private List userList;
     private TextArea chatArea;
-    private TextField nameField, chatField;
+    private TextField nameField, ipField, portField, chatField;
     private Button submitButton, logoutButton;
 
     private void showLoginFrame() {
         loginFrame = new Frame();
-        loginFrame.setLayout(new FlowLayout());
+        loginFrame.setLayout(new GridLayout(4, 2, 0, 20));    // 5 rows, 3 columns, gaps
+        loginFrame.setResizable(false);
+        loginFrame.setBounds(100, 100, 1000, 1000);
 
         loginFrame.add(new Label("Name:"));
-
-        nameField = new TextField(20);
+        nameField = new TextField(30);
         loginFrame.add(nameField);
+        
+        loginFrame.add(new Label("IP:"));
+        ipField = new TextField(30);
+        loginFrame.add(ipField);
+        
+        loginFrame.add(new Label("Port:"));
+        portField = new TextField(30);
+        loginFrame.add(portField);
 
-        Button loginButton = new Button("login");
+        Button loginButton = new Button("logMEin");
         loginButton.addMouseListener(new LoginListener());
-        loginFrame.add(loginButton);
+        loginFrame.add(loginButton, BorderLayout.CENTER);
 
         loginFrame.pack();
         loginFrame.setVisible(true);
@@ -111,9 +117,9 @@ public class Client implements ChatEventListener {
     }
 
     public Client() {
-        PropertyConfigurator.configureAndWatch("log4j.properties", 60 * 1000);
+        //PropertyConfigurator.configureAndWatch("log4j.properties", 60 * 1000);
 
-        communicator = new ClientCommunicator(this);
+        //communicator = new ClientCommunicator(this);
         showLoginFrame();
     }
 
