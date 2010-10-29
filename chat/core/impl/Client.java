@@ -12,6 +12,8 @@ import java.awt.TextArea;
 import java.awt.TextField;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.Arrays;
 import java.util.Vector;
 
@@ -75,8 +77,15 @@ public class Client implements ChatEventListener {
 
         loginFrame.pack();
         loginFrame.setVisible(true);
+        
+        //Loginfenster lässt sich über das X schließen
+        loginFrame.addWindowListener(new WindowAdapter(){
+	        public void windowClosing(WindowEvent we){
+	          System.exit(0);
+	        }
+	      });
     }
-
+   
 
 	private void showChatFrame() {
         Panel usersPanel = new Panel();
@@ -122,6 +131,13 @@ public class Client implements ChatEventListener {
         chatFrame.add(ownPanel, BorderLayout.SOUTH);
         chatFrame.pack();
         chatFrame.setVisible(true);
+        
+        //Chatfenster lässt sich über das X schließen
+        chatFrame.addWindowListener(new WindowAdapter(){
+	        public void windowClosing(WindowEvent we){
+	          System.exit(0);
+	        }
+	      });
     }
 	
 	//Hilfsmethode Farbe
