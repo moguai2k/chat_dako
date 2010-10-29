@@ -118,7 +118,7 @@ public class Client implements ChatEventListener {
         Color(ownPanel);
         ownPanel.setLayout(new BorderLayout());
         ownPanel.add(new Label("What I want to say:"), BorderLayout.NORTH);
-        chatField = new TextField(20);
+        chatField = new TextField(30);
 	    enter(chatField, false);
         ownPanel.add(chatField, BorderLayout.CENTER);
         ownPanel.setForeground(Color.BLACK);
