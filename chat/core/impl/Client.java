@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.Vector;
 import core.ChatEventListener;
 import chatsession.ChatClientService;
+import chatsession.ChatClientServiceFactory;
 import chatsession.ex.ChatServiceException;
 import chatsession.impl.ChatClientServiceFactoryImpl;
 import chatsession.impl.ChatClientServiceImpl;
@@ -29,8 +30,7 @@ public class Client implements ChatEventListener {
     private TextArea chatArea;
     private TextField nameField, ipField, portField, chatField, errorField;
     private Button submitButton, logoutButton;
-    private ChatClientServiceImpl chatClientServiceImpl;
-	private ChatEventListener chatEventListener;
+    ChatClientService chatClientService;
 	
     private void showLoginFrame() {
         loginFrame = new Frame();
@@ -236,12 +236,13 @@ public class Client implements ChatEventListener {
     
 	public void login(String name, int port, String ip) {
 
-		ChatClientServiceFactoryImpl chatclientservicefactoryimpl = new ChatClientServiceFactoryImpl();
+		ChatClientServiceFactory chatclientservicefactory = new ChatClientServiceFactoryImpl();
+		chatClientService = new ChatClientServiceImpl();
 		
 		try {
-			chatclientservicefactoryimpl.register(port);
-			chatClientServiceImpl.create(ip, port, name);
-			communicator = new ClientCommunicator(this, chatClientServiceImpl, name);
+			chatclientservicefactory.register(port); //Registriert einen ChatClientService an einem lokalen port und gibt das ChatClientService-Objekt zur+ck
+			chatClientService.create(ip, port, name); //TODO: dynamisch. //Baut eine Session mit dem angegeben Partner auf
+			communicator = new ClientCommunicator(this, chatClientService, name);
 			} catch (ChatServiceException e) {
 				new ChatServiceException("Verbindungsfehler.");
 			}

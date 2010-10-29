@@ -49,8 +49,7 @@ public class ClientCommunicator implements ChatClientListener {
 
 	@Override
 	public void onMessageEvent(ChatMessage message) {
-		chatEventListener
-				.onMessage(message.getUsername(), message.getMessage());
+		chatEventListener.onMessage(message.getUsername(), message.getMessage());
 	}
 
 	public void logout(String name) {
