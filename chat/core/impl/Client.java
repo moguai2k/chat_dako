@@ -2,6 +2,7 @@ package core.impl;
 
 import java.awt.BorderLayout;
 import java.awt.Button;
+import java.awt.Color;
 import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.Label;
@@ -14,68 +15,98 @@ import java.awt.event.MouseEvent;
 import java.util.Arrays;
 import java.util.Vector;
 import core.ChatEventListener;
+import chatsession.ChatClientService;
+import chatsession.ex.ChatServiceException;
+import chatsession.impl.ChatClientServiceFactoryImpl;
+import chatsession.impl.ChatClientServiceImpl;
 import chatsession.pdu.ChatAction;
 
 public class Client implements ChatEventListener {
     private ClientCommunicator communicator;
-    private String userName;
+    private String userName, userIP, userPort;
     private Frame loginFrame, chatFrame;
     private List userList;
     private TextArea chatArea;
-    private TextField nameField, ipField, portField, chatField;
+    private TextField nameField, ipField, portField, chatField, errorField;
     private Button submitButton, logoutButton;
-
+    private ChatClientServiceImpl chatClientServiceImpl;
+	private ChatEventListener chatEventListener;
+	
     private void showLoginFrame() {
         loginFrame = new Frame();
         loginFrame.setLayout(new GridLayout(4, 2, 0, 20));    // 5 rows, 3 columns, gaps
         loginFrame.setResizable(false);
         loginFrame.setBounds(100, 100, 1000, 1000);
+        loginFrame.setBackground(Color.BLACK);
+        loginFrame.setForeground(Color.WHITE);
 
         loginFrame.add(new Label("Name:"));
         nameField = new TextField(30);
         loginFrame.add(nameField);
+        nameField.setForeground(Color.BLACK);
         
         loginFrame.add(new Label("IP:"));
         ipField = new TextField(30);
+		ipField.setText("127.0.0.1");
         loginFrame.add(ipField);
+        ipField.setForeground(Color.BLACK);
         
         loginFrame.add(new Label("Port:"));
         portField = new TextField(30);
+		portField.setText("50000");
         loginFrame.add(portField);
+        portField.setForeground(Color.BLACK);
 
         Button loginButton = new Button("logMEin");
         loginButton.addMouseListener(new LoginListener());
-        loginFrame.add(loginButton, BorderLayout.CENTER);
+        loginFrame.add(loginButton);
+        loginButton.setForeground(Color.BLACK);
+        
+        errorField = new TextField(50);
+        loginFrame.add(errorField);
+        errorField.setBackground(Color.RED);
+        errorField.setForeground(Color.WHITE);
 
         loginFrame.pack();
         loginFrame.setVisible(true);
     }
 
-    private void showChatFrame() {
+
+	private void showChatFrame() {
         Panel usersPanel = new Panel();
+        Color(usersPanel);
         usersPanel.setLayout(new BorderLayout());
         usersPanel.add(new Label("Current users:"), BorderLayout.NORTH);
         userList = new List(5, false);
+        userList.setBackground(Color.BLACK);
+        userList.setForeground(Color.WHITE);
         usersPanel.add(userList, BorderLayout.SOUTH);
 
         Panel chatPanel = new Panel();
+        Color(chatPanel);
         chatPanel.setLayout(new BorderLayout());
         chatPanel.add(new Label("Chat:"), BorderLayout.NORTH);
         chatArea = new TextArea(10, 20);
+        chatArea.setBackground(Color.BLACK);
+        chatArea.setForeground(Color.WHITE);
         chatPanel.add(chatArea, BorderLayout.SOUTH);
 
         Panel ownPanel = new Panel();
+        Color(ownPanel);
         ownPanel.setLayout(new BorderLayout());
         ownPanel.add(new Label("What I want to say:"), BorderLayout.NORTH);
         chatField = new TextField(20);
         ownPanel.add(chatField, BorderLayout.CENTER);
+        ownPanel.setForeground(Color.BLACK);
         Panel buttonsPanel = new Panel();
         submitButton = new Button("submit");
         submitButton.addMouseListener(new ChatListener());
         buttonsPanel.add(submitButton);
+        submitButton.setForeground(Color.BLACK);
         logoutButton = new Button("logout");
         logoutButton.addMouseListener(new ChatListener());
         buttonsPanel.add(logoutButton);
+        logoutButton.setForeground(Color.BLACK);
         ownPanel.add(buttonsPanel, BorderLayout.SOUTH);
 
         chatFrame = new Frame();
@@ -86,6 +117,12 @@ public class Client implements ChatEventListener {
         chatFrame.pack();
         chatFrame.setVisible(true);
     }
+	
+	//Hilfsmethode Farbe
+	private void Color(Panel ty) {
+        ty.setBackground(Color.BLACK);
+        ty.setForeground(Color.WHITE);
+	}
 
     @Override
     public void onMessage(String username, String message) {
@@ -118,9 +155,9 @@ public class Client implements ChatEventListener {
 
     public Client() {
         //PropertyConfigurator.configureAndWatch("log4j.properties", 60 * 1000);
-
         //communicator = new ClientCommunicator(this);
         showLoginFrame();
+
     }
 
     public static void main(String[] args) {
@@ -129,12 +166,60 @@ public class Client implements ChatEventListener {
 
     class LoginListener extends MouseAdapter {
         public void mouseClicked(MouseEvent e) {
-            userName = nameField.getText();
+            boolean ok = true;
+        	String error = "";
+        	
+        		if (nameField.getText().isEmpty()) {
+            	error += " Name ";
+            	ok = false;
+            }
+
+            if (ipField.getText().isEmpty() | !containsOnlyNumbers(ipField.getText(),"ip")) {
+            	error += "IP ";
+            	ok = false;
+            }
+
+            if (portField.getText().isEmpty() | !containsOnlyNumbers(portField.getText(),"port")) { //absichern dass es nur zahlen sind usw...
+            	error += "Port ";
+            	ok = false;
+            }
+
+            if (ok) {
+        	userName = nameField.getText();
+            userIP = ipField.getText();
+            userPort = portField.getText();
+            int port = Integer.parseInt(userPort); //String -> int
 
             loginFrame.dispose();
             showChatFrame();
-            communicator.login(userName);
+            login(userName, port, userIP);
+            }
+            else {
+            	errorField.setText("Bitte Eingaben kontrollieren:" + error);
+            	new LoginListener();
+            }
         }
+    }
+    
+    //HilfsMethode
+    public boolean containsOnlyNumbers(String str, String kind) {
+        
+        if (str == null || str.length() == 0)
+            return false;
+        
+        for (int i = 0; i < str.length(); i++) {
+
+        	if(kind == "ip") {
+        		if (!Character.isDigit(str.charAt(i)) && str.charAt(i) != '.') 
+        			return false;
+        	}
+        	else {
+        		if (!Character.isDigit(str.charAt(i))) 
+        			return false;
+        	}
+        }
+        
+        return true;
     }
 
     class ChatListener extends MouseAdapter {
@@ -148,5 +233,19 @@ public class Client implements ChatEventListener {
             }
         }
     }
+    
+	public void login(String name, int port, String ip) {
+
+		ChatClientServiceFactoryImpl chatclientservicefactoryimpl = new ChatClientServiceFactoryImpl();
+		
+		try {
+			chatclientservicefactoryimpl.register(port);
+			chatClientServiceImpl.create(ip, port, name);
+			communicator = new ClientCommunicator(this, chatClientServiceImpl, name);
+			} catch (ChatServiceException e) {
+				new ChatServiceException("Verbindungsfehler.");
+			}
+
+	}
 
 } // Client

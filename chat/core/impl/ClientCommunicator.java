@@ -13,57 +13,28 @@ import chatsession.pdu.ChatUserList;
 
 public class ClientCommunicator implements ChatClientListener {
 	private static Log log = LogFactory.getLog(ClientCommunicator.class);
-	private static Integer startPort = 51000;
 	private ChatEventListener chatEventListener;
 	private ChatClientService chatClientService;
-	private int currentPort;
+	private ChatClientServiceFactoryImpl chatclientservicefactoryimpl;
+	private Client client;
+	private String username;
 
-	public ClientCommunicator(ChatEventListener chatEventListener) {
-		
+	public ClientCommunicator(Client client, ChatClientService chatClientService, String username) {
+		 this.client = client;
+		 this.chatClientService = chatClientService;
+		 this.username = username;
+
 		 try {
 			 chatClientService.registerChatSessionListener(this);
 			} catch (ChatServiceException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		
-		/*int nextPort = startPort;
-		boolean connected = false;
-		while (!connected) {
-			try {
-				chatClientService = new ChatClientServiceFactoryImpl().register(nextPort);
-				chatClientService.registerChatSessionListener(this);
-				registerChatEventListener(chatEventListener);
-				currentPort = nextPort;
-			} catch (ChatServiceException e) {
-				log.error(e.getCause());
-				nextPort = nextPort + 1;
-				continue;
-			}
-			connected = true;
-		}*/
 	}
 
 	public void registerChatEventListener(ChatEventListener listener) {
 		this.chatEventListener = listener;
 	}
-
-	public void login(String name) {
-
-		boolean connected = false;
-
-		try {
-
-			log.info("Trying to set Listenport to " + currentPort);
-
-			chatClientService.create("127.0.0.1", 50000, name);
-
-		} catch (ChatServiceException e) {
-			log.error(e.getCause());
-
-		}
-
-	}
+	
 
 	@Override
 	public void onActionEvent(ChatAction action) {
