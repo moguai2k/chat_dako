@@ -33,6 +33,9 @@ import chatsession.impl.ChatClientServiceFactoryImpl;
 import chatsession.impl.ChatClientServiceImpl;
 import chatsession.pdu.ChatAction;
 
+import java.util.Date; 
+import java.text.*; 
+
 public class Client implements ChatEventListener {
     private ClientCommunicator communicator;
     private String userName, userIP, userPort;
@@ -43,6 +46,7 @@ public class Client implements ChatEventListener {
     private Button submitButton, logoutButton;
     ChatClientService chatClientService;
 	private static Log log = LogFactory.getLog(Client.class);
+	private ServerCommunicator server;
 	
     private void showLoginFrame() {
         loginFrame = new Frame();
@@ -113,13 +117,14 @@ public class Client implements ChatEventListener {
         chatArea.setBackground(Color.BLACK);
         chatArea.setForeground(Color.WHITE);
         chatPanel.add(chatArea, BorderLayout.SOUTH);
-
+        
         Panel ownPanel = new Panel();
         Color(ownPanel);
         ownPanel.setLayout(new BorderLayout());
         ownPanel.add(new Label("What I want to say:"), BorderLayout.NORTH);
         chatField = new TextField(30);
 	    enter(chatField, false);
+	    
         ownPanel.add(chatField, BorderLayout.CENTER);
         ownPanel.setForeground(Color.BLACK);
         Panel buttonsPanel = new Panel();
@@ -148,13 +153,19 @@ public class Client implements ChatEventListener {
         chatFrame.setVisible(true);
     }
 	
-	//Hilfsmethode Farbe
+	//eigene Hilfsmethode Uhrzeit (TODO FÜR SERVERCOMMUNICATOR + GETTER)
+	public static String time(){
+	DateFormat shortTime = DateFormat.getTimeInstance(DateFormat.SHORT); 
+	return shortTime.format(new Date()).toString(); 
+	}
+	
+	//eigene Hilfsmethode Farbe
 	private void Color(Panel ty) {
         ty.setBackground(Color.BLACK);
         ty.setForeground(Color.WHITE);
 	}
 	
-	//Hilfsmethode Enter-Taste
+	//eigene Hilfsmethode Enter-Taste
     private void enter(TextField field, final boolean login) {
 	    field.addKeyListener(new KeyAdapter() {
             public void keyPressed(KeyEvent e)
@@ -173,7 +184,7 @@ public class Client implements ChatEventListener {
         });
 	}
     
-    //Hilfsmethode zum Check ob Buchstaben oder Zahlen in IP/Port - nicht perfekt
+    //eigene Hilfsmethode zum Check ob Buchstaben oder Zahlen in IP/Port - nicht perfekt
     public boolean containsOnlyNumbers(String str, String kind) {
         
         if (str == null || str.length() == 0)
@@ -196,7 +207,10 @@ public class Client implements ChatEventListener {
 
     @Override
     public void onMessage(String username, String message) {
-        chatArea.append(username + ": " + message + "\n");
+    	if(message.contains(";)")) { //TODO: Erster Test: Smileys ersetzen und Schimpfwortfilter
+    		message.replaceAll(";)", ";-)");
+    	}
+        chatArea.append("(" + server.getTime() + ")" + " " + username + ": " + message + "\n");
         chatFrame.setVisible(true);
     }
 
@@ -209,9 +223,7 @@ public class Client implements ChatEventListener {
     @Override
     public void onAction(int actionId, String reserved) {
         if (actionId == ChatAction.CHATACTION_USERNAME_SCHON_VERGEBEN) {
-
-            chatArea
-                .append("Der Username ist schon vergeben. Bitte loggen Sie sich aus und starten Sie die Anwendung neu");
+            chatArea.append("Der Username ist schon vergeben. Bitte loggen Sie sich aus und starten Sie die Anwendung neu");
         }
     }
 
