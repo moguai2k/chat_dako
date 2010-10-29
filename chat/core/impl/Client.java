@@ -14,6 +14,11 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Arrays;
 import java.util.Vector;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.PropertyConfigurator;
+
 import core.ChatEventListener;
 import chatsession.ChatClientService;
 import chatsession.ChatClientServiceFactory;
@@ -31,6 +36,7 @@ public class Client implements ChatEventListener {
     private TextField nameField, ipField, portField, chatField, errorField;
     private Button submitButton, logoutButton;
     ChatClientService chatClientService;
+	private static Log log = LogFactory.getLog(Client.class);
 	
     private void showLoginFrame() {
         loginFrame = new Frame();
@@ -154,10 +160,9 @@ public class Client implements ChatEventListener {
     }
 
     public Client() {
-        //PropertyConfigurator.configureAndWatch("log4j.properties", 60 * 1000);
-        //communicator = new ClientCommunicator(this);
+        PropertyConfigurator.configureAndWatch("log4j.properties", 60 * 1000);
         showLoginFrame();
-
+		log.debug("<< Chat gestartet >>");
     }
 
     public static void main(String[] args) {
