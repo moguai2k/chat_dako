@@ -41,6 +41,7 @@ public class ChatClientServiceImpl extends BaseServiceImpl implements ChatClient
 		pdu.setOpId(ChatPdu.ChatOpId.sendMessage_req_PDU);
 		pdu.setName(message.getUsername());
 		pdu.setData(message);
+		log.debug("<< Name ("+message.getUsername()+") + Nachricht ("+message.getMessage()+") weitergegeben >>");
 		try {
 			lwtrtconnection.send(pdu);
 		} catch (LWTRTException e) {
