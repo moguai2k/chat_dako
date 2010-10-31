@@ -1,6 +1,7 @@
 package chatsession;
 
 import chatsession.ex.ChatServiceException;
+import chatsession.pdu.ChatUserList;
 import chatsession.listener.ChatClientListener;
 import chatsession.pdu.ChatAction;
 import chatsession.pdu.ChatMessage;
@@ -36,5 +37,7 @@ public interface ChatClientService extends BaseSessionService {
      * @param listener
      */
     void registerChatSessionListener(ChatClientListener listener) throws ChatServiceException;
+
+	void sendUserList(ChatUserList userlist) throws ChatServiceException; //neu
 
 }

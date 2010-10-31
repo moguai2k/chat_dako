@@ -10,12 +10,15 @@ import chatsession.pdu.ChatMessage;
 import chatsession.pdu.ChatUserList;
 
 public class ClientCommunicator implements ChatClientListener {
+	
+	//Attribute//
 	private static Log log = LogFactory.getLog(ClientCommunicator.class);
 	private ChatClientService chatClientService;
 	private Client client;
 	private String username;
 	
-	//TODO: Status: zu überarbeiten !
+	
+	//Ctor - TODO: überarbeiten !
 	public ClientCommunicator(Client client, ChatClientService chatClientService, String username) {
 		 this.client = client;
 		 this.chatClientService = chatClientService;
@@ -28,37 +31,36 @@ public class ClientCommunicator implements ChatClientListener {
 			}
 	}
 
-//	public void registerChatEventListener(ChatEventListener listener) {
-//		this.chatEventListener = listener;
-//	}
 	
-
-	@Override //Status vorerst Fertig !
+	//Test via ActionID auf Name-schon-vorhanden
 	public void onActionEvent(ChatAction action) {
 		client.onAction(action.getOpId(), action.getReserved());
-
 	}
 
-	@Override //Status Fertig ! ( müsste funktionieren )
+
+	//Userlistupdate
 	public void onUserListEvent(ChatUserList userlist) {
 		client.onUserListUpdate(userlist.getUserList());
 	}
 
-	@Override //Status erstmal Fertig !
+
+	//Nachricht wird empfahngen - Weitergabe von Name und Nachricht an Client
 	public void onMessageEvent(ChatMessage message) {
 		client.onMessage(message.getUsername(), message.getMessage());
 	}
 	
-	// TODO: Status: zu überarbeiten - destroy festlegen !
+	
+	//Logout-Methode
 	public void logout(String name) {
 		try {
-			chatClientService.destroy();
+			chatClientService.destroy(name);
 		} catch (ChatServiceException e) {
 			log.error(e);
 		}
 	}
 	
-	//TODO: Status: müsste theoretisch funktionieren
+	
+	//Nachricht geschrieben - Weitergabe von Nachricht und Name an Server
 	public void tell(String name, String text) {
 		ChatMessage msg = new ChatMessage(name, text);
 		try {

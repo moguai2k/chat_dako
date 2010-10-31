@@ -2,16 +2,17 @@ package chatsession.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
+import chatsession.impl.Threader;
 import chatsession.ChatClientService;
 import chatsession.ex.ChatServiceException;
 import chatsession.listener.ChatClientListener;
 import chatsession.pdu.ChatAction;
 import chatsession.pdu.ChatMessage;
 import chatsession.pdu.ChatPdu;
+import chatsession.pdu.ChatUserList;
+import lwtrt.impl.LWTRTServiceImpl;
 import lwtrt.LWTRTConnection;
 import lwtrt.ex.LWTRTException;
-import lwtrt.impl.LWTRTServiceImpl;
 
 /**
  * The Class ClientSessionImpl.
@@ -23,18 +24,34 @@ public class ChatClientServiceImpl extends BaseServiceImpl implements ChatClient
 	private static Log log = LogFactory.getLog(ChatClientServiceImpl.class);
 	protected ChatClientListener listener;
 	protected LWTRTConnection lwtrtconnection;
+	private Threader thread;
 
+	
 	@Override
 	public void create(String rcvAdd, int port, String name) throws ChatServiceException {
-		
-		if (currentStatus != SessionStatus.NO_SESSION) {
-			throw new ChatServiceException(
-					"Aufruf nicht m+glich. Falscher Status. Aktueller Status:"
-							+ currentStatus.toString());
+		LWTRTServiceImpl service = new LWTRTServiceImpl();
+		try {
+			service.connect(rcvAdd,port);
+		} catch (LWTRTException e) {
+			e.printStackTrace();
 		}
-
+		
+		ChatPdu pdu = new ChatPdu();
+		pdu.setOpId(ChatPdu.ChatOpId.createSession_req_PDU);
+		pdu.setName(name);
+		try {
+			lwtrtconnection.send(pdu);
+		} catch (LWTRTException er) {
+			er.printStackTrace();
+		}
+		
+/*		if (currentStatus != SessionStatus.NO_SESSION) {
+			throw new ChatServiceException(
+					"Aufruf nicht moeglich. Falscher Status. Aktueller Status:" + currentStatus.toString());
+		}*/
 	}
 
+	
 	@Override
 	public void sendMessage(ChatMessage message) throws ChatServiceException {
 		ChatPdu pdu = new ChatPdu();
@@ -49,20 +66,67 @@ public class ChatClientServiceImpl extends BaseServiceImpl implements ChatClient
 		}
 	}
 
+	
 	@Override
 	public void sendAction(ChatAction action) throws ChatServiceException {
-
+		ChatPdu pdu = new ChatPdu();
+		pdu.setOpId(ChatPdu.ChatOpId.sendAction_req_PDU);
+		pdu.setData(action);
+		log.debug("<< 'Action' zum Chat versandt >>");
+		try {
+			lwtrtconnection.send(pdu);
+		} catch (LWTRTException e) {
+			e.printStackTrace();
+		}
 	}
 
+	
 	@Override
-	public void registerChatSessionListener(ChatClientListener listener) {
+	public void registerChatSessionListener(ChatClientListener listener) throws ChatServiceException {
 		this.listener = listener;
+		
+		if (lwtrtconnection == null) {
+			throw new ChatServiceException("Kein Thread gestartet");
+		}
+		thread = new Threader(lwtrtconnection);
+		
+/*		if (thread == null)
+		{
+			thread = new Thread(lwtrtconnection); //k.A. wie man nen thread mit der connection aufmacht...
+			thread.setPriority(Thread.MIN_PRIORITY);
+			thread.start();
+		}*/
 
 	}
 
+	
 	@Override
-	public void destroy() throws ChatServiceException {
-
+	public void destroy(String username) throws ChatServiceException {
+		ChatPdu pdu = new ChatPdu();
+		pdu.setOpId(ChatPdu.ChatOpId.destroySession_req_PDU);
+		pdu.setName(username);
+		log.debug("<< Name ("+username+") loggt sich aus >>");
+		try {
+			lwtrtconnection.send(pdu);
+			lwtrtconnection.disconnect();
+		} catch (LWTRTException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+	//neue Methode, da noch pdu-id-sendList_req_PDU vorhanden war ^^
+	@Override
+	public void sendUserList(ChatUserList userlist) throws ChatServiceException {
+		ChatPdu pdu = new ChatPdu();
+		pdu.setOpId(ChatPdu.ChatOpId.sendList_req_PDU);
+		pdu.setData(userlist);
+		log.debug("<< Userlist generiert >>");
+		try {
+			lwtrtconnection.send(pdu);
+		} catch (LWTRTException e) {
+			e.printStackTrace();
+		}
 	}
 
 }
