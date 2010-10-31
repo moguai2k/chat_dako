@@ -2,10 +2,8 @@ package core.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import core.ChatEventListener;
 import chatsession.ChatClientService;
 import chatsession.ex.ChatServiceException;
-import chatsession.impl.ChatClientServiceFactoryImpl;
 import chatsession.listener.ChatClientListener;
 import chatsession.pdu.ChatAction;
 import chatsession.pdu.ChatMessage;
@@ -13,12 +11,11 @@ import chatsession.pdu.ChatUserList;
 
 public class ClientCommunicator implements ChatClientListener {
 	private static Log log = LogFactory.getLog(ClientCommunicator.class);
-	private ChatEventListener chatEventListener;
 	private ChatClientService chatClientService;
-	private ChatClientServiceFactoryImpl chatclientservicefactoryimpl;
 	private Client client;
 	private String username;
-
+	
+	//TODO: Status: zu überarbeiten !
 	public ClientCommunicator(Client client, ChatClientService chatClientService, String username) {
 		 this.client = client;
 		 this.chatClientService = chatClientService;
@@ -31,27 +28,28 @@ public class ClientCommunicator implements ChatClientListener {
 			}
 	}
 
-	public void registerChatEventListener(ChatEventListener listener) {
-		this.chatEventListener = listener;
-	}
+//	public void registerChatEventListener(ChatEventListener listener) {
+//		this.chatEventListener = listener;
+//	}
 	
 
-	@Override
+	@Override //Status vorerst Fertig !
 	public void onActionEvent(ChatAction action) {
-		chatEventListener.onAction(action.getOpId(), action.getReserved());
+		client.onAction(action.getOpId(), action.getReserved());
 
 	}
 
-	@Override
+	@Override //Status Fertig ! ( müsste funktionieren )
 	public void onUserListEvent(ChatUserList userlist) {
-		chatEventListener.onUserListUpdate(userlist.getUserList());
+		client.onUserListUpdate(userlist.getUserList());
 	}
 
-	@Override
+	@Override //Status erstmal Fertig !
 	public void onMessageEvent(ChatMessage message) {
-		chatEventListener.onMessage(message.getUsername(), message.getMessage());
+		client.onMessage(message.getUsername(), message.getMessage());
 	}
-
+	
+	// Status: zu überarbeiten - destroy festlegen !
 	public void logout(String name) {
 		try {
 			chatClientService.destroy();
@@ -59,7 +57,8 @@ public class ClientCommunicator implements ChatClientListener {
 			log.error(e);
 		}
 	}
-
+	
+	// Status: müsste theoretisch funktionieren
 	public void tell(String name, String text) {
 		ChatMessage msg = new ChatMessage(name, text);
 		try {
