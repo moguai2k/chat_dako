@@ -256,7 +256,7 @@ public class Client implements ChatEventListener {
         new Client();
     }
 
-    //Login-Methode (vorher LoginListener) ( TODO: überarbeiten - Fehlerhandling bei IP und beim Port )
+    //Login-Methode (vorher LoginListener) ( TODO: überarbeiten - Fehlerhandling bei IP )
     public void logMEin() {
             boolean ok = true;
         	String error = "";
@@ -275,13 +275,12 @@ public class Client implements ChatEventListener {
             	ok = false;
 	            }
 
-            if (userPort.isEmpty() || userPort.length() <= 5 || port >= 00000 || port <= 65535) {
+            if (userPort.isEmpty() || userPort.length() > 5 || port <= 00000 || port >= 65535) {
             	error += "Port ";
             	ok = false;
             }
+            
             if (ok) {
-
-//          int port = Integer.parseInt(userPort); //String -> int
 
             loginFrame.dispose();
             showChatFrame();
