@@ -9,12 +9,6 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.Vector;
 
-/**
- * The Class ConnectionImpl.
- * 
- * @author Hochschule München
- * @version 1.0.0
- */
 public class LWTRTConnectionImpl implements LWTRTConnection {
 	
 	// Instanzvariablen
