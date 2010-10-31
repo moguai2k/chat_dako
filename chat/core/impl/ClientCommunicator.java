@@ -49,7 +49,7 @@ public class ClientCommunicator implements ChatClientListener {
 		client.onMessage(message.getUsername(), message.getMessage());
 	}
 	
-	// Status: zu überarbeiten - destroy festlegen !
+	// TODO: Status: zu überarbeiten - destroy festlegen !
 	public void logout(String name) {
 		try {
 			chatClientService.destroy();
@@ -58,7 +58,7 @@ public class ClientCommunicator implements ChatClientListener {
 		}
 	}
 	
-	// Status: müsste theoretisch funktionieren
+	//TODO: Status: müsste theoretisch funktionieren
 	public void tell(String name, String text) {
 		ChatMessage msg = new ChatMessage(name, text);
 		try {

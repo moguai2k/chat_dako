@@ -177,7 +177,7 @@ public class Client implements ChatEventListener {
         chatFrame.setVisible(true);
     }
 	
-	//eigene Hilfsmethode Uhrzeit (TODO FÜR SERVERCOMMUNICATOR + GETTER)
+//eigene Hilfsmethode Uhrzeit (TODO FÜR SERVERCOMMUNICATOR + GETTER)
 //	public static String time(){
 //	DateFormat shortTime = DateFormat.getTimeInstance(DateFormat.SHORT); 
 //	return shortTime.format(new Date()).toString(); 
@@ -238,7 +238,7 @@ public class Client implements ChatEventListener {
         chatFrame.setVisible(true);
     }
     
-    @Override // Status : ?
+    @Override //TODO: Status : ?
     public void onUserListUpdate(String[] userList) {
         fillUserList(new Vector<String>(Arrays.asList(userList)));
         chatFrame.setVisible(true);
@@ -272,7 +272,7 @@ public class Client implements ChatEventListener {
         new Client();
     }
 
-    //neue Login-Methode (vorher LoginListener) ( Status: überarbeiten - Fehlerhandling bei IP und beim Port )
+    //TODO: neue Login-Methode (vorher LoginListener) ( Status: überarbeiten - Fehlerhandling bei IP und beim Port )
     public void logMEin() {
             boolean ok = true;
         	String error = "";
