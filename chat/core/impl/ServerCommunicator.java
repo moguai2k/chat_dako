@@ -1,6 +1,9 @@
 package core.impl;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -135,6 +138,13 @@ public class ServerCommunicator extends Thread implements ChatServerListener {
 		if (message.getMessage() != null) {
 			sendToEveryone(message);
 		}
+	}
+	
+	// Gibt die Zeit zurück HH:mm:ss
+	public String getTime() {
+		Date now = Calendar.getInstance().getTime();
+		SimpleDateFormat format = new SimpleDateFormat ("HH:mm:ss");
+		return format.format(now);
 	}
 
 } // ServerCommunicator
