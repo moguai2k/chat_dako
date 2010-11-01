@@ -13,7 +13,7 @@ public abstract class BaseServiceImpl implements BaseSessionService {
 	protected Threader thread;
 	protected LWTRTConnection connection;
 	protected SessionStatus currentStatus = SessionStatus.NO_SESSION;
-	protected String username;
+	protected String userName;
 
 	public enum SessionStatus {
 		NO_SESSION(1), SESSION_ACTIVE(2), SESSION_DESTROYED(3);
@@ -24,12 +24,12 @@ public abstract class BaseServiceImpl implements BaseSessionService {
 		}
 	}
 
-	public String getUsername() {
-		return username;
+	public String getUserName() {
+		return userName;
 	}
 
 	public void setUsername(String username) {
-		this.username = username;
+		this.userName = username;
 	}
 
 	public LWTRTConnection getConnection() {
