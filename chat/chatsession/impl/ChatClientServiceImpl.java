@@ -26,10 +26,12 @@ public class ChatClientServiceImpl extends BaseServiceImpl implements ChatClient
 	protected LWTRTConnection lwtrtconnection;
 	private Threader thread;
 
-	
+	//überarbeiten!
 	@Override
 	public void create(String rcvAdd, int port, String name) throws ChatServiceException {
-		LWTRTServiceImpl service = new LWTRTServiceImpl();
+		this.username = name;
+		//Test:
+/*		LWTRTServiceImpl service = new LWTRTServiceImpl();
 		try {
 			service.connect(rcvAdd,port);
 		} catch (LWTRTException e) {
@@ -43,8 +45,9 @@ public class ChatClientServiceImpl extends BaseServiceImpl implements ChatClient
 			lwtrtconnection.send(pdu);
 		} catch (LWTRTException er) {
 			er.printStackTrace();
-		}
+		}*/
 		
+		//Alt:
 /*		if (currentStatus != SessionStatus.NO_SESSION) {
 			throw new ChatServiceException(
 					"Aufruf nicht moeglich. Falscher Status. Aktueller Status:" + currentStatus.toString());
@@ -101,7 +104,7 @@ public class ChatClientServiceImpl extends BaseServiceImpl implements ChatClient
 
 	
 	@Override
-	public void destroy(String username) throws ChatServiceException {
+	public void destroy() throws ChatServiceException {
 		ChatPdu pdu = new ChatPdu();
 		pdu.setOpId(ChatPdu.ChatOpId.destroySession_req_PDU);
 		pdu.setName(username);

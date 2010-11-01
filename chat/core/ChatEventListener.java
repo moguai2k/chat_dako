@@ -2,7 +2,7 @@ package core;
 
 public interface ChatEventListener {
 
-    public void onMessage(String username, String message);
+    public void onMessage(String username, String message, String time);
 
     public void onUserListUpdate(String[] userList);
 

@@ -17,7 +17,6 @@ public class ChatClientServiceFactoryImpl implements ChatClientServiceFactory {
 
 	@Override
 	public ChatClientService register(int port) throws ChatServiceException {
-		
         try {
     		service.register(port);
 		} catch (LWTRTException e) {

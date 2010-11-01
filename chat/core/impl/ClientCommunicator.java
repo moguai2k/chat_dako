@@ -46,14 +46,14 @@ public class ClientCommunicator implements ChatClientListener {
 
 	//Nachricht wird empfahngen - Weitergabe von Name und Nachricht an Client
 	public void onMessageEvent(ChatMessage message) {
-		client.onMessage(message.getUsername(), message.getMessage());
+		client.onMessage(message.getUsername(), message.getMessage(), message.getTime());
 	}
 	
 	
 	//Logout-Methode
-	public void logout(String name) {
+	public void logout() {
 		try {
-			chatClientService.destroy(name);
+			chatClientService.destroy();
 		} catch (ChatServiceException e) {
 			log.error(e);
 		}

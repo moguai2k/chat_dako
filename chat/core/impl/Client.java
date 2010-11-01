@@ -44,7 +44,6 @@ public class Client implements ChatEventListener {
     private Button submitButton, logoutButton;
     ChatClientService chatClientService;
 	private static Log log = LogFactory.getLog(Client.class);
-	private ServerCommunicator server;
 	
 	
 	//Erzeugen des Loginframes.
@@ -160,13 +159,6 @@ public class Client implements ChatEventListener {
     }
 	
 	
-	//eigene Hilfsmethode Uhrzeit (FÜR SERVERCOMMUNICATOR + GETTER)
-/*	public static String time(){
-	DateFormat shortTime = DateFormat.getTimeInstance(DateFormat.SHORT); 
-	return shortTime.format(new Date()).toString(); 
-	}*/
-
-	
 	//eigene Hilfsmethode Farbe
 	private void Color(Panel ty) {
         ty.setBackground(Color.BLACK);
@@ -211,11 +203,11 @@ public class Client implements ChatEventListener {
 
 
     //Nachricht und Name werden empfangen und zusammen mit der Serverzeit im Chat eingetragen
-    public void onMessage(String username, String message) {
+    public void onMessage(String username, String message, String time) {
     	if(message.contains(";)")) { //TODO: Erster Test: Smileys ersetzen und Schimpfwortfilter
     		message.replaceAll(";)", ";-)");  //Funktionsweise bei Laufzeit testen und ggf. über ENUM-Klassen steuern
     	}
-        chatArea.append("(" + server.getTime() + ")" + " " + username + ": " + message + "\n");
+        chatArea.append("(" + time + ")" + " " + username + ": " + message + "\n");
         chatFrame.setVisible(true);
     }
 
@@ -275,7 +267,7 @@ public class Client implements ChatEventListener {
             	ok = false;
 	            }
 
-            if (userPort.isEmpty() || userPort.length() > 5 || port <= 00000 || port >= 65535) {
+            if (userPort.isEmpty() || userPort.length() > 5 || port <= 00000 || port > 65535) {
             	error += "Port ";
             	ok = false;
             }
@@ -299,7 +291,8 @@ public class Client implements ChatEventListener {
                 communicator.tell(userName, chatField.getText());
                 chatField.setText("");
             } else if (e.getSource() == logoutButton) {
-                communicator.logout(userName);
+                communicator.logout();
+				chatFrame.dispose();
                 System.exit(0);
             }
         }

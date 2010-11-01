@@ -9,6 +9,6 @@ public interface BaseSessionService {
      * Beendet die Session und loggt den Client aus
      * @param name 
      */
-    void destroy(String name) throws ChatServiceException; //String name
+    void destroy() throws ChatServiceException;
 
 }

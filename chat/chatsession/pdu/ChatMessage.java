@@ -14,6 +14,11 @@ public class ChatMessage extends AbstractChatServiceData {
      * Der Benutzername des Senders
      */
     private String username;
+    
+    /**
+     * Serverzeit
+     */
+    private String time;
 
     public ChatMessage() {
 
@@ -39,5 +44,13 @@ public class ChatMessage extends AbstractChatServiceData {
     public void setUsername(String username) {
         this.username = username;
     }
+
+	public String getTime() {
+		return time;
+	}
+
+	public void setTime(String time) {
+		this.time = time;
+	}
 
 }
