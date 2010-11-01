@@ -33,8 +33,7 @@ public class ServerCommunicator extends Thread implements ChatServerListener {
 			PropertyConfigurator.configureAndWatch("log4j.properties",
 					60 * 1000);
 			int serverport = 50000;
-			if (args != null)
-				serverport = Integer.parseInt((args[0]));
+			
 			factory = new ChatServerServiceFactoryImpl();
 			factory.register(serverport);
 			System.out.println("ServerCommunicator waiting for clients...");
