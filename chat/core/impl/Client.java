@@ -1,7 +1,6 @@
 package core.impl;
 
 import java.awt.BorderLayout;
-
 import java.awt.AWTException;
 import java.awt.Button;
 import java.awt.Color;
@@ -185,19 +184,15 @@ public class Client implements ChatEventListener {
 	}
     
     
-    //eigene Hilfsmethode zum Check ob Buchstaben oder Zahlen in IP/Port - nicht perfekt
-    public boolean ipCheck(String str) {
-        
-        if (str == null || str.length() == 0)
-            return false;
-        
-        for (int i = 0; i < str.length(); i++) {
-        	
-        		if (!Character.isDigit(str.charAt(i)) && str.charAt(i) != '.') 
-        			return false;
-        	}
-        
-        return true;
+    //Hilfsmethode zum Check der IP-Adresse - IP-Pattern aus http://forums.sun.com/thread.jspa?threadID=584205&start=15&tstart=0
+    public final static boolean ValidateIPAddress(String  str)
+    {
+    	final String IP_PATTERN = "^((\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.){3}(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])$";
+		
+    	if (str.matches(IP_PATTERN))
+    		return true;
+    	else
+    		return false;
     }
 
 
@@ -247,7 +242,7 @@ public class Client implements ChatEventListener {
         new Client();
     }
 
-    //Login-Methode (vorher LoginListener) ( TODO: überarbeiten - Fehlerhandling bei IP )
+    //Login-Methode (vorher LoginListener)
     public void logMEin() {
             boolean ok = true;
         	String error = "";
@@ -261,7 +256,7 @@ public class Client implements ChatEventListener {
             ok = false;
             }
 
-            if (userIP.isEmpty() | !ipCheck(userIP)) {
+        	if (userIP.isEmpty() | !ValidateIPAddress(userIP)) {
             	error += "IP ";
             	ok = false;
 	            }
