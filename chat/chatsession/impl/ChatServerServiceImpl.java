@@ -68,18 +68,17 @@ public class ChatServerServiceImpl extends BaseServiceImpl implements
 
 	}
 
-	@Override
 	public String getUserName() {
 		return null;
 	}
 
 	@Override
-	public void destroy(String name) throws ChatServiceException {
+	public void destroy() throws ChatServiceException {
 		try {
 			this.finalize();
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
-		log.debug("Session von " +name+ " beendet");	
+		log.debug("Session von " +username+ " beendet");	
 	}
 }
