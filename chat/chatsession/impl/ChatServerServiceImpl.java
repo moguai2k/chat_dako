@@ -79,6 +79,6 @@ public class ChatServerServiceImpl extends BaseServiceImpl implements
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
-		log.debug("Session von " +super.username+ " beendet");	
+		log.debug("Session von " +super.userName+ " beendet");	
 	}
 }
