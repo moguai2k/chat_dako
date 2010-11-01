@@ -29,7 +29,7 @@ public class ChatClientServiceImpl extends BaseServiceImpl implements ChatClient
 	//überarbeiten!
 	@Override
 	public void create(String rcvAdd, int port, String name) throws ChatServiceException {
-		this.username = name;
+		this.userName = name;
 		//Test:
 /*		LWTRTServiceImpl service = new LWTRTServiceImpl();
 		try {
@@ -107,8 +107,8 @@ public class ChatClientServiceImpl extends BaseServiceImpl implements ChatClient
 	public void destroy() throws ChatServiceException {
 		ChatPdu pdu = new ChatPdu();
 		pdu.setOpId(ChatPdu.ChatOpId.destroySession_req_PDU);
-		pdu.setName(username);
-		log.debug("<< Name ("+username+") loggt sich aus >>");
+		pdu.setName(userName);
+		log.debug("<< Name ("+userName+") loggt sich aus >>");
 		try {
 			lwtrtconnection.send(pdu);
 			lwtrtconnection.disconnect();
