@@ -9,6 +9,8 @@ import chatsession.BaseSessionService;
 
 public abstract class BaseServiceImpl implements BaseSessionService {
 	private static Log log = LogFactory.getLog(BaseServiceImpl.class);
+	
+	protected Threader thread;
 	protected LWTRTConnection connection;
 	protected SessionStatus currentStatus = SessionStatus.NO_SESSION;
 	protected String username;

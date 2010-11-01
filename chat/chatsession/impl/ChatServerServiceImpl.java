@@ -65,7 +65,7 @@ public class ChatServerServiceImpl extends BaseServiceImpl implements
 	public void registerChatSessionListener(ChatServerListener listener)
 			throws ChatServiceException {
 		this.listener = listener;
-
+		
 	}
 
 	public String getUserName() {
@@ -79,6 +79,6 @@ public class ChatServerServiceImpl extends BaseServiceImpl implements
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
-		log.debug("Session von " +username+ " beendet");	
+		log.debug("Session von " +super.username+ " beendet");	
 	}
 }

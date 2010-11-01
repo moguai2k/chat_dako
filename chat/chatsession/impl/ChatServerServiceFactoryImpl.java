@@ -1,7 +1,6 @@
 package chatsession.impl;
 
 import lwtrt.LWTRTConnection;
-import lwtrt.impl.LWTRTConnectionImpl;
 import lwtrt.impl.LWTRTServiceImpl;
 
 import org.apache.commons.logging.Log;
@@ -10,10 +9,6 @@ import org.apache.commons.logging.LogFactory;
 import chatsession.ChatServerService;
 import chatsession.ChatServerServiceFactory;
 import chatsession.ex.ChatServiceException;
-import chatsession.listener.ChatServerListener;
-import chatsession.pdu.ChatAction;
-import chatsession.pdu.ChatMessage;
-import chatsession.pdu.ChatUserList;
 
 /**
  * The Enum ServerSessionFactoryImpl.
@@ -30,6 +25,7 @@ public class ChatServerServiceFactoryImpl implements ChatServerServiceFactory {
 	public void register(int port) throws ChatServiceException {
 		try {
 			lwtrtService.register(port);
+			System.out.println(port+" registriert");
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -40,8 +36,7 @@ public class ChatServerServiceFactoryImpl implements ChatServerServiceFactory {
 	public ChatServerService getSession() throws ChatServiceException {
 		LWTRTConnection connection = null;
 		try {
-			connection = lwtrtService.accept();
-			
+			connection = lwtrtService.accept();	
 		} catch (Exception e) {
 			log.debug("Fehler in accept():" + e);
 		}
