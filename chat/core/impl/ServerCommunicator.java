@@ -135,12 +135,13 @@ public class ServerCommunicator extends Thread implements ChatServerListener {
 	public void onMessageEvent(ChatMessage message) {
 
 		if (message.getMessage() != null) {
+			message.setTime(getTime());
 			sendToEveryone(message);
 		}
 	}
 	
 	// Gibt die Zeit zurück HH:mm:ss
-	public String getTime() {
+	private static String getTime() {
 		Date now = Calendar.getInstance().getTime();
 		SimpleDateFormat format = new SimpleDateFormat ("HH:mm:ss");
 		return format.format(now);
