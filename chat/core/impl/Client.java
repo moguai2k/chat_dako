@@ -20,7 +20,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Arrays;
 import java.util.Vector;
-import java.util.Date; 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.PropertyConfigurator;
@@ -205,7 +204,7 @@ public class Client implements ChatEventListener {
     //Nachricht und Name werden empfangen und zusammen mit der Serverzeit im Chat eingetragen
     public void onMessage(String username, String message, String time) {
     	if(message.contains(";)")) { //TODO: Erster Test: Smileys ersetzen und Schimpfwortfilter
-    		message.replaceAll(";)", ";-)");  //Funktionsweise bei Laufzeit testen und ggf. über ENUM-Klassen steuern
+    		message = message.replaceAll(";)", ";-)");  //Funktionsweise bei Laufzeit testen und ggf. über ENUM-Klassen steuern
     	}
         chatArea.append("(" + time + ")" + " " + username + ": " + message + "\n");
         chatFrame.setVisible(true);

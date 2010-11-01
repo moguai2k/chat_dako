@@ -19,7 +19,7 @@ public class Threader {
 	public void startThread() throws ChatServiceException {
 		if (lwtrtconnection == null) {
 			throw new ChatServiceException(
-					"Konnte Poller nicht starten, Connection ist null ");
+					"Connection ist null ");
 		}
 		if (thread == null) {
 			thread = new Thread((Runnable) lwtrtconnection);
