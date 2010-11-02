@@ -300,7 +300,7 @@ public class Client implements ChatEventListener {
 		chatClientService = new ChatClientServiceImpl();
 		
 		try {
-			chatclientservicefactory.register(port); //Registriert einen ChatClientService an einem lokalen port und gibt das ChatClientService-Objekt zur+ck
+			chatClientService = chatclientservicefactory.register(port); //Registriert einen ChatClientService an einem lokalen port und gibt das ChatClientService-Objekt zur+ck
 			chatClientService.create(ip, port, name); //Baut eine Session mit dem angegeben Partner auf
 			communicator = new ClientCommunicator(this, chatClientService, name);
 			} catch (ChatServiceException e) {
