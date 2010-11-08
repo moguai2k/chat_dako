@@ -5,14 +5,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.io.PrintStream;
-import java.util.Enumeration;
 
 import javax.swing.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.Appender;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.PropertyConfigurator;
@@ -20,10 +17,9 @@ import chatsession.ChatServerService;
 import chatsession.ChatServerServiceFactory;
 import chatsession.impl.ChatServerServiceFactoryImpl;
 
-import core.impl.app.MyAppender;
-import core.impl.app.TextAreaOutputStream;
+import core.MyAppender;
 
-public class Server { //implements ListAppenderListener 
+public class Server {
 	
 	//Attribute//
 	private static Log log = LogFactory.getLog(Server.class);
@@ -35,6 +31,7 @@ public class Server { //implements ListAppenderListener
 	private JLabel header;
 	private JLabel label;
 
+	
 	public void showServerFrame(){
 		consoleFrame = new JFrame("Chat-Server-Console");
 		logoutButton = new JButton("Server herunterfahren");
@@ -85,11 +82,6 @@ public class Server { //implements ListAppenderListener
 
         });
 
-        TextAreaOutputStream taos = new TextAreaOutputStream( console, 60 );
-        PrintStream ps = new PrintStream( taos );
-        System.setOut( ps );
-        System.setErr( ps );
-        
         consoleNew.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         console.enable(false);        
         consoleFrame.pack();
@@ -99,7 +91,6 @@ public class Server { //implements ListAppenderListener
 	    consoleFrame.setVisible(true);
 		consoleFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
-
 
 	
     //Ctor, Logdatei einstellen + Loginframe anzeigen
@@ -114,27 +105,37 @@ public class Server { //implements ListAppenderListener
     public static void main(String[] args) throws InterruptedException {
     	new Server();
     	
-		MyAppender a = new MyAppender(console);
-		Logger root = Logger.getRootLogger();
-		root.addAppender(a);
+        // Log4J mit eigenem Appender starten, intialisieren, layouten
+        PatternLayout pl = new PatternLayout();
+        pl.setConversionPattern( "%d{HH:mm}  |  %5p  |  %-23F  |  %m%n" );        
+        MyAppender cca = new MyAppender(console);
+        cca.setLayout( pl );
+        Logger rl = Logger.getRootLogger(); 
+        rl.addAppender( cca ); 
+        
 		log.debug("<< Server gestartet >>");
     }
     
     
+    //Server starten
     private void serverStart() {
 		int serverPort = 0;
-		serverPort = Integer.parseInt(port.getText());;
 		
-		if (port.getText().isEmpty() || port.getText().length() > 5 || serverPort <= 00000 || serverPort > 65535) {
-			log.debug("<< Port falsch >>");
-        	port.setBackground(Color.PINK);
+		if (port.getText().length() > 1 && port.getText().length() < 6 && containsOnlyNumbers(port.getText())) {
+			serverPort = Integer.parseInt(port.getText());;
+			if (serverPort >= 00000 && serverPort < 65536) {
+	        	port.setBackground(Color.WHITE);
+				servLogin(serverPort);
+			}
         }
 		else {
-		servLogin(serverPort);
+			log.debug("<< Port falsch >>");
+        	port.setBackground(Color.PINK);
 		}
     }
     
     
+    //Server-Login
     private void servLogin(int serverport) {   	
     	try {
     	factory = new ChatServerServiceFactoryImpl();
@@ -161,5 +162,16 @@ public class Server { //implements ListAppenderListener
 			log.error(e);
 		}
 	}
-	
+
+
+	//Hilfsmethode
+    public boolean containsOnlyNumbers(String str) {
+        if (str == null || str.length() == 0)
+            return false;
+        for (int i = 0; i < str.length(); i++) {
+            if (!Character.isDigit(str.charAt(i)))
+                return false;
+        }
+        return true;
+    }
 }

@@ -194,6 +194,19 @@ public class Client implements ChatEventListener {
     	else
     		return false;
     }
+    
+    
+    //Hilfsmethode zum Check des Ports //TODO: Mit der Server-Port-Check-Methode abgleichen, kleine Redundanz
+    public boolean ValidatePort(String userPort) {
+		try {
+			int port = Integer.parseInt(userPort); //String -> int
+			if (userPort.length() > 1 && userPort.length() < 6 && port >= 00000 && port < 65536)
+				return true;
+			else return false;
+			} catch (Exception e) {
+				return false;
+			}
+    }
 
 
     //Nachricht und Name werden empfangen und zusammen mit der Serverzeit im Chat eingetragen
@@ -249,7 +262,6 @@ public class Client implements ChatEventListener {
         	userName = nameField.getText();
             userIP = ipField.getText();
             userPort = portField.getText();
-        	int port = Integer.parseInt(userPort); //String -> int
         	
         	if (nameField.getText().isEmpty()) {
             error += " Name ";
@@ -261,13 +273,13 @@ public class Client implements ChatEventListener {
             	ok = false;
 	            }
 
-            if (userPort.isEmpty() || userPort.length() > 5 || port <= 00000 || port > 65535) {
-            	error += "Port ";
-            	ok = false;
-            }
+    		if (!ValidatePort(userPort)) {
+                	error += "Port ";
+                	ok = false;
+    			}
             
             if (ok) {
-
+            int port = Integer.parseInt(userPort);
             loginFrame.dispose();
             showChatFrame();
             login(userName,userIP,port);
