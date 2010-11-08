@@ -25,7 +25,7 @@ public class ChatServerServiceFactoryImpl implements ChatServerServiceFactory {
 	public void register(int port) throws ChatServiceException {
 		try {
 			lwtrtService.register(port);
-			System.out.println(port+" registriert");
+			log.debug("<< " + port + "registriert >>");
 		}
 		catch (Exception e) {
 			e.printStackTrace();
