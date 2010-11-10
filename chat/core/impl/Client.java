@@ -1,6 +1,7 @@
 package core.impl;
 
 import java.awt.BorderLayout;
+
 import java.awt.AWTException;
 import java.awt.Button;
 import java.awt.Color;
@@ -33,21 +34,22 @@ import chatsession.pdu.ChatAction;
 public class Client implements ChatEventListener {
 	
 	//Attribute//
-	private ClientCommunicator communicator;	
+	private ClientCommunicator clientCommunicator;
+	private ChatClientService chatClientService;
+	
 	private String userName, userIP, userPort;	
     private Frame loginFrame, chatFrame;
     private List userList;
     private TextArea chatArea;
     private TextField nameField, ipField, portField, chatField, errorField;
-    private Button submitButton, logoutButton;
-    ChatClientService chatClientService;
+    private Button submitButton, logoutButton, toreButton;
 	private static Log log = LogFactory.getLog(Client.class);
 	
 	
 	//Erzeugen des Loginframes.
 	private void showLoginFrame() {
         loginFrame = new Frame();
-        loginFrame.setLayout(new GridLayout(4, 2, 0, 20));    // 4 rows, 2 columns, gaps
+        loginFrame.setLayout(new GridLayout(5, 2, 0, 20));    // 4 rows, 2 columns, gaps
         loginFrame.setResizable(false);
         loginFrame.setBounds(100, 100, 1000, 1000);
         loginFrame.setBackground(Color.BLACK);
@@ -82,7 +84,7 @@ public class Client implements ChatEventListener {
 		
         loginFrame.add(loginButton);
         loginButton.setForeground(Color.BLACK);
-	    
+        
         loginFrame.addWindowListener(new WindowAdapter(){
 	        public void windowClosing(WindowEvent we){
 	          System.exit(0);
@@ -94,7 +96,20 @@ public class Client implements ChatEventListener {
         loginFrame.add(errorField);
         errorField.setBackground(Color.PINK);
         errorField.setForeground(Color.BLACK);
+        
+        
+		//Tore-Button //TODO SPÄTER: GridLayout(4, ...) und "toreButton" löschen
+		Button toreButton = new Button("Tores IP");
+		toreButton.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent me) {
+				ipField.setText("192.168.178.25");
+			}
+		});
+        loginFrame.add(toreButton);
+        toreButton.setForeground(Color.BLACK);
+		//Tore-Button-Ende
 
+        
         loginFrame.pack();
         loginFrame.setVisible(true);
     }
@@ -175,7 +190,7 @@ public class Client implements ChatEventListener {
                 		logMEin();
                 	}
                 	else {
-                        communicator.tell(userName, chatField.getText());
+                        clientCommunicator.tell(userName, chatField.getText());
                         chatField.setText("");
                 	}
                 }
@@ -194,7 +209,7 @@ public class Client implements ChatEventListener {
     	else
     		return false;
     }
-    
+
     
     //Hilfsmethode zum Check des Ports //TODO: Mit der Server-Port-Check-Methode abgleichen, kleine Redundanz
     public boolean ValidatePort(String userPort) {
@@ -207,12 +222,12 @@ public class Client implements ChatEventListener {
 				return false;
 			}
     }
-
+    
 
     //Nachricht und Name werden empfangen und zusammen mit der Serverzeit im Chat eingetragen
     public void onMessage(String username, String message, String time) {
     	if(message.contains(";)")) { //TODO: Erster Test: Smileys ersetzen und Schimpfwortfilter
-    		message = message.replaceAll(";)", ";-)");  //Funktionsweise bei Laufzeit testen und ggf. über ENUM-Klassen steuern
+    		message = message.replaceAll(";)", ";-)");  //Funktionsweise bei Laufzeit testen und ggf. ï¿½ber ENUM-Klassen steuern
     	}
         chatArea.append("(" + time + ")" + " " + username + ": " + message + "\n");
         chatFrame.setVisible(true);
@@ -255,6 +270,7 @@ public class Client implements ChatEventListener {
         new Client();
     }
 
+    
     //Login-Methode (vorher LoginListener)
     public void logMEin() {
             boolean ok = true;
@@ -290,14 +306,14 @@ public class Client implements ChatEventListener {
         }
     
     
-    //Methode Login und Logout zuständig
+    //Methode Login und Logout zustï¿½ndig
     class ChatListener extends MouseAdapter {
         public void mouseClicked(MouseEvent e) {
             if (e.getSource() == submitButton) {
-                communicator.tell(userName, chatField.getText());
+                clientCommunicator.tell(userName, chatField.getText());
                 chatField.setText("");
             } else if (e.getSource() == logoutButton) {
-                communicator.logout();
+                clientCommunicator.logout();
 				chatFrame.dispose();
                 System.exit(0);
             }
@@ -305,16 +321,13 @@ public class Client implements ChatEventListener {
     }
     
     
-    //TODO: überarbeiten !! + Port evtl. dynamisch gestalten?
-	public void login(String name, String ip, int port) {
-
-		ChatClientServiceFactory chatclientservicefactory = new ChatClientServiceFactoryImpl();
-		chatClientService = new ChatClientServiceImpl();
-		
+    //TODO: ï¿½berarbeiten !! + Port evtl. dynamisch gestalten?
+	public void login(String userName, String remoteAdress, int remotePort) {
+		ChatClientServiceFactoryImpl clServFac = new ChatClientServiceFactoryImpl();	
 		try {
-			chatClientService = chatclientservicefactory.register(port); //Registriert einen ChatClientService an einem lokalen port und gibt das ChatClientService-Objekt zur+ck
-			chatClientService.create(ip, port, name); //Baut eine Session mit dem angegeben Partner auf
-			communicator = new ClientCommunicator(this, chatClientService, name);
+			chatClientService = clServFac.register(50000); //Registriet mal fest 50000 als Listener
+			chatClientService.create(remoteAdress, remotePort, userName); //Baut eine Session mit dem angegeben Partner auf
+			clientCommunicator = new ClientCommunicator(this, chatClientService, userName);
 			} catch (ChatServiceException e) {
 				new ChatServiceException("Verbindungsfehler.");
 			}

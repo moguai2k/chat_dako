@@ -18,7 +18,7 @@ public class LWTRTConnectionRecvThread extends Thread {
 	}
 	
 	public void run() {
-		log.debug("Thread LWTRTConnection gestartet: " + connection.getLocalPort() + this);
+		log.debug("LWTRTConnection Receive Thread gestartet: " + connection.getLocalPort());
 		while (true) {
 			synchronized (connection) {
 				if (!connection.recvCache.isEmpty()) {
@@ -31,7 +31,6 @@ public class LWTRTConnectionRecvThread extends Thread {
 								respDisc.setSequenceNumber(pdu.getSequenceNumber());
 								respDisc.setRemoteAddress(connection.getRemoteAddress());
 								respDisc.setRemotePort(connection.getRemotePort());
-								respDisc.setLocalAddress(LWTRTHelper.fetchLocalAddress());
 								respDisc.setOpId(LWTRTPdu.OPID_DISCONNECT_RSP);
 								try {
 									connection.getWrapper().send(respDisc);
@@ -59,8 +58,6 @@ public class LWTRTConnectionRecvThread extends Thread {
 								respData.setSequenceNumber(pdu.getSequenceNumber());
 								respData.setRemoteAddress(connection.getRemoteAddress());
 								respData.setRemotePort(connection.getRemotePort());
-								respData.setLocalAddress(LWTRTHelper.fetchLocalAddress());
-								respData.setLocalPort(connection.getLocalPort());
 								respData.setOpId(LWTRTPdu.OPID_DATA_RSP);
 								try {
 									connection.getWrapper().send(respData);
@@ -68,14 +65,20 @@ public class LWTRTConnectionRecvThread extends Thread {
 								} catch (IOException e) {
 									e.printStackTrace();
 								}
+								connection.setSequenceNumber(LWTRTHelper.invertSeqNum(connection.getSequenceNumber()));
 								connection.trunk.add(pdu);
+								log.debug("trunk.add("+pdu+")");
 								connection.recvCache.remove(pdu);
+								log.debug("recvCache.remove("+pdu+")");
 								break;
 							case LWTRTPdu.OPID_DATA_RSP:
-								if (pdu.getSequenceNumber() == connection.getSequenceNumber())
-									connection.setSend(true);
-								log.debug("Datasending OK!");
-								connection.recvCache.remove(pdu);
+								if (pdu.getSequenceNumber() == connection.getSequenceNumber()) {
+									log.debug("Datasending OK!");
+									log.debug("Data-Response PDU aus revCache entfernt.");
+									connection.recvCache.remove(pdu);
+									connection.setSequenceNumber(LWTRTHelper.invertSeqNum(connection.getSequenceNumber()));
+								}
+								//else log.debug("Irgendwas läuft hier asynchsron");
 								break;
 							case LWTRTPdu.OPID_PING_REQ:
 								break;

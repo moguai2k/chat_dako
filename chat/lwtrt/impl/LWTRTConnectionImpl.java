@@ -4,12 +4,21 @@ import udp.wrapper.UdpSocketWrapper;
 import lwtrt.pdu.LWTRTPdu;
 import lwtrt.LWTRTConnection;
 import lwtrt.ex.LWTRTException;
+import lwtrt.impl.LWTRTHelper;
 
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.Vector;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class LWTRTConnectionImpl implements LWTRTConnection {
+	
+	private static Log log = LogFactory.getLog(LWTRTConnectionImpl.class);
+	
 	
 	// Instanzvariablen
 	private String localAddress;
@@ -19,8 +28,17 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 
 	private long sequenceNumber;
 	
-	private boolean send = false;
+	// TEST
+	private boolean server = false;
 	
+	public boolean isServer() {
+		return server;
+	}
+
+	public void setServer(boolean server) {
+		this.server = server;
+	}
+
 	// UDP-Wrapper zum Senden der Protocol Data Units
 	private UdpSocketWrapper wrapper;
 	// Puffer für empfangene PDU´s
@@ -31,29 +49,21 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 	public Vector<LWTRTPdu> trunk = new Vector<LWTRTPdu>();
 	
 	// Konstruktor
-	public LWTRTConnectionImpl(String localAddress, int localPort, String remoteAddress, int remotePort) {
+	public LWTRTConnectionImpl(String localAddress, int localPort, String remoteAddress, int remotePort, UdpSocketWrapper wrapper) {
 		this.localAddress = localAddress;
 		this.localPort = localPort;
 		this.remoteAddress = remoteAddress;
 		this.remotePort = remotePort;
-		wrapper = LWTRTServiceImpl.socketMap.get((Integer) localPort);
+		this.wrapper = wrapper;
 		LWTRTConnectionRecvThread recvThread = new LWTRTConnectionRecvThread(this);
 		recvThread.start();
-		sequenceNumber = 1;	
+		this.sequenceNumber = 1;	
 	}
 	
 // Getter + Setter	
 	
 	public String getLocalAddress() {
 		return localAddress;
-	}
-
-	public boolean isSend() {
-		return send;
-	}
-
-	public void setSend(boolean send) {
-		this.send = send;
 	}
 
 	public void setLocalAddress(String localAddress) {
@@ -107,8 +117,6 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 		LWTRTPdu pdu = new LWTRTPdu();
 		LWTRTPdu recvPdu = new LWTRTPdu();
 		pdu.setOpId(LWTRTPdu.OPID_DISCONNECT_REQ);
-		pdu.setLocalAddress(localAddress);
-		pdu.setLocalPort(localPort);
 		pdu.setRemoteAddress(remoteAddress);
 		pdu.setRemotePort(remotePort);
 
@@ -137,8 +145,7 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 			}
 		} 
 		
-		if (this.sequenceNumber == 1) this.sequenceNumber = 0;
-		else this.sequenceNumber = 1;
+		sequenceNumber = LWTRTHelper.invertSeqNum(sequenceNumber);
 
 	}
 
@@ -160,52 +167,50 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 		LWTRTPdu pdu = new LWTRTPdu();
 		LWTRTPdu recvPdu = new LWTRTPdu();
 		pdu.setOpId(LWTRTPdu.OPID_DATA_REQ);
-		pdu.setLocalAddress(LWTRTHelper.fetchLocalAddress());
-		pdu.setLocalPort(localPort);
 		pdu.setRemoteAddress(remoteAddress);
 		pdu.setRemotePort(remotePort);
 		pdu.setUserData(chatPdu);
 		pdu.setSequenceNumber(sequenceNumber);
-		for (int i=1; i<=2; i++) {
+		//for (int i=1; i<=2; i++) {
 			try {
+				//log.debug("Sende chatPDU -- Versuch: " +i);
 				wrapper.send(pdu);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			long tenSecondsFromNow = Calendar.getInstance().getTimeInMillis() + 10000;
-			try {
-				while (Calendar.getInstance().getTimeInMillis() < tenSecondsFromNow) {
+			//if (server = false) {
+			
+			
+				/*try {
+					log.debug("Sende chatPDU -- Versuch: 1");
 					wrapper.receive(recvPdu);
+					log.debug("Sende chatPDU -- Versuch: 2");
 					if (recvPdu.getOpId() == LWTRTPdu.OPID_DATA_RSP){
-						System.out.println("Send OK!");
-						break; //While
+						log.debug("Sending OK");
+						//break; //While
 					}
-				}		
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			if (recvPdu.getOpId() == LWTRTPdu.OPID_DATA_RSP) {
-				System.out.println("Send OK!");
-				break; //For
-			}
-		} 		
-		if (this.sequenceNumber == 1) this.sequenceNumber = 0;
-		else this.sequenceNumber = 1;
+				} catch (IOException e) {
+					e.printStackTrace();
+				}*/
+			//}	
+		//}	
+		sequenceNumber = LWTRTHelper.invertSeqNum(sequenceNumber);
 	}
-
+	
 	@Override
 	public Object receive() throws LWTRTException {
 		while (true) {
 			if (!trunk.isEmpty()) {
 				LWTRTPdu pdu = trunk.firstElement();
 				trunk.remove(pdu);
+				log.debug("PDU abgearbeitet und aus Trunk entfernt");
 				return pdu.getUserData();
 			}
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(10);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
-			}
+			}	
 		}
 	}
 
@@ -216,8 +221,7 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 		pdu.setRemoteAddress(remoteAddress);
 		pdu.setRemotePort(remotePort);
 		pdu.setSequenceNumber(this.sequenceNumber);
-		if (this.sequenceNumber == 1) this.sequenceNumber = 0;
-		else this.sequenceNumber = 1;
+		this.sequenceNumber = LWTRTHelper.invertSeqNum(this.sequenceNumber);
 		try {
 			wrapper.send(pdu);
 		} catch (IOException e) {
@@ -225,4 +229,5 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 			e.printStackTrace();
 		}
 	}
+	
 }

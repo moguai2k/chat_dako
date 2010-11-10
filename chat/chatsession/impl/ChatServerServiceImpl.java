@@ -12,6 +12,7 @@ import chatsession.pdu.ChatAction;
 import chatsession.pdu.ChatMessage;
 import chatsession.pdu.ChatPdu;
 import chatsession.pdu.ChatUserList;
+import chatsession.pdu.ChatPdu.ChatOpId;
 
 /**
  * The Class ServerSessionImpl.
@@ -21,6 +22,7 @@ import chatsession.pdu.ChatUserList;
  */
 public class ChatServerServiceImpl extends BaseServiceImpl implements
 		ChatServerService {
+	
 	private static Log log = LogFactory.getLog(ChatServerServiceImpl.class);
 	ChatServerListener listener;
 
@@ -65,11 +67,12 @@ public class ChatServerServiceImpl extends BaseServiceImpl implements
 	public void registerChatSessionListener(ChatServerListener listener)
 			throws ChatServiceException {
 		this.listener = listener;
-		
+		log.debug("ChatSessionListener registriert.");
+		super.startThread();
 	}
 
 	public String getUserName() {
-		return null;
+		return super.getUserName();
 	}
 
 	@Override
@@ -80,5 +83,22 @@ public class ChatServerServiceImpl extends BaseServiceImpl implements
 			e.printStackTrace();
 		}
 		log.debug("Session von " +super.userName+ " beendet");	
+	}
+
+	@Override
+	protected void handleChatPdu(ChatPdu pdu) {
+		log.debug("Handle Chat-PDU: " +pdu.getOpId());
+		switch (pdu.getOpId()) {
+			case createSession_req_PDU:
+				super.setUserName(pdu.getName()); break;
+			case destroySession_req_PDU:
+				listener.onLogout(pdu.getName()); break;
+			case sendMessage_req_PDU:
+				ChatMessage msg = (ChatMessage) pdu.getData();
+				log.debug(msg.getMessage());
+				if (msg == null || msg.getMessage().equals(""))
+					System.out.println("Leere Nachricht, nichts passiert!"); 
+				listener.onMessageEvent(msg); break;
+		}	
 	}
 }

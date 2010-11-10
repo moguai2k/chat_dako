@@ -2,7 +2,6 @@ package chatsession.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import chatsession.impl.Threader;
 import chatsession.ChatClientService;
 import chatsession.ex.ChatServiceException;
 import chatsession.listener.ChatClientListener;
@@ -23,38 +22,23 @@ import lwtrt.ex.LWTRTException;
 public class ChatClientServiceImpl extends BaseServiceImpl implements ChatClientService {
 	private static Log log = LogFactory.getLog(ChatClientServiceImpl.class);
 	protected ChatClientListener listener;
-	protected LWTRTConnection lwtrtconnection;
-	private Threader thread;
-
-
-	//überarbeiten!
+	protected LWTRTServiceImpl lwtrtService;
+	
+	public ChatClientServiceImpl(LWTRTServiceImpl lwtrtService) {
+		this.lwtrtService = lwtrtService;
+	}
+	
 	@Override
-	public void create(String rcvAdd, int port, String name) throws ChatServiceException {
-		this.userName = name;
-		//Test:
-		LWTRTServiceImpl service = new LWTRTServiceImpl();
+	public void create(String serverAdress, int serverPort, String name) throws ChatServiceException {
+		super.userName = name;
 		try {
-			service.connect(rcvAdd,port);
+			super.setConnection(lwtrtService.connect(serverAdress, serverPort));
+			log.debug("Connection erstellt zu: " +serverAdress+ ", Remoteport: " +serverPort);
+			
 		} catch (LWTRTException e) {
 			e.printStackTrace();
 		}
-		
-		ChatPdu pdu = new ChatPdu();
-		pdu.setOpId(ChatPdu.ChatOpId.createSession_req_PDU);
-		pdu.setName(name);
-		try {
-			lwtrtconnection.send(pdu);
-		} catch (LWTRTException er) {
-			er.printStackTrace();
-		}
-		
-		//Alt:
-/*		if (currentStatus != SessionStatus.NO_SESSION) {
-			throw new ChatServiceException(
-					"Aufruf nicht moeglich. Falscher Status. Aktueller Status:" + currentStatus.toString());
-		}*/
 	}
-
 	
 	@Override
 	public void sendMessage(ChatMessage message) throws ChatServiceException {
@@ -64,7 +48,7 @@ public class ChatClientServiceImpl extends BaseServiceImpl implements ChatClient
 		pdu.setData(message);
 		log.debug("<< Name ("+message.getUsername()+") + Nachricht ("+message.getMessage()+") weitergegeben >>");
 		try {
-			lwtrtconnection.send(pdu);
+			super.connection.send(pdu);
 		} catch (LWTRTException e) {
 			e.printStackTrace();
 		}
@@ -78,7 +62,7 @@ public class ChatClientServiceImpl extends BaseServiceImpl implements ChatClient
 		pdu.setData(action);
 		log.debug("<< 'Action' zum Chat versandt >>");
 		try {
-			lwtrtconnection.send(pdu);
+			connection.send(pdu);
 		} catch (LWTRTException e) {
 			e.printStackTrace();
 		}
@@ -87,20 +71,24 @@ public class ChatClientServiceImpl extends BaseServiceImpl implements ChatClient
 	
 	@Override
 	public void registerChatSessionListener(ChatClientListener listener) throws ChatServiceException {
-		this.listener = listener;
-		
-		if (lwtrtconnection == null) {
-			throw new ChatServiceException("Kein Thread gestartet");
-		}
-		thread = new Threader(lwtrtconnection);
-		
-/*		if (thread == null)
-		{
-			thread = new Thread(lwtrtconnection); //k.A. wie man nen thread mit der connection aufmacht...
-			thread.setPriority(Thread.MIN_PRIORITY);
-			thread.start();
-		}*/
 
+		log.debug ("-- ChatSessionListner registriert");
+		this.listener = listener;
+		try {
+			super.startThread();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		ChatPdu pdu = new ChatPdu();
+		pdu.setOpId(ChatPdu.ChatOpId.createSession_req_PDU);
+		pdu.setName(super.userName);
+		try {
+			super.connection.send(pdu);
+		} catch (LWTRTException e) {
+			e.printStackTrace();
+		}
+		
 	}
 
 	
@@ -108,11 +96,11 @@ public class ChatClientServiceImpl extends BaseServiceImpl implements ChatClient
 	public void destroy() throws ChatServiceException {
 		ChatPdu pdu = new ChatPdu();
 		pdu.setOpId(ChatPdu.ChatOpId.destroySession_req_PDU);
-		pdu.setName(userName);
-		log.debug("<< Name ("+userName+") loggt sich aus >>");
+		pdu.setName(super.userName);
+		log.debug("<< Name ("+super.userName+") loggt sich aus >>");
 		try {
-			lwtrtconnection.send(pdu);
-			lwtrtconnection.disconnect();
+			connection.send(pdu);
+			connection.disconnect();
 		} catch (LWTRTException e) {
 			e.printStackTrace();
 		}
@@ -127,9 +115,23 @@ public class ChatClientServiceImpl extends BaseServiceImpl implements ChatClient
 		pdu.setData(userlist);
 		log.debug("<< Userlist generiert >>");
 		try {
-			lwtrtconnection.send(pdu);
+			connection.send(pdu);
 		} catch (LWTRTException e) {
 			e.printStackTrace();
+		}
+	}
+
+
+	@Override
+	protected void handleChatPdu(ChatPdu pdu) {
+		log.debug("Handle Chat-PDU: " +pdu.getOpId());
+		switch(pdu.getOpId()) {
+			case sendMessage_req_PDU:
+				listener.onMessageEvent((ChatMessage) pdu.getData()); break;
+			case sendAction_req_PDU:
+				listener.onActionEvent((ChatAction) pdu.getData()); break;
+			case sendList_req_PDU:
+				listener.onUserListEvent((ChatUserList) pdu.getData()); break;
 		}
 	}
 

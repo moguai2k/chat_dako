@@ -18,17 +18,18 @@ public class ClientCommunicator implements ChatClientListener {
 	private String username;
 	
 	
-	//Ctor - TODO: überarbeiten !
+	//Ctor - TODO: ï¿½berarbeiten !
 	public ClientCommunicator(Client client, ChatClientService chatClientService, String username) {
 		 this.client = client;
 		 this.chatClientService = chatClientService;
 		 this.username = username;
 
-		 try {
-			 chatClientService.registerChatSessionListener(this);
-			} catch (ChatServiceException e) {
-				e.printStackTrace();
-			}
+		try {
+			chatClientService.registerChatSessionListener(this);
+		} catch (ChatServiceException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
 	}
 
 	

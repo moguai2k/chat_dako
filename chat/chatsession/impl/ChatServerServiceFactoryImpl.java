@@ -1,6 +1,7 @@
 package chatsession.impl;
 
 import lwtrt.LWTRTConnection;
+import lwtrt.ex.LWTRTException;
 import lwtrt.impl.LWTRTServiceImpl;
 
 import org.apache.commons.logging.Log;
@@ -25,20 +26,19 @@ public class ChatServerServiceFactoryImpl implements ChatServerServiceFactory {
 	public void register(int port) throws ChatServiceException {
 		try {
 			lwtrtService.register(port);
-			log.debug("<< " + port + "registriert >>");
 		}
 		catch (Exception e) {
 			e.printStackTrace();
 		}
-
 	}
-
+	
 	public ChatServerService getSession() throws ChatServiceException {
-		LWTRTConnection connection = null;
+		
+		LWTRTConnection connection;
 		try {
-			connection = lwtrtService.accept();	
+			connection = lwtrtService.accept();
 		} catch (Exception e) {
-			log.debug("Fehler in accept():" + e);
+			throw new ChatServiceException("Problem beim Verbindungsaufbau:" +e);
 		}
 		ChatServerServiceImpl chatService = new ChatServerServiceImpl();
 		chatService.setConnection(connection);

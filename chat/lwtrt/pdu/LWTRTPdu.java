@@ -21,9 +21,6 @@ public class LWTRTPdu implements Serializable {
 	String remoteAddress;
 	long sequenceNumber;
 	Object userData;
-	
-	int localPort;
-	String localAddress;
 
 	public LWTRTPdu(int opId, int sourcePort, String remoteAddress,
 			long sequenceNumber, Object userData) {
@@ -34,16 +31,6 @@ public class LWTRTPdu implements Serializable {
 		this.setUserData(userData);
 	}
 	
-	// Hinzugefügt quell + ziel
-	public LWTRTPdu(int opId, int localPort, String localAddress, int remotePort, String remoteAddress,
-			long sequenceNumber) {
-		this.opId = opId;
-		this.localPort = localPort;
-		this.localAddress = localAddress;
-		this.remotePort = remotePort;
-		this.remoteAddress = remoteAddress;
-		this.sequenceNumber = sequenceNumber;	
-	}
 	
 	public LWTRTPdu(int opId, long sequenceNumber) {
 		this(opId, 0, "0.0.0.0", sequenceNumber, null);
@@ -51,22 +38,6 @@ public class LWTRTPdu implements Serializable {
 
 	public LWTRTPdu() {
 	};
-	
-	public int getLocalPort() {
-		return localPort;
-	}
-
-	public void setLocalPort(int localPort) {
-		this.localPort = localPort;
-	}
-
-	public String getLocalAddress() {
-		return localAddress;
-	}
-
-	public void setLocalAddress(String localAddress) {
-		this.localAddress = localAddress;
-	}
 
 	/**
 	 * @return the opId

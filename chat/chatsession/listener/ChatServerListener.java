@@ -9,4 +9,6 @@ public interface ChatServerListener extends BaseChatListener {
      * @param username
      */
     public void onLogout(String username);
+    
+    public void onLogin(String username);
 }
