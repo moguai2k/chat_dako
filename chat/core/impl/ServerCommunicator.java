@@ -10,9 +10,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+//import org.apache.log4j.PropertyConfigurator;
 
 import chatsession.ChatServerService;
+//import chatsession.ChatServerServiceFactory;
 import chatsession.ex.ChatServiceException;
+//import chatsession.impl.ChatServerServiceFactoryImpl;
 import chatsession.listener.ChatServerListener;
 import chatsession.pdu.ChatAction;
 import chatsession.pdu.ChatMessage;
@@ -21,8 +24,31 @@ import chatsession.pdu.ChatUserList;
 public class ServerCommunicator extends Thread implements ChatServerListener {
 	private static Log log = LogFactory.getLog(ServerCommunicator.class);
 
+	//private static ChatServerServiceFactory factory; //in der Server.java zu finden!
 	private static ConcurrentHashMap<String, ChatServerService> sessions = new ConcurrentHashMap<String, ChatServerService>();
 	private ChatServerService chatServerService;
+
+/*	public static void main(String args[]) { //in der Server.java zu finden!
+		try {
+			PropertyConfigurator.configureAndWatch("log4j.properties",
+					60 * 1000);
+			int serverport = 50000;
+			
+			factory = new ChatServerServiceFactoryImpl();
+			factory.register(serverport);
+			System.out.println("ServerCommunicator waiting for clients...");
+
+			while (true) {
+				ChatServerService service = factory.getSession();
+
+				ServerCommunicator communicator = new ServerCommunicator(
+						service);
+
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}*/
 
 		public ServerCommunicator(ChatServerService chatServerService) {
 		this.chatServerService = chatServerService;
