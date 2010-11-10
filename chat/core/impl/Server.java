@@ -107,7 +107,7 @@ public class Server {
     	
         // Log4J mit eigenem Appender starten, intialisieren, layouten
         PatternLayout pl = new PatternLayout();
-        pl.setConversionPattern( "%d{HH:mm}  |  %5p  |  %-23F  |  %m%n" );        
+        pl.setConversionPattern( "%d{HH:mm}  |  %5p  |  %F:%L  |  %m%n" );        
         MyAppender cca = new MyAppender(console);
         cca.setLayout( pl );
         Logger rl = Logger.getRootLogger(); 
