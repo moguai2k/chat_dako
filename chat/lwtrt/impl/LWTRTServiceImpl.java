@@ -147,17 +147,28 @@ public class LWTRTServiceImpl implements LWTRTService {
 		@Override
 		public void run() {
 			log.debug("--LWTRTService Receive Thread gestartet: " + connection.getLocalPort() +"--");
+				synchronized (connection.getWrapper()) {
+					while (true) {
+						LWTRTPdu recvPdu = new LWTRTPdu();
+						try {
+							this.connection.getWrapper().receive(recvPdu);
+						} catch (IOException e) {
+							e.printStackTrace();
+							this.stop();
+						}
+						this.connection.recvCache.add(recvPdu);
+						//log.debug
+						log.debug("PDU in Receive-Cache gespeichert. Hash:  " +recvPdu);
+						try{
+							Thread.sleep(20);
+							log.debug("SleepRECEIVETHREAD 20");
+						} catch (InterruptedException e){
+							
+						}
+				}
 				
-				while (true) {
-					LWTRTPdu recvPdu = new LWTRTPdu();
-					try {
-						this.connection.getWrapper().receive(recvPdu);
-					} catch (IOException e) {
-						e.printStackTrace();
-						this.stop();
-					}
-					this.connection.recvCache.add(recvPdu);
-					log.debug("PDU in Receive-Cache gespeichert. Hash:  " +recvPdu);
+						
+						
 				}
 		}
 	}

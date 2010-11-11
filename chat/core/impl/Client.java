@@ -46,7 +46,7 @@ public class Client implements ChatEventListener {
 	//Erzeugen des Loginframes.
 	private void showLoginFrame() {
         loginFrame = new Frame();
-        loginFrame.setLayout(new GridLayout(5, 2, 0, 20));    // 4 rows, 2 columns, gaps
+        loginFrame.setLayout(new GridLayout(4, 2, 0, 20));    // 4 rows, 2 columns, gaps
         loginFrame.setResizable(false);
         loginFrame.setBounds(100, 100, 1000, 1000);
         loginFrame.setBackground(Color.BLACK);
@@ -93,19 +93,6 @@ public class Client implements ChatEventListener {
         loginFrame.add(errorField);
         errorField.setBackground(Color.PINK);
         errorField.setForeground(Color.BLACK);
-        
-        
-		//Tore-Button //TODO SPÄTER: ToreButton löschen + GridLayout(4, ...)
-		Button toreButton = new Button("Tores IP");
-		toreButton.addMouseListener(new MouseAdapter() {
-			public void mousePressed(MouseEvent me) {
-				ipField.setText("192.168.178.25");
-			}
-		});
-        loginFrame.add(toreButton);
-        toreButton.setForeground(Color.BLACK);
-		//Tore-Button-Ende
-
         
         loginFrame.pack();
         loginFrame.setVisible(true);

@@ -8,6 +8,7 @@ import lwtrt.impl.LWTRTHelper;
 
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.Enumeration;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
@@ -47,6 +48,8 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 	public Vector<LWTRTPdu> pingCache = new Vector<LWTRTPdu>();
 	// Eimer PDU`s
 	public Vector<LWTRTPdu> trunk = new Vector<LWTRTPdu>();
+	//Reveice Trunk
+	public Vector<LWTRTPdu> receivetrunk = new Vector<LWTRTPdu>();
 	
 	// Konstruktor
 	public LWTRTConnectionImpl(String localAddress, int localPort, String remoteAddress, int remotePort, UdpSocketWrapper wrapper) {
@@ -171,30 +174,32 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 		pdu.setRemotePort(remotePort);
 		pdu.setUserData(chatPdu);
 		pdu.setSequenceNumber(sequenceNumber);
-		//for (int i=1; i<=2; i++) {
 			try {
 				//log.debug("Sende chatPDU -- Versuch: " +i);
 				wrapper.send(pdu);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			//if (server = false) {
 			
+			while(true) {
+				for (int i=0; i<receivetrunk.size(); i++) {
+					LWTRTPdu element = receivetrunk.get(i);
+					 log.debug("resp"+element.getSequenceNumber());
+				     log.debug("get"+pdu.getSequenceNumber());
+					if (pdu.getSequenceNumber() == element.getSequenceNumber()) {
+						receivetrunk.remove(element);
+						break;
+				}
+				
+				}
+				//log.debug("RESPONSE-PDU ERHALTEN!");
+				log.debug("SN: "+ sequenceNumber);
+				//sequenceNumber++;
+				log.debug("SN danach: "+ sequenceNumber);
+				break;
+			}
 			
-				/*try {
-					log.debug("Sende chatPDU -- Versuch: 1");
-					wrapper.receive(recvPdu);
-					log.debug("Sende chatPDU -- Versuch: 2");
-					if (recvPdu.getOpId() == LWTRTPdu.OPID_DATA_RSP){
-						log.debug("Sending OK");
-						//break; //While
-					}
-				} catch (IOException e) {
-					e.printStackTrace();
-				}*/
-			//}	
-		//}	
-		sequenceNumber = LWTRTHelper.invertSeqNum(sequenceNumber);
+		
 	}
 	
 	@Override

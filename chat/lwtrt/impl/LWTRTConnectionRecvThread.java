@@ -22,6 +22,7 @@ public class LWTRTConnectionRecvThread extends Thread {
 		while (true) {
 			synchronized (connection) {
 				if (!connection.recvCache.isEmpty()) {
+						log.debug("ich bin wieder in der schleife");
 						LWTRTPdu pdu = connection.recvCache.firstElement();
 						switch (pdu.getOpId()) {
 							case LWTRTPdu.OPID_CONNECT_REQ: connection.recvCache.remove(pdu); break;
@@ -55,7 +56,9 @@ public class LWTRTConnectionRecvThread extends Thread {
 								this.stop(); break;
 							case LWTRTPdu.OPID_DATA_REQ:
 								LWTRTPdu respData = new LWTRTPdu();
+								
 								respData.setSequenceNumber(pdu.getSequenceNumber());
+								log.debug("get sequence "+respData.getSequenceNumber());
 								respData.setRemoteAddress(connection.getRemoteAddress());
 								respData.setRemotePort(connection.getRemotePort());
 								respData.setOpId(LWTRTPdu.OPID_DATA_RSP);
@@ -65,20 +68,17 @@ public class LWTRTConnectionRecvThread extends Thread {
 								} catch (IOException e) {
 									e.printStackTrace();
 								}
-								connection.setSequenceNumber(LWTRTHelper.invertSeqNum(connection.getSequenceNumber()));
+								connection.setSequenceNumber(pdu.getSequenceNumber()+1);
 								connection.trunk.add(pdu);
 								log.debug("trunk.add("+pdu+")");
 								connection.recvCache.remove(pdu);
 								log.debug("recvCache.remove("+pdu+")");
 								break;
 							case LWTRTPdu.OPID_DATA_RSP:
-								if (pdu.getSequenceNumber() == connection.getSequenceNumber()) {
-									log.debug("Datasending OK!");
+									connection.receivetrunk.add(pdu);
+									log.debug("PDU in Response-Cache gespeichert. Hash:  " +pdu);
 									log.debug("Data-Response PDU aus revCache entfernt.");
 									connection.recvCache.remove(pdu);
-									connection.setSequenceNumber(LWTRTHelper.invertSeqNum(connection.getSequenceNumber()));
-								}
-								//else log.debug("Irgendwas läuft hier asynchsron");
 								break;
 							case LWTRTPdu.OPID_PING_REQ:
 								break;
@@ -90,7 +90,7 @@ public class LWTRTConnectionRecvThread extends Thread {
 				} // end-if 
 			} // synchronized
 			try {
-				Thread.sleep(10);
+				Thread.sleep(1);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
