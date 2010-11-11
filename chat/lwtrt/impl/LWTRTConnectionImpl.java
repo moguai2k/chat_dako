@@ -146,10 +146,7 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 				System.out.println("Disconnect accepted!");
 				break; //For
 			}
-		} 
-		
-		sequenceNumber = LWTRTHelper.invertSeqNum(sequenceNumber);
-
+		}
 	}
 
 	@Override
@@ -220,7 +217,6 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 		pdu.setRemoteAddress(remoteAddress);
 		pdu.setRemotePort(remotePort);
 		pdu.setSequenceNumber(this.sequenceNumber);
-		this.sequenceNumber = LWTRTHelper.invertSeqNum(this.sequenceNumber);
 		try {
 			wrapper.send(pdu);
 		} catch (IOException e) {

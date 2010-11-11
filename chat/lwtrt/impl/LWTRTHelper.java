@@ -16,10 +16,4 @@ public class LWTRTHelper {
 		return localAddress;
 	}
 	
-	public static long invertSeqNum(long sequenceNumber) {
-		if (sequenceNumber == 1)
-			return 0;
-		else return 1;
-	}
-	
 }
