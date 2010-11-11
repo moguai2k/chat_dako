@@ -185,8 +185,7 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 		while(received==false) {
 			for (int i=0; i<receivetrunk.size(); i++) {
 				LWTRTPdu element = receivetrunk.get(i);
-				 log.debug("resp"+element.getSequenceNumber());
-			     log.debug("get"+pdu.getSequenceNumber());
+				log.debug("Warte auf Response...");
 				if (pdu.getSequenceNumber() == element.getSequenceNumber()) {
 					log.debug("Response PDU eingetroffen und entfernt");
 					receivetrunk.remove(element);
