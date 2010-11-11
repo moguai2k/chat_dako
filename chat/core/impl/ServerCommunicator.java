@@ -23,41 +23,17 @@ import chatsession.pdu.ChatUserList;
 
 public class ServerCommunicator extends Thread implements ChatServerListener {
 	private static Log log = LogFactory.getLog(ServerCommunicator.class);
-
-	//private static ChatServerServiceFactory factory; //in der Server.java zu finden!
 	private static ConcurrentHashMap<String, ChatServerService> sessions = new ConcurrentHashMap<String, ChatServerService>();
 	private ChatServerService chatServerService;
 
-/*	public static void main(String args[]) { //in der Server.java zu finden!
-		try {
-			PropertyConfigurator.configureAndWatch("log4j.properties",
-					60 * 1000);
-			int serverport = 50000;
-			
-			factory = new ChatServerServiceFactoryImpl();
-			factory.register(serverport);
-			System.out.println("ServerCommunicator waiting for clients...");
 
-			while (true) {
-				ChatServerService service = factory.getSession();
-
-				ServerCommunicator communicator = new ServerCommunicator(
-						service);
-
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}*/
-
-		public ServerCommunicator(ChatServerService chatServerService) {
+	public ServerCommunicator(ChatServerService chatServerService) {
 		this.chatServerService = chatServerService;
 		try {
 			chatServerService.registerChatSessionListener(this);
 			try {
 				Thread.sleep(2000);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			onLogin(chatServerService.getUserName());
@@ -104,8 +80,6 @@ public class ServerCommunicator extends Thread implements ChatServerListener {
 
 	@Override
 	public void onActionEvent(ChatAction action) {
-		// TODO bisher noch keine Actions definiert
-
 	}
 
 	public void onLogin(String username) {
@@ -143,7 +117,7 @@ public class ServerCommunicator extends Thread implements ChatServerListener {
 	// Gibt die Zeit zurück HH:mm:ss
 	private static String getTime() {
 		Date now = Calendar.getInstance().getTime();
-		SimpleDateFormat format = new SimpleDateFormat ("HH:mm:ss");
+		SimpleDateFormat format = new SimpleDateFormat ("HH:mm");
 		return format.format(now);
 	}
 

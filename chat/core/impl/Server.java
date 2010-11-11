@@ -15,6 +15,7 @@ import org.apache.log4j.PatternLayout;
 import org.apache.log4j.PropertyConfigurator;
 import chatsession.ChatServerService;
 import chatsession.ChatServerServiceFactory;
+import chatsession.ex.ChatServiceException;
 import chatsession.impl.ChatServerServiceFactoryImpl;
 
 import core.MyAppender;
@@ -30,6 +31,7 @@ public class Server {
 	private JButton loginButton, logoutButton;
 	private JLabel header;
 	private JLabel label;
+	private Thread thread;
 
 	
 	public void showServerFrame(){
@@ -47,7 +49,6 @@ public class Server {
 		JPanel panel = new JPanel();
 		panel.add(header);panel.add(port);panel.add(consoleNew);panel.add(label);
 		panel.add(loginButton);panel.add(logoutButton);
-		logoutButton.setBounds(70,200,90,30);
 		
 		logoutButton.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent event){
@@ -56,13 +57,13 @@ public class Server {
         });
 		
 		consoleNew.setPreferredSize(new Dimension(400,400));
-		header.setBounds(30,20,280,80);
-		label.setBounds(20,445,250,60);
-		port.setBounds(180,460,100,30);
-		consoleNew.setBounds(50,100,500,330);
+		header.setBounds(30,20,280,80); //(int x, int y, int width, int height) 
+		label.setBounds(120,445,250,60);
+		port.setBounds(280,460,100,30);
+		consoleNew.setBounds(20,100,690,330);
 		port.setText("50000");
-		loginButton.setBounds(70,500,180,30);
-		logoutButton.setBounds(250,500,180,30);
+		loginButton.setBounds(170,500,180,30);
+		logoutButton.setBounds(350,500,180,30);
 		
         loginButton.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent event){
@@ -87,7 +88,7 @@ public class Server {
         consoleFrame.pack();
 		consoleFrame.add(panel);
 		panel.setLayout(null);
-		consoleFrame.setSize(600, 600);
+		consoleFrame.setSize(740, 600);
 	    consoleFrame.setVisible(true);
 		consoleFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
@@ -107,13 +108,13 @@ public class Server {
     	
         // Log4J mit eigenem Appender starten, intialisieren, layouten
         PatternLayout pl = new PatternLayout();
-        pl.setConversionPattern( "%d{HH:mm}  |  %5p  |  %F:%L  |  %m%n" );        
+        pl.setConversionPattern( "%d{HH:mm}  |  %F:%L  |  %m%n" );        
         MyAppender cca = new MyAppender(console);
         cca.setLayout( pl );
         Logger rl = Logger.getRootLogger(); 
         rl.addAppender( cca ); 
         
-		log.debug("<< Server gestartet >>");
+		log.debug("Server gestartet");
     }
     
     
@@ -129,7 +130,7 @@ public class Server {
 			}
         }
 		else {
-			log.debug("<< Port falsch >>");
+			log.debug("Port falsch");
         	port.setBackground(Color.PINK);
 		}
     }
@@ -138,17 +139,14 @@ public class Server {
     //Server-Login
     private void servLogin(int serverport) {   	
     	try {
-    	factory = new ChatServerServiceFactoryImpl();
-    	factory.register(serverport);
-    	log.debug("<< ServerCommunicator erwartet Clients >>");
+        	factory = new ChatServerServiceFactoryImpl();
+			factory.register(serverport);
+	    	log.debug("ServerCommunicator erwartet Clients");
+		} catch (ChatServiceException e) {
+			e.printStackTrace();
+		}
 
-    	while (true) {
-    		ChatServerService service = factory.getSession();
-    		ServerCommunicator communicator = new ServerCommunicator(service);
-    	}
-    	} catch (Exception e) {
-    			e.printStackTrace();
-    	}
+    	StartStopThread();
 
 }
 	
@@ -174,4 +172,35 @@ public class Server {
         }
         return true;
     }
+    
+    
+    //Threading ServerGui
+	public void StartStopThread()
+	{
+	if (thread == null)
+	{
+		thread = new Thread(new Runnable()
+	{
+
+	//Threading RUNit
+	public void run()
+	{
+		try {
+    	while (true) {
+    		ChatServerService service = factory.getSession();
+    		ServerCommunicator communicator = new ServerCommunicator(service);
+    	}
+    	} catch (Exception e) {
+    			e.printStackTrace();
+    	}
+	}
+	});
+		thread.start();
+
+	} else
+	{
+		thread = null;
+		thread.interrupt();
+	}
+	}
 }

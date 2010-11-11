@@ -1,7 +1,6 @@
 package core.impl;
 
 import java.awt.BorderLayout;
-
 import java.awt.AWTException;
 import java.awt.Button;
 import java.awt.Color;
@@ -25,10 +24,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.PropertyConfigurator;
 import core.ChatEventListener;
 import chatsession.ChatClientService;
-import chatsession.ChatClientServiceFactory;
 import chatsession.ex.ChatServiceException;
 import chatsession.impl.ChatClientServiceFactoryImpl;
-import chatsession.impl.ChatClientServiceImpl;
 import chatsession.pdu.ChatAction;
 
 public class Client implements ChatEventListener {
@@ -42,7 +39,7 @@ public class Client implements ChatEventListener {
     private List userList;
     private TextArea chatArea;
     private TextField nameField, ipField, portField, chatField, errorField;
-    private Button submitButton, logoutButton, toreButton;
+    private Button submitButton, logoutButton;
 	private static Log log = LogFactory.getLog(Client.class);
 	
 	
@@ -98,7 +95,7 @@ public class Client implements ChatEventListener {
         errorField.setForeground(Color.BLACK);
         
         
-		//Tore-Button //TODO SPÄTER: GridLayout(4, ...) und "toreButton" löschen
+		//Tore-Button //TODO SPÄTER: ToreButton löschen + GridLayout(4, ...)
 		Button toreButton = new Button("Tores IP");
 		toreButton.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent me) {
@@ -262,7 +259,7 @@ public class Client implements ChatEventListener {
     public Client() {
         PropertyConfigurator.configureAndWatch("log4j.properties", 60 * 1000);
         showLoginFrame();
-		log.debug("<< Chat gestartet >>");
+		log.debug("Chat gestartet");
     }
 
     //MAIN
