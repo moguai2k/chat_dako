@@ -168,38 +168,33 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 	@Override
 	public void send(Object chatPdu) throws LWTRTException {		
 		LWTRTPdu pdu = new LWTRTPdu();
-		LWTRTPdu recvPdu = new LWTRTPdu();
 		pdu.setOpId(LWTRTPdu.OPID_DATA_REQ);
 		pdu.setRemoteAddress(remoteAddress);
 		pdu.setRemotePort(remotePort);
 		pdu.setUserData(chatPdu);
 		pdu.setSequenceNumber(sequenceNumber);
-			try {
-				//log.debug("Sende chatPDU -- Versuch: " +i);
-				wrapper.send(pdu);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+		this.sequenceNumber++;
+		try {
+			//log.debug("Sende chatPDU -- Versuch: " +i);
+			wrapper.send(pdu);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 			
-			while(true) {
-				for (int i=0; i<receivetrunk.size(); i++) {
-					LWTRTPdu element = receivetrunk.get(i);
-					 log.debug("resp"+element.getSequenceNumber());
-				     log.debug("get"+pdu.getSequenceNumber());
-					if (pdu.getSequenceNumber() == element.getSequenceNumber()) {
-						receivetrunk.remove(element);
-						break;
-				}
-				
-				}
-				//log.debug("RESPONSE-PDU ERHALTEN!");
-				log.debug("SN: "+ sequenceNumber);
-				//sequenceNumber++;
-				log.debug("SN danach: "+ sequenceNumber);
-				break;
+		boolean received = false;
+		while(received==false) {
+			for (int i=0; i<receivetrunk.size(); i++) {
+				LWTRTPdu element = receivetrunk.get(i);
+				 log.debug("resp"+element.getSequenceNumber());
+			     log.debug("get"+pdu.getSequenceNumber());
+				if (pdu.getSequenceNumber() == element.getSequenceNumber()) {
+					log.debug("Response PDU eingetroffen und entfernt");
+					receivetrunk.remove(element);
+					received = true;
+					break;
+				}	
 			}
-			
-		
+		}
 	}
 	
 	@Override
