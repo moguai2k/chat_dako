@@ -28,17 +28,6 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 	private int remotePort;
 
 	private long sequenceNumber;
-	
-	// TEST
-	private boolean server = false;
-	
-	public boolean isServer() {
-		return server;
-	}
-
-	public void setServer(boolean server) {
-		this.server = server;
-	}
 
 	// UDP-Wrapper zum Senden der Protocol Data Units
 	private UdpSocketWrapper wrapper;
@@ -48,8 +37,8 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 	public Vector<LWTRTPdu> pingCache = new Vector<LWTRTPdu>();
 	// Eimer PDU`s
 	public Vector<LWTRTPdu> trunk = new Vector<LWTRTPdu>();
-	//Reveice Trunk
-	public Vector<LWTRTPdu> receivetrunk = new Vector<LWTRTPdu>();
+	//Response Trunk
+	public Vector<LWTRTPdu> responeTrunk = new Vector<LWTRTPdu>();
 	
 	// Konstruktor
 	public LWTRTConnectionImpl(String localAddress, int localPort, String remoteAddress, int remotePort, UdpSocketWrapper wrapper) {
@@ -118,12 +107,30 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 	@Override
 	public void disconnect() throws LWTRTException {
 		LWTRTPdu pdu = new LWTRTPdu();
-		LWTRTPdu recvPdu = new LWTRTPdu();
 		pdu.setOpId(LWTRTPdu.OPID_DISCONNECT_REQ);
 		pdu.setRemoteAddress(remoteAddress);
 		pdu.setRemotePort(remotePort);
-
-		// Schleife für 2 Wiederholungen bis Timeout
+		try {
+			wrapper.send(pdu);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		boolean received = false;
+		while(received==false) {
+			for (int i=0; i<responeTrunk.size(); i++) {
+				LWTRTPdu element = responeTrunk.get(i);
+				log.debug("Warte auf Response...");
+				if (pdu.getSequenceNumber() == element.getSequenceNumber()) {
+					log.debug("Response PDU eingetroffen und entfernt");
+					responeTrunk.remove(element);
+					received = true;
+					break;
+				}	
+			}
+		}
+				
+		/*// Schleife für 2 Wiederholungen bis Timeout
 		for (int i=1; i<=2; i++) {
 			try {
 				wrapper.send(pdu);
@@ -146,7 +153,7 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 				System.out.println("Disconnect accepted!");
 				break; //For
 			}
-		}
+		}*/
 	}
 
 	@Override
@@ -180,12 +187,12 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 			
 		boolean received = false;
 		while(received==false) {
-			for (int i=0; i<receivetrunk.size(); i++) {
-				LWTRTPdu element = receivetrunk.get(i);
+			for (int i=0; i<responeTrunk.size(); i++) {
+				LWTRTPdu element = responeTrunk.get(i);
 				log.debug("Warte auf Response...");
 				if (pdu.getSequenceNumber() == element.getSequenceNumber()) {
 					log.debug("Response PDU eingetroffen und entfernt");
-					receivetrunk.remove(element);
+					responeTrunk.remove(element);
 					received = true;
 					break;
 				}	

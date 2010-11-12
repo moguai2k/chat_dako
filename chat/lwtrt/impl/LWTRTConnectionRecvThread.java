@@ -22,7 +22,6 @@ public class LWTRTConnectionRecvThread extends Thread {
 		while (true) {
 			synchronized (connection) {
 				if (!connection.recvCache.isEmpty()) {
-						log.debug("ich bin wieder in der schleife");
 						LWTRTPdu pdu = connection.recvCache.firstElement();
 						switch (pdu.getOpId()) {
 							case LWTRTPdu.OPID_CONNECT_REQ: connection.recvCache.remove(pdu); break;
@@ -35,25 +34,18 @@ public class LWTRTConnectionRecvThread extends Thread {
 								respDisc.setOpId(LWTRTPdu.OPID_DISCONNECT_RSP);
 								try {
 									connection.getWrapper().send(respDisc);
-									log.debug("Send: DC-Response");
+									log.debug("Send: Disconnect-Response");
 								} catch (IOException e) {
-									e.printStackTrace();
-								}
-								try {
-									LWTRTServiceImpl.INSTANCE.unregister();
-								} catch (LWTRTException e) {
 									e.printStackTrace();
 								}
 								connection.recvCache.remove(pdu);
 								this.stop(); break;	
 							case LWTRTPdu.OPID_DISCONNECT_RSP:
-								try {
-									LWTRTServiceImpl.INSTANCE.unregister();
-								} catch (LWTRTException e) {
-									e.printStackTrace();
-								}
+								connection.responeTrunk.add(pdu);
+								log.debug("PDU in Response-Cache gespeichert. Hash:  " +pdu);
+								log.debug("Data-Response PDU aus revCache entfernt.");
 								connection.recvCache.remove(pdu);
-								this.stop(); break;
+								this.stop();break;
 							case LWTRTPdu.OPID_DATA_REQ:
 								LWTRTPdu respData = new LWTRTPdu();
 								respData.setSequenceNumber(pdu.getSequenceNumber());
@@ -73,10 +65,10 @@ public class LWTRTConnectionRecvThread extends Thread {
 								log.debug("recvCache.remove("+pdu+")");
 								break;
 							case LWTRTPdu.OPID_DATA_RSP:
-									connection.receivetrunk.add(pdu);
-									log.debug("PDU in Response-Cache gespeichert. Hash:  " +pdu);
-									log.debug("Data-Response PDU aus revCache entfernt.");
-									connection.recvCache.remove(pdu);
+								connection.responeTrunk.add(pdu);
+								log.debug("PDU in Response-Cache gespeichert. Hash:  " +pdu);
+								log.debug("Data-Response PDU aus revCache entfernt.");
+								connection.recvCache.remove(pdu);
 								break;
 							case LWTRTPdu.OPID_PING_REQ:
 								break;
@@ -88,7 +80,7 @@ public class LWTRTConnectionRecvThread extends Thread {
 				} // end-if 
 			} // synchronized
 			try {
-				Thread.sleep(1);
+				Thread.sleep(10);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

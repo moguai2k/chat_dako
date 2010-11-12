@@ -23,7 +23,7 @@ public class LWTRTServiceImpl implements LWTRTService {
 	private static Log log = LogFactory.getLog(LWTRTServiceImpl.class);
 	protected static ConcurrentHashMap<Integer, UdpSocketWrapper> socketMap = new ConcurrentHashMap<Integer, UdpSocketWrapper>();
 	protected static ConcurrentHashMap<Integer, LWTRTConnectionImpl> connectionMap = new ConcurrentHashMap<Integer, LWTRTConnectionImpl>();
-	public static LWTRTServiceImpl INSTANCE = new LWTRTServiceImpl();
+	
 	private int listenPort;
 	private String localAddress = LWTRTHelper.fetchLocalAddress();
 	private long sequenceNumber = 0;
@@ -126,7 +126,6 @@ public class LWTRTServiceImpl implements LWTRTService {
 		// Connection erstellen und in einer Map speichern
 		LWTRTConnectionImpl connection = new LWTRTConnectionImpl(localAddress, listenPort, 
 				recvPdu.getRemoteAddress(), recvPdu.getRemotePort(), wrapper);
-		connection.setServer(true);
 		log.debug("Connection erstellt zu: " +recvPdu.getRemoteAddress()+ ", Remoteport: " +recvPdu.getRemotePort());
 		LWTRTServiceImpl.connectionMap.put(recvPdu.getRemotePort(), connection);
 		// Service Receive Thread starten
@@ -160,9 +159,9 @@ public class LWTRTServiceImpl implements LWTRTService {
 					log.debug("PDU in Receive-Cache gespeichert. Hash:  " +recvPdu);
 					try{
 						Thread.sleep(20);
-						log.debug("SleepRECEIVETHREAD 20");
+						//log.debug("SleepRECEIVETHREAD 20");
 					} catch (InterruptedException e){
-						
+						log.debug(e);
 					}
 				}		
 			}
