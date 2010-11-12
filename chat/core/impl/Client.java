@@ -211,7 +211,9 @@ public class Client implements ChatEventListener {
     //Nachricht und Name werden empfangen und zusammen mit der Serverzeit im Chat eingetragen
     public void onMessage(String username, String message, String time) {
     	if(message.contains(";)")) { //TODO: Erster Test: Smileys ersetzen und Schimpfwortfilter
-    		message = message.replaceAll(";)", ";-)");  //Funktionsweise bei Laufzeit testen und ggf. �ber ENUM-Klassen steuern
+    		//TODO - Fix
+    		//message = message.replaceAll(";)", ";-)");  //Funktionsweise bei Laufzeit testen und ggf. �ber ENUM-Klassen steuern
+    		//geht nicht. 
     	}
         chatArea.append("(" + time + ")" + " " + username + ": " + message + "\n");
         chatFrame.setVisible(true);

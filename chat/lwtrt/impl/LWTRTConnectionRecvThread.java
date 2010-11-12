@@ -49,7 +49,6 @@ public class LWTRTConnectionRecvThread extends Thread {
 							case LWTRTPdu.OPID_DATA_REQ:
 								LWTRTPdu respData = new LWTRTPdu();
 								respData.setSequenceNumber(pdu.getSequenceNumber());
-								log.debug("get sequence "+respData.getSequenceNumber());
 								respData.setRemoteAddress(connection.getRemoteAddress());
 								respData.setRemotePort(connection.getRemotePort());
 								respData.setOpId(LWTRTPdu.OPID_DATA_RSP);

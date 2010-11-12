@@ -8,6 +8,7 @@ import lwtrt.impl.LWTRTHelper;
 
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -129,31 +130,6 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 				}	
 			}
 		}
-				
-		/*// Schleife für 2 Wiederholungen bis Timeout
-		for (int i=1; i<=2; i++) {
-			try {
-				wrapper.send(pdu);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			long tenSecondsFromNow = Calendar.getInstance().getTimeInMillis() + 10000;
-			try {
-				while (Calendar.getInstance().getTimeInMillis() < tenSecondsFromNow) {
-					wrapper.receive(recvPdu);
-					if (recvPdu.getOpId() == LWTRTPdu.OPID_DISCONNECT_RSP){
-						System.out.println("Disconnect accepted!");
-						break; //While
-					}
-				}		
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			if (recvPdu.getOpId() == LWTRTPdu.OPID_DISCONNECT_RSP) {
-				System.out.println("Disconnect accepted!");
-				break; //For
-			}
-		}*/
 	}
 
 	@Override
@@ -185,6 +161,8 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 			e.printStackTrace();
 		}
 			
+		int counter = 0;
+		long milli = System.currentTimeMillis() + 2000;
 		boolean received = false;
 		while(received==false) {
 			for (int i=0; i<responeTrunk.size(); i++) {
@@ -196,6 +174,24 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 					received = true;
 					break;
 				}	
+			}
+			// Testen ob das Response Paket innerhalb von 2000 Millisekunden ankam.
+			// Falls nicht, wird das Paket nochmal geschickt, und der timer nochmal um 2000 Millisekunden hochgesetzt
+			// Die Counter Variable dient dazu, dass das Paket maximal 5 mal gesendet wird.
+			if(milli < System.currentTimeMillis()) {
+				milli = System.currentTimeMillis() + 2000;
+				counter++;
+				log.debug("Paket gesendet - Response kam nach 2 Sekunden nicht an - Paket wird nochmal geschickt. Anzahl der geschickten Pakete: "+ counter);
+				//Paket wird nochmal gesendet.
+				try {
+					wrapper.send(pdu);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				if(counter > 4) {
+					// TODO Hier müsste dann eine Meldung dem Nutzer ausgegeben werden, dass sein Paket nicht ankam
+					// Alternativ gleich disconnecten
+				}
 			}
 		}
 	}
