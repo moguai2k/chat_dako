@@ -99,8 +99,8 @@ public class ChatClientServiceImpl extends BaseServiceImpl implements ChatClient
 		pdu.setName(super.userName);
 		log.debug("<< Name ("+super.userName+") loggt sich aus >>");
 		try {
-			connection.send(pdu);
-			//connection.disconnect();
+			//connection.send(pdu);
+			connection.disconnect();
 		} catch (LWTRTException e) {
 			e.printStackTrace();
 		}
