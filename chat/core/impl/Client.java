@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.AWTException;
 import java.awt.Button;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.Label;
@@ -11,6 +12,8 @@ import java.awt.List;
 import java.awt.Panel;
 import java.awt.TextArea;
 import java.awt.TextField;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -19,6 +22,15 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Arrays;
 import java.util.Vector;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.PropertyConfigurator;
@@ -33,71 +45,84 @@ public class Client implements ChatEventListener {
 	//Attribute//
 	private ClientCommunicator clientCommunicator;
 	private ChatClientService chatClientService;
-	
 	private String userName, userIP, userPort;	
-    private Frame loginFrame, chatFrame;
+	private static Log log = LogFactory.getLog(Client.class);
+	//Chat
+    private Frame chatFrame;
     private List userList;
     private TextArea chatArea;
-    private TextField nameField, ipField, portField, chatField, errorField;
+    private TextField chatField;
     private Button submitButton, logoutButton;
-	private static Log log = LogFactory.getLog(Client.class);
-	
+	//Login
+	private JFrame clientLoginFrame;
+	private JTextField name, ip, port;
+	private JButton loginButton, downButton;
+	private JLabel header;
+	private JLabel labelName, labelIP, labelPORT, labelError;
+
 	
 	//Erzeugen des Loginframes.
-	private void showLoginFrame() {
-        loginFrame = new Frame();
-        loginFrame.setLayout(new GridLayout(4, 2, 0, 20));    // 4 rows, 2 columns, gaps
-        loginFrame.setResizable(false);
-        loginFrame.setBounds(100, 100, 1000, 1000);
-        loginFrame.setBackground(Color.BLACK);
-        loginFrame.setForeground(Color.WHITE);
-        
-        loginFrame.add(new Label("Name:"));
-        nameField = new TextField(30);
-        loginFrame.add(nameField);
-        nameField.setForeground(Color.BLACK);
-	    enter(nameField, true);
-        
-        loginFrame.add(new Label("IP:"));
-        ipField = new TextField(30);
-		ipField.setText("127.0.0.1");
-        loginFrame.add(ipField);
-        ipField.setForeground(Color.BLACK);
-	    enter(ipField, true);
-        
-        loginFrame.add(new Label("Port:"));
-        portField = new TextField(30);
-		portField.setText("50000");
-        loginFrame.add(portField);
-        portField.setForeground(Color.BLACK);
-	    enter(portField, true);
-	    
-		Button loginButton = new Button("logMEin");
-		loginButton.addMouseListener(new MouseAdapter() {
-			public void mousePressed(MouseEvent me) {
-				logMEin();
-			}
-		});
+	public void showLoginFrame(){
+		clientLoginFrame = new JFrame("Chat-Client-Login");
+		clientLoginFrame.setResizable(false);
+		downButton = new JButton("Chat schließen");
+		name = new JTextField();
+		ip = new JTextField();
+		port = new JTextField();
 		
-        loginFrame.add(loginButton);
-        loginButton.setForeground(Color.BLACK);
-        
-        loginFrame.addWindowListener(new WindowAdapter(){
-	        public void windowClosing(WindowEvent we){
-	          System.exit(0);
-	        }
-	      });
-        
-        errorField = new TextField(50);
-        errorField.enable(false);
-        loginFrame.add(errorField);
-        errorField.setBackground(Color.PINK);
-        errorField.setForeground(Color.BLACK);
-        
-        loginFrame.pack();
-        loginFrame.setVisible(true);
-    }
-    
+		loginButton = new JButton("Chat starten");
+		header = new JLabel("Chat-Login");
+		header.setFont(new Font("Impact", Font.BOLD,40));
+		labelName = new JLabel("Bitte Nicknamen eingeben:");
+		labelIP = new JLabel("Bitte IP eingeben:");
+		labelPORT = new JLabel("Bitte Server-Port eingeben:");
+		labelError = new JLabel("");
+		JPanel panel = new JPanel();
+		panel.add(header);panel.add(name);panel.add(ip);panel.add(port);panel.add(labelName);
+		panel.add(labelIP);panel.add(labelPORT);panel.add(labelError);
+		panel.add(loginButton);panel.add(downButton);
+		
+		downButton.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent event){
+            	clientLoginFrame.dispose();
+                System.exit(0);
+            }
+        });
+		
+		header.setBounds(30,20,280,80); //(int x, int y, int width, int height) 
+		
+		labelName.setBounds(120,80,250,60);
+		name.setBounds(280,95,100,30);
+		name.setText("");
+		
+		labelIP.setBounds(120,120,250,60);
+		ip.setBounds(280,135,100,30);
+		ip.setText("127.0.0.1");
+		
+		labelPORT.setBounds(120,160,250,60);
+		port.setBounds(280,175,100,30);
+		port.setText("50000");
+		
+		loginButton.setBounds(170,220,180,30);
+		downButton.setBounds(350,220,180,30);
+		
+        loginButton.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent event){
+				logMEin();
+            }
+        });
+		enter(name, true);
+		enter(ip, true);
+		enter(port, true);
+
+        clientLoginFrame.pack();
+		clientLoginFrame.add(panel);
+		panel.setLayout(null);
+		clientLoginFrame.setSize(590, 325);
+	    clientLoginFrame.setVisible(true);
+		clientLoginFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	}
+	
 
 	//Erzeugen des Chatframes
 	private void showChatFrame() {
@@ -125,7 +150,7 @@ public class Client implements ChatEventListener {
         ownPanel.setLayout(new BorderLayout());
         ownPanel.add(new Label("What I want to say:"), BorderLayout.NORTH);
         chatField = new TextField(30);
-	    enter(chatField, false);
+	    //enter(chatField, false);
 	    
         ownPanel.add(chatField, BorderLayout.CENTER);
         ownPanel.setForeground(Color.BLACK);
@@ -141,6 +166,7 @@ public class Client implements ChatEventListener {
         ownPanel.add(buttonsPanel, BorderLayout.SOUTH);
 
         chatFrame = new Frame();
+        chatFrame.setResizable(false);
         chatFrame.setLayout(new BorderLayout());
         chatFrame.add(usersPanel, BorderLayout.NORTH);
         chatFrame.add(chatPanel, BorderLayout.CENTER);
@@ -156,16 +182,16 @@ public class Client implements ChatEventListener {
     }
 	
 	
-	//eigene Hilfsmethode Farbe
+	//eigene Hilfsmethode Farbe für Chat
 	private void Color(Panel ty) {
         ty.setBackground(Color.BLACK);
         ty.setForeground(Color.WHITE);
 	}
 	
-	
+
 	//eigene Hilfsmethode Enter-Taste
-    private void enter(TextField field, final boolean login) {
-	    field.addKeyListener(new KeyAdapter() {
+    private void enter(JTextField label, final boolean login) {
+	    label.addKeyListener(new KeyAdapter() {
             public void keyPressed(KeyEvent e)
             {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER)
@@ -195,7 +221,7 @@ public class Client implements ChatEventListener {
     }
 
     
-    //Hilfsmethode zum Check des Ports //TODO: Mit der Server-Port-Check-Methode abgleichen, kleine Redundanz
+    //Hilfsmethode zum Check des Ports
     public boolean ValidatePort(String userPort) {
 		try {
 			int port = Integer.parseInt(userPort); //String -> int
@@ -210,10 +236,8 @@ public class Client implements ChatEventListener {
 
     //Nachricht und Name werden empfangen und zusammen mit der Serverzeit im Chat eingetragen
     public void onMessage(String username, String message, String time) {
-    	if(message.contains(";)")) { //TODO: Erster Test: Smileys ersetzen und Schimpfwortfilter
-    		//TODO - Fix
-    		//message = message.replaceAll(";)", ";-)");  //Funktionsweise bei Laufzeit testen und ggf. ï¿½ber ENUM-Klassen steuern
-    		//geht nicht. 
+    	if(message.contains("lol")) { //TODO: Erster Test: Smileys ersetzen und Schimpfwortfilter
+    		message = message.replaceAll("lol", ":D");  //Funktionsweise bei Laufzeit testen und ggf. ï¿½ber ENUM-Klassen steuern
     	}
         chatArea.append("(" + time + ")" + " " + username + ": " + message + "\n");
         chatFrame.setVisible(true);
@@ -259,35 +283,39 @@ public class Client implements ChatEventListener {
     
     //Login-Methode (vorher LoginListener)
     public void logMEin() {
+	    Border thickBorder = new LineBorder(Color.WHITE, 2);
+	    name.setBorder(thickBorder);
+	    ip.setBorder(thickBorder);
+	    port.setBorder(thickBorder);
+	    thickBorder = new LineBorder(Color.RED, 2);
+	    
             boolean ok = true;
         	String error = "";
-        	userName = nameField.getText();
-            userIP = ipField.getText();
-            userPort = portField.getText();
+        	userName = name.getText();
+            userIP = ip.getText();
+            userPort = port.getText();
         	
-        	if (nameField.getText().isEmpty()) {
-            error += " Name ";
-            ok = false;
+        	if (name.getText().isEmpty()) {
+        		error += " Name ";
+        		ok = false;
+        		name.setBorder(thickBorder);
             }
-
         	if (userIP.isEmpty() | !ValidateIPAddress(userIP)) {
             	error += "IP ";
             	ok = false;
+        	    ip.setBorder(thickBorder);
 	            }
-
     		if (!ValidatePort(userPort)) {
                 	error += "Port ";
                 	ok = false;
+            	    port.setBorder(thickBorder);
     			}
             
             if (ok) {
-            int port = Integer.parseInt(userPort);
-            loginFrame.dispose();
+            int portNumber = Integer.parseInt(userPort);
+            clientLoginFrame.dispose();
             showChatFrame();
-            login(userName,userIP,port);
-            }
-            else {
-            	errorField.setText("Bitte Eingaben kontrollieren:" + error);
+            login(userName,userIP,portNumber);
             }
         }
     
@@ -307,8 +335,8 @@ public class Client implements ChatEventListener {
     }
     
     
-    //TODO: ï¿½berarbeiten !! + Port evtl. dynamisch gestalten?
 	public void login(String userName, String remoteAdress, int remotePort) {
+		System.out.println(userName + remoteAdress + remotePort);
 		ChatClientServiceFactoryImpl clServFac = new ChatClientServiceFactoryImpl();	
 		try {
 			chatClientService = clServFac.register(50000); //Registriet mal fest 50000 als Listener
@@ -318,5 +346,4 @@ public class Client implements ChatEventListener {
 				new ChatServiceException("Verbindungsfehler.");
 			}
 	}
-
 } // Client

@@ -101,8 +101,11 @@ public class ChatClientServiceImpl extends BaseServiceImpl implements ChatClient
 		try {
 			//connection.send(pdu);
 			connection.disconnect();
+			this.finalize();
 		} catch (LWTRTException e) {
 			e.printStackTrace();
+		} catch (Throwable e) {
+				e.printStackTrace();
 		}
 	}
 	

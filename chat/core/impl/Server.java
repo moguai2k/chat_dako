@@ -5,9 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-
 import javax.swing.*;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Logger;
@@ -17,7 +15,6 @@ import chatsession.ChatServerService;
 import chatsession.ChatServerServiceFactory;
 import chatsession.ex.ChatServiceException;
 import chatsession.impl.ChatServerServiceFactoryImpl;
-
 import core.MyAppender;
 
 public class Server {
@@ -36,12 +33,13 @@ public class Server {
 	
 	public void showServerFrame(){
 		consoleFrame = new JFrame("Chat-Server-Console");
+		consoleFrame.setResizable(false);
 		logoutButton = new JButton("Server herunterfahren");
 		port = new JTextField();
 		
 		console = new JTextArea();
 		JScrollPane consoleNew = new JScrollPane(console);
-
+		
 		loginButton = new JButton("Server starten");
 		header = new JLabel("Chat-Server");
 		header.setFont(new Font("Impact", Font.BOLD,40));
@@ -182,6 +180,7 @@ public class Server {
 		thread = new Thread(new Runnable()
 	{
 
+			
 	//Threading RUNit
 	public void run()
 	{
