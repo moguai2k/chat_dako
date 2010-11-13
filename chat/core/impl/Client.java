@@ -150,7 +150,18 @@ public class Client implements ChatEventListener {
         ownPanel.setLayout(new BorderLayout());
         ownPanel.add(new Label("What I want to say:"), BorderLayout.NORTH);
         chatField = new TextField(30);
-	    //enter(chatField, false);
+	    
+        //enter vorrübergehen hier drin, sollte in die untere methode gehen, wenn jframes im chat sind
+	    chatField.addKeyListener(new KeyAdapter() {
+            public void keyPressed(KeyEvent e)
+            {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER)
+                {
+                        clientCommunicator.tell(userName, chatField.getText());
+                        chatField.setText("");
+                }
+            }
+        });
 	    
         ownPanel.add(chatField, BorderLayout.CENTER);
         ownPanel.setForeground(Color.BLACK);
