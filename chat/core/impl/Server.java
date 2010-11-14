@@ -106,7 +106,7 @@ public class Server {
     	
         // Log4J mit eigenem Appender starten, intialisieren, layouten
         PatternLayout pl = new PatternLayout();
-        pl.setConversionPattern( "%d{HH:mm}  |  %F:%L  |  %m%n" );        
+        pl.setConversionPattern( "%d{HH:mm:ss}  |  %F:%L  |  %m%n" );        
         MyAppender cca = new MyAppender(console);
         cca.setLayout( pl );
         Logger rl = Logger.getRootLogger(); 
@@ -187,7 +187,7 @@ public class Server {
 		try {
     	while (true) {
     		ChatServerService service = factory.getSession();
-    		ServerCommunicator communicator = new ServerCommunicator(service);
+    		if (service != null) {ServerCommunicator communicator = new ServerCommunicator(service);}
     	}
     	} catch (Exception e) {
     			e.printStackTrace();
@@ -202,4 +202,4 @@ public class Server {
 		thread.interrupt();
 	}
 	}
-}
+}//Server
