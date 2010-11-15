@@ -23,11 +23,15 @@ import java.awt.event.WindowEvent;
 import java.util.Arrays;
 import java.util.Vector;
 
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 
@@ -48,11 +52,14 @@ public class Client implements ChatEventListener {
 	private String userName, userIP, userPort;	
 	private static Log log = LogFactory.getLog(Client.class);
 	//Chat
-    private Frame chatFrame;
-    private List userList;
-    private TextArea chatArea;
-    private TextField chatField;
-    private Button submitButton, logoutButton;
+    private JFrame chatFrame;
+    private JTextPane chatArea;
+    private JTextField chatField;
+    private JButton submitButton, logoutButton;
+	private JList jList;
+	private DefaultListModel defaultListModel;
+	private JScrollPane jScrollPane;
+	
 	//Login
 	private JFrame clientLoginFrame;
 	private JTextField name, ip, port;
@@ -60,11 +67,13 @@ public class Client implements ChatEventListener {
 	private JLabel header;
 	private JLabel labelName, labelIP, labelPORT, labelError;
 
+
 	
 	//Erzeugen des Loginframes.
 	public void showLoginFrame(){
-		clientLoginFrame = new JFrame("Chat-Client-Login");
+		clientLoginFrame = new JFrame("Client-Login");
 		clientLoginFrame.setResizable(false);
+		
 		downButton = new JButton("Chat schließen");
 		name = new JTextField();
 		ip = new JTextField();
@@ -126,71 +135,149 @@ public class Client implements ChatEventListener {
 
 	//Erzeugen des Chatframes
 	private void showChatFrame() {
-        Panel usersPanel = new Panel();
-        Color(usersPanel);
-        usersPanel.setLayout(new BorderLayout());
-        usersPanel.add(new Label("Current users:"), BorderLayout.NORTH);
-        userList = new List(5, false);
-        userList.setBackground(Color.BLACK);
-        userList.setForeground(Color.WHITE);
-        usersPanel.add(userList, BorderLayout.SOUTH);
-        
-        Panel chatPanel = new Panel();
-        Color(chatPanel);
-        chatPanel.setLayout(new BorderLayout());
-        chatPanel.add(new Label("Chat:"), BorderLayout.NORTH);
-        chatArea = new TextArea(10, 20);
-        chatArea.setBackground(Color.BLACK);
-        chatArea.setForeground(Color.WHITE);
-        chatArea.setEditable(false);
-        chatPanel.add(chatArea, BorderLayout.SOUTH);
-        
-        Panel ownPanel = new Panel();
-        Color(ownPanel);
-        ownPanel.setLayout(new BorderLayout());
-        ownPanel.add(new Label("What I want to say:"), BorderLayout.NORTH);
-        chatField = new TextField(30);
+		chatFrame = new JFrame("Client-Chatframe");
+		chatFrame.setResizable(false);
+		
+		submitButton = new JButton("Submit");
+		logoutButton = new JButton("Logout");
+		
+		chatArea 	= new JTextPane();
+		chatField 	= new JTextField(300);
+	      
+		defaultListModel = new DefaultListModel();
+	    jList = new JList();
+	    jList.setModel(defaultListModel);
 	    
-        //enter vorrübergehen hier drin, sollte in die untere methode gehen, wenn jframes im chat sind
-	    chatField.addKeyListener(new KeyAdapter() {
-            public void keyPressed(KeyEvent e)
-            {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER)
-                {
-                        clientCommunicator.tell(userName, chatField.getText());
-                        chatField.setText("");
-                }
+	    jScrollPane = new JScrollPane(jList);
+	    jScrollPane.setViewportView(jList);
+		
+		
+		JPanel chatpanel = new JPanel();
+		chatpanel.add(jScrollPane);chatpanel.add(chatArea);chatpanel.add(chatField);
+		chatpanel.add(submitButton);chatpanel.add(logoutButton);
+		
+		jScrollPane.setBounds(10,25,250,50);
+
+		
+		chatArea.setBounds(0, 150, 400, 150);
+		chatArea.setEditable(false);
+		
+		//TODO: Buttons für Kursiv, Fett usw.
+		
+		//TODO: Beim Starten des Chatframes soll der Cursor (Caret) im chatfield sein.
+		chatField.setBounds(0, 335, 400, 30);
+		
+		//(int x, int y, int width, int height) 
+		submitButton.setBounds(0,387,150,35);
+		logoutButton.setBounds(150,387,150,35);
+		logoutButton.addMouseListener(new ChatListener());
+		
+		
+        submitButton.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent event){
+				logMEin();
             }
         });
-	    
-        ownPanel.add(chatField, BorderLayout.CENTER);
-        ownPanel.setForeground(Color.BLACK);
-        Panel buttonsPanel = new Panel();
-        submitButton = new Button("submit");
-        submitButton.addMouseListener(new ChatListener());
-        buttonsPanel.add(submitButton);
-        submitButton.setForeground(Color.BLACK);
-        logoutButton = new Button("logout");
-        logoutButton.addMouseListener(new ChatListener());
-        buttonsPanel.add(logoutButton);
-        logoutButton.setForeground(Color.BLACK);
-        ownPanel.add(buttonsPanel, BorderLayout.SOUTH);
-
-        chatFrame = new Frame();
-        chatFrame.setResizable(false);
-        chatFrame.setLayout(new BorderLayout());
-        chatFrame.add(usersPanel, BorderLayout.NORTH);
-        chatFrame.add(chatPanel, BorderLayout.CENTER);
-        chatFrame.add(ownPanel, BorderLayout.SOUTH);
-	    chatFrame.addWindowListener(new WindowAdapter(){
-	        public void windowClosing(WindowEvent we){
-	          System.exit(0);
-	        }
-	      });
-
         chatFrame.pack();
+		chatFrame.add(chatpanel);
+		
+		chatpanel.setLayout(null);
+		chatFrame.setSize(300, 450);
+		chatFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         chatFrame.setVisible(true);
+        
+        
+//        ActionListener al = new ActionListener() 
+//        { 
+//          @Override public void actionPerformed( ActionEvent e ) 
+//          { 
+//            if ( "Ende".equals(e.getActionCommand()) ) 
+//              System.exit( 0 ); 
+//            if ( "fett".equals(e.getActionCommand()) ) 
+//              t.setFont( font = font.deriveFont( font.getStyle() ^ Font.BOLD ) ); 
+//            else if ( "kursiv".equals(e.getActionCommand()) ) 
+//              t.setFont( font = font.deriveFont( font.getStyle() ^ Font.ITALIC ) ); 
+//          } 
+//          panel.add( button = new JToggleButton("fett") ); 
+//          button.addActionListener( al ); 
+//          button.setFont( font.deriveFont( Font.BOLD ) ); 
+//       
+//          panel.add( button = new JToggleButton("kursiv") ); 
+//          button.addActionListener( al ); 
+//          button.setFont( font.deriveFont( Font.ITALIC ) ); 
+//       
+//          panel.add( button = new JButton("Ende") ); 
+//          button.addActionListener( al ); 
+
+
     }
+	
+	
+//        Panel usersPanel = new Panel();
+//        Color(usersPanel);
+//        usersPanel.setLayout(new BorderLayout());
+//        usersPanel.add(new Label("Current users:"), BorderLayout.NORTH);
+//        userList = new List(5, false);
+//        userList.setBackground(Color.BLACK);
+//        userList.setForeground(Color.WHITE);
+//        usersPanel.add(userList, BorderLayout.SOUTH);
+//        
+//        Panel chatPanel = new Panel();
+//        Color(chatPanel);
+//        chatPanel.setLayout(new BorderLayout());
+//        chatPanel.add(new Label("Chat:"), BorderLayout.NORTH);
+//        chatArea = new TextArea(10, 20);
+//        chatArea.setBackground(Color.BLACK);
+//        chatArea.setForeground(Color.WHITE);
+//        chatArea.setEditable(false);
+//        chatPanel.add(chatArea, BorderLayout.SOUTH);
+//        
+//        Panel ownPanel = new Panel();
+//        Color(ownPanel);
+//        ownPanel.setLayout(new BorderLayout());
+//        ownPanel.add(new Label("What I want to say:"), BorderLayout.NORTH);
+//        chatField = new TextField(30);
+//	    
+//        //enter vorrübergehen hier drin, sollte in die untere methode gehen, wenn jframes im chat sind
+//	    chatField.addKeyListener(new KeyAdapter() {
+//            public void keyPressed(KeyEvent e)
+//            {
+//                if (e.getKeyCode() == KeyEvent.VK_ENTER)
+//                {
+//                        clientCommunicator.tell(userName, chatField.getText());
+//                        chatField.setText("");
+//                }
+//            }
+//        });
+//	    
+//        ownPanel.add(chatField, BorderLayout.CENTER);
+//        ownPanel.setForeground(Color.BLACK);
+//        Panel buttonsPanel = new Panel();
+//        submitButton = new Button("submit");
+//        submitButton.addMouseListener(new ChatListener());
+//        buttonsPanel.add(submitButton);
+//        submitButton.setForeground(Color.BLACK);
+//        logoutButton = new Button("logout");
+//        logoutButton.addMouseListener(new ChatListener());
+//        buttonsPanel.add(logoutButton);
+//        logoutButton.setForeground(Color.BLACK);
+//        ownPanel.add(buttonsPanel, BorderLayout.SOUTH);
+//
+//        chatFrame = new Frame();
+//        chatFrame.setResizable(false);
+//        chatFrame.setLayout(new BorderLayout());
+//        chatFrame.add(usersPanel, BorderLayout.NORTH);
+//        chatFrame.add(chatPanel, BorderLayout.CENTER);
+//        chatFrame.add(ownPanel, BorderLayout.SOUTH);
+//	    chatFrame.addWindowListener(new WindowAdapter(){
+//	        public void windowClosing(WindowEvent we){
+//	          System.exit(0);
+//	        }
+//	      });
+//
+//        chatFrame.pack();
+//        chatFrame.setVisible(true);
+//    }
 	
 	
 	//eigene Hilfsmethode Farbe für Chat
@@ -250,7 +337,7 @@ public class Client implements ChatEventListener {
     	if(message.contains("lol")) { //TODO: Erster Test: Smileys ersetzen und Schimpfwortfilter
     		message = message.replaceAll("lol", ":D");  //Funktionsweise bei Laufzeit testen und ggf. ï¿½ber ENUM-Klassen steuern
     	}
-        chatArea.append("(" + time + ")" + " " + username + ": " + message + "\n");
+        chatArea.setText("(" + time + ")" + " " + username + ": " + message + "\n");
         chatFrame.setVisible(true);
     }
 
@@ -264,17 +351,20 @@ public class Client implements ChatEventListener {
     
     //aktualisiert die Userliste
     private void fillUserList(Vector<String> names) {
-        userList.removeAll();
-        for (int i = 0; i < names.size(); i++)
-            if (names.get(i).equals(userName)) userList.add("<" + names.get(i) + ">");
-            else userList.add(names.get(i) + " ");
+    	jList.removeAll();
+    	for (int i = 0; i < names.size(); i++) {
+            if (names.get(i).equals(userName)) 
+            	defaultListModel.addElement(new String("<" + names.get(i) + ">"));
+    			jList.ensureIndexIsVisible(defaultListModel.size() - 1);
+            else jList.X(names.get(i) + " ");  	
+    	}
     }   
     
     
     //Wenn der Name schon vorhanden ist -> Errormeldung im Chat
     public void onAction(int actionId, String reserved) {
         if (actionId == ChatAction.CHATACTION_USERNAME_SCHON_VERGEBEN) {
-            chatArea.append("Der Username ist schon vergeben. Bitte loggen Sie sich aus und starten Sie die Anwendung neu!");
+            chatArea.setText("Der Username ist schon vergeben. Bitte loggen Sie sich aus und starten Sie die Anwendung neu!");
         }
     }
 
