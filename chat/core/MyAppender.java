@@ -1,22 +1,27 @@
 package core;
 
-import javax.swing.JTextArea;
+import javax.swing.DefaultListModel;
+import javax.swing.JList;
+
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.spi.LoggingEvent;
 
 public class MyAppender extends AppenderSkeleton {
 
-	private JTextArea area;
+	private JList jList;
+	private DefaultListModel defaultListModel;
 	
 	
-	public MyAppender(JTextArea a) {
-		this.area = a;
+	
+	public MyAppender(JList a, DefaultListModel defaultListModel) {
+		this.jList = a;
+		this.defaultListModel = defaultListModel;
 	}
     
 
 	public void append(LoggingEvent event) {
-        //System.out.print(this.layout.format(event));
-		area.setText(area.getText()+this.layout.format(event));
+        defaultListModel.addElement(new String(this.layout.format(event)));
+        jList.ensureIndexIsVisible(defaultListModel.size() - 1);
    }
 
     public void close() {

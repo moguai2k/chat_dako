@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import javax.swing.*;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Logger;
@@ -24,11 +25,14 @@ public class Server {
 	static ChatServerServiceFactory factory;
 	private JFrame consoleFrame;
 	private JTextField port;
-	private static JTextArea console;
 	private JButton loginButton, logoutButton;
 	private JLabel header;
 	private JLabel label;
 	private Thread thread;
+	
+	  private static JList jList;
+	  private static DefaultListModel defaultListModel;
+	  private JScrollPane jScrollPane;
 
 	
 	public void showServerFrame(){
@@ -37,15 +41,20 @@ public class Server {
 		logoutButton = new JButton("Server herunterfahren");
 		port = new JTextField();
 		
-		console = new JTextArea();
-		JScrollPane consoleNew = new JScrollPane(console);
+	      defaultListModel = new DefaultListModel();
+	      jList = new JList();
+	      jList.setModel(defaultListModel);
+	      
+	      jScrollPane = new JScrollPane(jList);
+	      jScrollPane.setPreferredSize(new java.awt.Dimension(400, 400));
+	      jScrollPane.setViewportView(jList);
 		
 		loginButton = new JButton("Server starten");
 		header = new JLabel("Chat-Server");
 		header.setFont(new Font("Impact", Font.BOLD,40));
 		label = new JLabel("Bitte Server-Port eingeben:");
 		JPanel panel = new JPanel();
-		panel.add(header);panel.add(port);panel.add(consoleNew);panel.add(label);
+		panel.add(header);panel.add(port);panel.add(label);panel.add(jScrollPane);
 		panel.add(loginButton);panel.add(logoutButton);
 		
 		logoutButton.addActionListener(new ActionListener(){
@@ -53,12 +62,11 @@ public class Server {
             	servLogout();
             }
         });
-		
-		consoleNew.setPreferredSize(new Dimension(400,400));
+
 		header.setBounds(30,20,280,80); //(int x, int y, int width, int height) 
 		label.setBounds(120,445,250,60);
 		port.setBounds(280,460,100,30);
-		consoleNew.setBounds(20,100,690,330);
+		jScrollPane.setBounds(20,100,690,330);
 		port.setText("50000");
 		loginButton.setBounds(170,500,180,30);
 		logoutButton.setBounds(350,500,180,30);
@@ -81,13 +89,12 @@ public class Server {
 
         });
 
-        consoleNew.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-        console.enable(false);        
-        consoleFrame.pack();
+        consoleFrame.pack(); //1.
+		consoleFrame.setSize(740, 600); //1.
+	    consoleFrame.setLocationRelativeTo(null); //2. Zentrierung
 		consoleFrame.add(panel);
 		panel.setLayout(null);
-		consoleFrame.setSize(740, 600);
-	    consoleFrame.setVisible(true);
+	    consoleFrame.setVisible(true); //3.
 		consoleFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 
@@ -107,7 +114,7 @@ public class Server {
         // Log4J mit eigenem Appender starten, intialisieren, layouten
         PatternLayout pl = new PatternLayout();
         pl.setConversionPattern( "%d{HH:mm:ss}  |  %F:%L  |  %m%n" );        
-        MyAppender cca = new MyAppender(console);
+        MyAppender cca = new MyAppender(jList,defaultListModel);
         cca.setLayout( pl );
         Logger rl = Logger.getRootLogger(); 
         rl.addAppender( cca ); 
