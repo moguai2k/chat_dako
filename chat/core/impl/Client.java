@@ -143,6 +143,7 @@ public class Client implements ChatEventListener {
 		
 		chatArea 	= new JTextPane();
 		chatField 	= new JTextField(300);
+		enter(chatField, false);
 	      
 		defaultListModel = new DefaultListModel();
 	    jList = new JList();
@@ -164,20 +165,26 @@ public class Client implements ChatEventListener {
 		
 		//TODO: Buttons für Kursiv, Fett usw.
 		
-		//TODO: Beim Starten des Chatframes soll der Cursor (Caret) im chatfield sein.
+		//TODO: Beim Starten des Chatframes soll der Cursor im chatfield sein.
 		chatField.setBounds(0, 335, 400, 30);
+		
 		
 		//(int x, int y, int width, int height) 
 		submitButton.setBounds(0,387,150,35);
+		submitButton.addMouseListener(new ChatListener());
 		logoutButton.setBounds(150,387,150,35);
 		logoutButton.addMouseListener(new ChatListener());
 		
+//        chatpanel.add( button = new JToggleButton("fett") ); 
+//        button.addActionListener( al ); 
+//        button.setFont( font.deriveFont( Font.BOLD ) ); 
+//     
+//        panel.add( button = new JToggleButton("kursiv") ); 
+//        button.addActionListener( al ); 
+//        button.setFont( font.deriveFont( Font.ITALIC ) ); 
 		
-        submitButton.addActionListener(new ActionListener(){
-            public void actionPerformed(ActionEvent event){
-				logMEin();
-            }
-        });
+            
+		
         chatFrame.pack();
 		chatFrame.add(chatpanel);
 		
@@ -353,10 +360,10 @@ public class Client implements ChatEventListener {
     private void fillUserList(Vector<String> names) {
     	jList.removeAll();
     	for (int i = 0; i < names.size(); i++) {
-            if (names.get(i).equals(userName)) 
+            if (names.get(i).equals(userName)) {
             	defaultListModel.addElement(new String("<" + names.get(i) + ">"));
-    			jList.ensureIndexIsVisible(defaultListModel.size() - 1);
-            else jList.X(names.get(i) + " ");  	
+    			jList.ensureIndexIsVisible(defaultListModel.size() - 1); }
+            else { defaultListModel.addElement(new String(names.get(i) + " ")); }  	
     	}
     }   
     
