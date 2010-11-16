@@ -6,7 +6,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import javax.swing.*;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Logger;
@@ -29,25 +28,24 @@ public class Server {
 	private JLabel header;
 	private JLabel label;
 	private Thread thread;
-	
-	  private static JList jList;
-	  private static DefaultListModel defaultListModel;
-	  private JScrollPane jScrollPane;
+	private static JList jList;
+	private static DefaultListModel defaultListModel;
+	private JScrollPane jScrollPane;
 
 	
+	//Server-Frame
 	public void showServerFrame(){
 		consoleFrame = new JFrame("Chat-Server-Console");
 		consoleFrame.setResizable(false);
 		logoutButton = new JButton("Server herunterfahren");
 		port = new JTextField();
 		
-	      defaultListModel = new DefaultListModel();
-	      jList = new JList();
-	      jList.setModel(defaultListModel);
+	    defaultListModel = new DefaultListModel();
+	    jList = new JList();
+	    jList.setModel(defaultListModel);
 	      
-	      jScrollPane = new JScrollPane(jList);
-	      jScrollPane.setPreferredSize(new java.awt.Dimension(400, 400));
-	      jScrollPane.setViewportView(jList);
+	    jScrollPane = new JScrollPane(jList);
+	    jScrollPane.setViewportView(jList);
 		
 		loginButton = new JButton("Server starten");
 		header = new JLabel("Chat-Server");
@@ -188,20 +186,22 @@ public class Server {
 	{
 
 			
-	//Threading RUNit
-	public void run()
-	{
-		try {
-    	while (true) {
-    		ChatServerService service = factory.getSession();
-    		if (service != null) {ServerCommunicator communicator = new ServerCommunicator(service);}
-    	}
-    	} catch (Exception e) {
-    			e.printStackTrace();
-    	}
-	}
-	});
-		thread.start();
+			//Threading RUNit
+			public void run()
+			{
+				try {
+					while (true) {
+						ChatServerService service = factory.getSession();
+						if (service != null) {ServerCommunicator communicator = new ServerCommunicator(service);}
+					}
+				} 
+				catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+		
+	thread.start();
 
 	} else
 	{
@@ -209,4 +209,4 @@ public class Server {
 		thread.interrupt();
 	}
 	}
-}//Server
+} //Server

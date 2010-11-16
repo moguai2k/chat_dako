@@ -1,28 +1,17 @@
 package core.impl;
 
-import java.awt.BorderLayout;
 import java.awt.AWTException;
-import java.awt.Button;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Frame;
-import java.awt.GridLayout;
-import java.awt.Label;
-import java.awt.List;
 import java.awt.Panel;
-import java.awt.TextArea;
-import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.util.Arrays;
 import java.util.Vector;
-
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -34,7 +23,6 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.PropertyConfigurator;
@@ -59,7 +47,7 @@ public class Client implements ChatEventListener {
 	private JList jList;
 	private DefaultListModel defaultListModel;
 	private JScrollPane jScrollPane;
-	
+	private JLabel header2;
 	//Login
 	private JFrame clientLoginFrame;
 	private JTextField name, ip, port;
@@ -68,7 +56,6 @@ public class Client implements ChatEventListener {
 	private JLabel labelName, labelIP, labelPORT, labelError;
 
 
-	
 	//Erzeugen des Loginframes.
 	public void showLoginFrame(){
 		clientLoginFrame = new JFrame("Client-Login");
@@ -138,12 +125,21 @@ public class Client implements ChatEventListener {
 		chatFrame = new JFrame("Client-Chatframe");
 		chatFrame.setResizable(false);
 		
+		//NEW @Raphi 
+		header2 = new JLabel("Chat");
+		header2.setFont(new Font("Impact", Font.BOLD,40));
+		
 		submitButton = new JButton("Submit");
 		logoutButton = new JButton("Logout");
 		
 		chatArea 	= new JTextPane();
 		chatField 	= new JTextField(300);
 		enter(chatField, false);
+
+		//NEW @Raphi TODO: automatisches scrollen nach unten
+		JScrollPane chatAreaScrollable = new JScrollPane(chatArea,
+				JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 	      
 		defaultListModel = new DefaultListModel();
 	    jList = new JList();
@@ -152,27 +148,26 @@ public class Client implements ChatEventListener {
 	    jScrollPane = new JScrollPane(jList);
 	    jScrollPane.setViewportView(jList);
 		
-		
+		//NEW @Raphi
 		JPanel chatpanel = new JPanel();
-		chatpanel.add(jScrollPane);chatpanel.add(chatArea);chatpanel.add(chatField);
-		chatpanel.add(submitButton);chatpanel.add(logoutButton);
+		chatpanel.add(jScrollPane);chatpanel.add(chatAreaScrollable);chatpanel.add(chatField);
+		chatpanel.add(submitButton);chatpanel.add(logoutButton);chatpanel.add(header2);
 		
-		jScrollPane.setBounds(10,25,250,50);
-
-		
-		chatArea.setBounds(0, 150, 400, 150);
-		chatArea.setEditable(false);
 		
 		//TODO: Buttons für Kursiv, Fett usw.
-		
 		//TODO: Beim Starten des Chatframes soll der Cursor im chatfield sein.
-		chatField.setBounds(0, 335, 400, 30);
 		
 		
-		//(int x, int y, int width, int height) 
-		submitButton.setBounds(0,387,150,35);
+		//Netz-Elemente, von oben Links beginnend(int x, int y, int width, int height) 
+		header2.setBounds(20,20,100,50); //NEW @Raphi
+		jScrollPane.setBounds(150,20,220,80);
+		chatAreaScrollable.setBounds(0, 120, 396, 180); //NEW @Raphi
+		chatField.setBounds(0, 300, 396, 30);
+		submitButton.setBounds(100,330,100,30);
+		logoutButton.setBounds(200,330,100,30);
+		
+		chatArea.setEditable(false);
 		submitButton.addMouseListener(new ChatListener());
-		logoutButton.setBounds(150,387,150,35);
 		logoutButton.addMouseListener(new ChatListener());
 		
 //        chatpanel.add( button = new JToggleButton("fett") ); 
@@ -182,14 +177,11 @@ public class Client implements ChatEventListener {
 //        panel.add( button = new JToggleButton("kursiv") ); 
 //        button.addActionListener( al ); 
 //        button.setFont( font.deriveFont( Font.ITALIC ) ); 
-		
-            
-		
+
         chatFrame.pack();
 		chatFrame.add(chatpanel);
-		
 		chatpanel.setLayout(null);
-		chatFrame.setSize(300, 450);
+		chatFrame.setSize(400, 390);
 		chatFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         chatFrame.setVisible(true);
         
@@ -344,7 +336,7 @@ public class Client implements ChatEventListener {
     	if(message.contains("lol")) { //TODO: Erster Test: Smileys ersetzen und Schimpfwortfilter
     		message = message.replaceAll("lol", ":D");  //Funktionsweise bei Laufzeit testen und ggf. ï¿½ber ENUM-Klassen steuern
     	}
-        chatArea.setText("(" + time + ")" + " " + username + ": " + message + "\n");
+        chatArea.setText(chatArea.getText()+ "(" + time + ")" + " " + username + ": " + message + "\n"); //NEW @Raphi: chatArea.getText()+ 
         chatFrame.setVisible(true);
     }
 
@@ -383,6 +375,7 @@ public class Client implements ChatEventListener {
 		log.debug("Chat gestartet");
     }
 
+    
     //MAIN
     public static void main(String[] args) throws AWTException {
         new Client();
@@ -443,6 +436,7 @@ public class Client implements ChatEventListener {
     }
     
     
+    //LoginTO
 	public void login(String userName, String remoteAdress, int remotePort) {
 		System.out.println(userName + remoteAdress + remotePort);
 		ChatClientServiceFactoryImpl clServFac = new ChatClientServiceFactoryImpl();	
