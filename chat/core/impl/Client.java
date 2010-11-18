@@ -20,7 +20,6 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -28,7 +27,6 @@ import javax.swing.JTextPane;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
@@ -58,9 +56,10 @@ public class Client implements ChatEventListener {
 	private DefaultListModel defaultListModel;
 	private JScrollPane jScrollPane;
 	private JLabel header2;
-	private javax.swing.text.html.HTMLEditorKit eKit; //HTML-Code in JTextPane möglich
-	ImageIcon icon = null;
-	java.net.URL where = null;
+	//private javax.swing.text.html.HTMLEditorKit eKit; //HTML-Code in JTextPane möglich
+	private ImageIcon icon = null;
+	private java.net.URL where = null;
+	private boolean smileys = false;
 	//Login
 	private JFrame clientLoginFrame;
 	private JTextField name, ip, port;
@@ -138,7 +137,6 @@ public class Client implements ChatEventListener {
 		chatFrame = new JFrame("Client-Chatframe");
 		chatFrame.setResizable(false);
 		
-		//NEW @Raphi 
 		header2 = new JLabel("Chat");
 		header2.setFont(new Font("Impact", Font.BOLD,40));
 		
@@ -146,31 +144,28 @@ public class Client implements ChatEventListener {
 		logoutButton = new JButton("Logout");
 		
 		chatArea 	= new JTextPane();
-		eKit = new javax.swing.text.html.HTMLEditorKit();
-
 		chatField 	= new JTextField(300);
 		enter(chatField, false);
 
-		//NEW @Raphi TODO: automatisches scrollen nach unten
+		//TODO: Vertiakel Autoscrollen
 		JScrollPane chatAreaScrollable = new JScrollPane(chatArea,
 				JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-	    // button to insert an icon
+		
+	    //SmileyButton
 	    where = new URL("http://www.zuh.net/java/img/sourire.gif");
 	    icon = new ImageIcon(where);
 	    iconButton = new JButton(icon);
+	    iconButton.setText("an");
 	    iconButton.addActionListener(new ActionListener() {
 	      public void actionPerformed(final ActionEvent event) {
-			StyledDocument doc = chatArea.getStyledDocument();
-			Style style = doc.addStyle(null, null);
-			StyleConstants.setIcon(style, icon);
-			try {
-			    doc.insertString(doc.getLength()," Schau mal ein Smiley: ",chatArea.getCharacterAttributes());
-			    doc.insertString(doc.getLength()," TEXT SHOULD BE IGNORED IN FAVOUR OF ICON ",style);
-			    doc.insertString(doc.getLength(), "\n",chatArea.getCharacterAttributes());
-			} catch (Exception e) {
-			    System.err.println("Exception in inserting text and icons: " + e);
-			}
+	    	  if (smileys) { 
+	    		  smileys = false;
+	    		  iconButton.setText("aus");
+	    	  }
+	    	  else { smileys = true;
+	    	  iconButton.setText("an");
+	    	  }
 	      }
 	    });
 	    
@@ -181,29 +176,24 @@ public class Client implements ChatEventListener {
 	    jScrollPane = new JScrollPane(jList);
 	    jScrollPane.setViewportView(jList);
 		
-		//NEW @Raphi
 		JPanel chatpanel = new JPanel();
 		chatpanel.add(jScrollPane);chatpanel.add(chatAreaScrollable);chatpanel.add(chatField);
 		chatpanel.add(submitButton);chatpanel.add(logoutButton);chatpanel.add(header2);chatpanel.add(iconButton);
 		
-		
-		//TODO: Buttons für Kursiv, Fett usw.
-		//TODO: Beim Starten des Chatframes soll der Cursor im chatfield sein.
-		
-		
 		//Netz-Elemente, von oben Links beginnend(int x, int y, int width, int height) 
 		header2.setBounds(20,20,100,50); //NEW @Raphi
 		jScrollPane.setBounds(150,20,220,80);
-		chatAreaScrollable.setBounds(0, 120, 396, 180); //NEW @Raphi
-		chatField.setBounds(0, 300, 396, 30);
+		chatAreaScrollable.setBounds(0,120,396,180); //NEW @Raphi
+		chatField.setBounds(0,300,396,30);
 		submitButton.setBounds(100,330,100,30);
 		logoutButton.setBounds(200,330,100,30);
-		iconButton.setBounds(0, 330, 50, 30);
+		iconButton.setBounds(0,330,75,30);
 		
 		chatArea.setEditable(false);
 		submitButton.addMouseListener(new ChatListener());
 		logoutButton.addMouseListener(new ChatListener());
 		
+		//TODO: Buttons für Kursiv, Fett usw.
 //        chatpanel.add( button = new JToggleButton("fett") ); 
 //        button.addActionListener( al ); 
 //        button.setFont( font.deriveFont( Font.BOLD ) ); 
@@ -218,7 +208,7 @@ public class Client implements ChatEventListener {
 		chatFrame.setSize(400, 390);
 		chatFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         chatFrame.setVisible(true);
-        chatField.requestFocus();
+        chatField.requestFocus(); //Setzt den Cursor in das ChatField
 	}
         
         
@@ -273,19 +263,159 @@ public class Client implements ChatEventListener {
 			}
     }
     
+    
+    //Hilfsmethode Smiley
+    private void smiley(){
+		try {
+			where = new URL("http://www.zuh.net/java/img/sourire.gif");
+	    	icon = new ImageIcon(where);
+			StyledDocument doc = chatArea.getStyledDocument();
+			Style style = doc.addStyle(null, null);
+			StyleConstants.setIcon(style, icon);
+			doc.insertString(doc.getLength(),"",chatArea.getCharacterAttributes());
+			doc.insertString(doc.getLength()," TEXT SHOULD BE IGNORED IN FAVOUR OF ICON ",style);
+			//doc.insertString(doc.getLength(), "\n",chatArea.getCharacterAttributes());
+		} catch (BadLocationException e) {
+			e.printStackTrace();
+		}
+		catch (MalformedURLException e1) {
+			e1.printStackTrace();
+		}
+    }
+    
+    
+    //Hilfsmethode "Wie oft im String?"
+	public int ContainsCount(String SearchPhrase, String SearchText) {
+		String Remains = SearchText;
+		int NewIndex = 0;
+		int Count = 0;
+		while (Remains.length() >= SearchPhrase.length())
+		{
+		NewIndex = Remains.indexOf(SearchPhrase);
+
+		    if (NewIndex >= 0)
+		    {
+		    Count++;
+		    Remains = Remains.substring(NewIndex + SearchPhrase.length());
+		    }
+		    else
+		    {
+		    return Count;
+		    }
+
+		}
+		return Count;
+		}
+    
+    
+    //Hilfsmethode Smiley-Check
+    private void smileyCheckAndMessageOutput (String text) {
+    	
+		StyledDocument doc = chatArea.getStyledDocument();
+		Style style = doc.addStyle(null, null);
+    	
+    	if (this.smileys) { //wenn smileys aktiviert
+
+    		StyleConstants.setIcon(style, icon);
+		
+		//Check ob EIN Smiley vorhanden ist, welches ersetzt werden muss:
+		if (text.contains("lol") || 
+				text.contains(";)") || 
+					text.contains(":)") || 
+						text.contains(";-)") ||
+							text.contains(":-)") ||
+								text.contains(":D")) {
+			
+			//Falls ja, alle Smileys nacheinander durchsuchen und durch Bild ersetzen
+			for(int i = 1; i < 7; i++) {
+			
+				String smiley = "";
+				int pause = 0;
+				
+				switch (i) {
+					case 1:  smiley = "lol"; pause = 3;  break;
+					case 2:  smiley = ";)"; pause = 2; break;
+					case 3:  smiley = ":)"; pause = 2; break;
+					case 4:  smiley = ";-)"; pause = 3; break;
+					case 5:  smiley = ":-)"; pause = 3; break;
+					case 6:  smiley = ":D"; pause = 2; break;
+				}
+				
+				int count = ContainsCount(smiley, text);
+				System.out.println(count);
+				
+				//Texte werden solange auseinander geschnitten bis alle Smileys ersetzt wurden
+				for (int j = 0; j < count; j++) {
+				//while (text.contains(smiley)) {
+					String eins;
+					String zwei;
+			
+					int start = 0;
+					int position = text.indexOf(smiley);
+					int ende = text.length();
+			
+					eins = text.substring(start,position);
+					zwei = text.substring(position+pause,ende);
+					
+					//text = eins + "bild" + zwei; 
+					try {
+					    doc.insertString(doc.getLength(),eins,chatArea.getCharacterAttributes());
+					    smiley();
+					    doc.insertString(doc.getLength(),zwei,chatArea.getCharacterAttributes());
+					} catch (Exception e) {
+					    System.err.println("Exception in inserting text and icons: " + e);
+					}
+					
+				}
+			}
+		}
+		else {
+			try {
+			    doc.insertString(doc.getLength(),text,chatArea.getCharacterAttributes());
+			} catch (Exception e) {
+			    System.err.println("Exception in inserting text and icons: " + e);
+			}
+		}
+    	}
+    	{
+			try {
+			    doc.insertString(doc.getLength(),text,chatArea.getCharacterAttributes());
+			} catch (Exception e) {
+			    System.err.println("Exception in inserting text and icons: " + e);
+			}
+    	}
+    }
+    
 
     //Nachricht und Name werden empfangen und zusammen mit der Serverzeit im Chat eingetragen
     public void onMessage(String username, String message, String time) {
-    	if(message.contains("lol")) { //TODO: Erster Test: Smileys ersetzen und Schimpfwortfilter
-    		message = message.replaceAll("lol", ":D");  //Funktionsweise bei Laufzeit testen und ggf. ï¿½ber ENUM-Klassen steuern
-    	    
-    		
-    		//EditorKit setzen und Smiley einfügen
-    		//chatArea.setEditorKit(eKit);
-    		//chatArea.setText(chatArea.getText() + "<IMG SRC='http://www.zuh.net/java/img/sourire.gif' />");
-    		
-
-    	}
+    	
+		StyledDocument doc = chatArea.getStyledDocument();
+		Style style = doc.addStyle(null, null);
+		StyleConstants.setIcon(style, icon);
+		try {
+		    doc.insertString(doc.getLength(),"(",chatArea.getCharacterAttributes());
+		    doc.insertString(doc.getLength(),time,chatArea.getCharacterAttributes());
+		    doc.insertString(doc.getLength(),")",chatArea.getCharacterAttributes());
+		    doc.insertString(doc.getLength()," ",chatArea.getCharacterAttributes());
+		    doc.insertString(doc.getLength(),username,chatArea.getCharacterAttributes());
+		    doc.insertString(doc.getLength(),": ",chatArea.getCharacterAttributes());
+		    //doc.insertString(doc.getLength(),message,chatArea.getCharacterAttributes());
+		} catch (Exception e) {
+		    System.err.println("Exception in inserting text and icons: " + e);
+		}
+    	
+    	smileyCheckAndMessageOutput(message);
+	
+    	try {	
+    		doc.insertString(doc.getLength(), "\n",chatArea.getCharacterAttributes());
+	} catch (Exception e) {
+	    System.err.println("Exception in inserting text and icons: " + e);
+	}
+	
+		//EditorKit setzen und Smiley einfügen
+		//chatArea.setEditorKit(eKit);
+		//chatArea.setText(chatArea.getText() + "<IMG SRC='http://www.zuh.net/java/img/sourire.gif' />");
     	
     	/*neuer Versuch
 	    try {
@@ -313,8 +443,6 @@ public class Client implements ChatEventListener {
 		*///Ende neuer Versuch
     	
     	
-
-    	
 		//effizienter bei viel text:
 /*		try {
 			chatArea.getDocument().insertString(chatArea.getDocument().getLength(), "(" + time + ")" + " " + username + ": " + message + "\n", null);
@@ -322,23 +450,6 @@ public class Client implements ChatEventListener {
 			e.printStackTrace();
 		}*/
         
-    	
-		StyledDocument doc = chatArea.getStyledDocument();
-		Style style = doc.addStyle(null, null);
-		StyleConstants.setIcon(style, icon);
-		try {
-		    doc.insertString(doc.getLength(),"(",chatArea.getCharacterAttributes());
-		    doc.insertString(doc.getLength(),time,chatArea.getCharacterAttributes());
-		    doc.insertString(doc.getLength(),")",chatArea.getCharacterAttributes());
-		    doc.insertString(doc.getLength()," ",chatArea.getCharacterAttributes());
-		    doc.insertString(doc.getLength(),username,chatArea.getCharacterAttributes());
-		    doc.insertString(doc.getLength(),": ",chatArea.getCharacterAttributes());
-		    doc.insertString(doc.getLength(),message,chatArea.getCharacterAttributes());
-		    doc.insertString(doc.getLength(), "\n",chatArea.getCharacterAttributes());
-		} catch (Exception e) {
-		    System.err.println("Exception in inserting text and icons: " + e);
-		}
-    	
     	
     	//chatArea.setText(chatArea.getText()+ "(" + time + ")" + " " + username + ": " + message + "\n"); //NEW @Raphi: chatArea.getText()+ 
         chatField.requestFocus();
@@ -425,7 +536,6 @@ public class Client implements ChatEventListener {
             try {
 				showChatFrame();
 			} catch (MalformedURLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
             login(userName,userIP,portNumber);
