@@ -58,7 +58,7 @@ public class Client implements ChatEventListener {
 	private JLabel header2;
 	//private javax.swing.text.html.HTMLEditorKit eKit; //HTML-Code in JTextPane möglich
 	private ImageIcon icon = null;
-	private java.net.URL where = null;
+	private java.net.URL sourire = null;
 	private boolean smileys = false;
 	//Login
 	private JFrame clientLoginFrame;
@@ -147,24 +147,25 @@ public class Client implements ChatEventListener {
 		chatField 	= new JTextField(300);
 		enter(chatField, false);
 
-		//TODO: Vertiakel Autoscrollen
+		//TODO: Vertiakeles Autoscrollen
 		JScrollPane chatAreaScrollable = new JScrollPane(chatArea,
 				JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		
 	    //SmileyButton
-	    where = new URL("http://www.zuh.net/java/img/sourire.gif");
-	    icon = new ImageIcon(where);
+		sourire = new URL("http://www.friegel-design.de/dl/dakosmileys/sourire.gif");
+	    icon = new ImageIcon(sourire);
 	    iconButton = new JButton(icon);
-	    iconButton.setText("an");
+	    //iconButton.setText("aus");
 	    iconButton.addActionListener(new ActionListener() {
 	      public void actionPerformed(final ActionEvent event) {
-	    	  if (smileys) { 
-	    		  smileys = false;
+	    	  if (smileys) { //Button laggt, daher verkehrte welt :D
 	    		  iconButton.setText("aus");
+	    		  smileys = false;
 	    	  }
-	    	  else { smileys = true;
-	    	  iconButton.setText("an");
+	    	  else { 
+		    	  iconButton.setText("an");
+	    		  smileys = true;
 	    	  }
 	      }
 	    });
@@ -193,7 +194,7 @@ public class Client implements ChatEventListener {
 		submitButton.addMouseListener(new ChatListener());
 		logoutButton.addMouseListener(new ChatListener());
 		
-		//TODO: Buttons für Kursiv, Fett usw.
+		//TODO: Buttons für Kursiv, Fett usw. - wenn überhaupt?!?!?
 //        chatpanel.add( button = new JToggleButton("fett") ); 
 //        button.addActionListener( al ); 
 //        button.setFont( font.deriveFont( Font.BOLD ) ); 
@@ -230,8 +231,10 @@ public class Client implements ChatEventListener {
                 		logMEin();
                 	}
                 	else {
+                		if (!chatField.getText().isEmpty()) {
                         clientCommunicator.tell(userName, chatField.getText());
                         chatField.setText("");
+                		}
                 	}
                 }
             }
@@ -251,7 +254,7 @@ public class Client implements ChatEventListener {
     }
 
     
-    //Hilfsmethode zum Check des Ports
+    //eigene Hilfsmethode zum Check des Ports
     public boolean ValidatePort(String userPort) {
 		try {
 			int port = Integer.parseInt(userPort); //String -> int
@@ -264,11 +267,11 @@ public class Client implements ChatEventListener {
     }
     
     
-    //Hilfsmethode Smiley
+    //eigene Hilfsmethode Smiley
     private void smiley(){
 		try {
-			where = new URL("http://www.zuh.net/java/img/sourire.gif");
-	    	icon = new ImageIcon(where);
+			sourire = new URL("http://www.friegel-design.de/dl/dakosmileys/sourire.gif");
+	    	icon = new ImageIcon(sourire);
 			StyledDocument doc = chatArea.getStyledDocument();
 			Style style = doc.addStyle(null, null);
 			StyleConstants.setIcon(style, icon);
@@ -284,7 +287,7 @@ public class Client implements ChatEventListener {
     }
     
     
-    //Hilfsmethode "Wie oft im String?"
+    //eigene Hilfsmethode "Wie oft im String?"
 	public int ContainsCount(String SearchPhrase, String SearchText) {
 		String Remains = SearchText;
 		int NewIndex = 0;
@@ -308,7 +311,7 @@ public class Client implements ChatEventListener {
 		}
     
     
-    //Hilfsmethode Smiley-Check
+    //eigene Hilfsmethode Smiley-Check
     private void smileyCheckAndMessageOutput (String text) {
     	
 		StyledDocument doc = chatArea.getStyledDocument();
@@ -342,7 +345,6 @@ public class Client implements ChatEventListener {
 				}
 				
 				int count = ContainsCount(smiley, text);
-				System.out.println(count);
 				
 				//Texte werden solange auseinander geschnitten bis alle Smileys ersetzt wurden
 				for (int j = 0; j < count; j++) {
@@ -389,7 +391,7 @@ public class Client implements ChatEventListener {
 
     //Nachricht und Name werden empfangen und zusammen mit der Serverzeit im Chat eingetragen
     public void onMessage(String username, String message, String time) {
-    	
+ 
 		StyledDocument doc = chatArea.getStyledDocument();
 		Style style = doc.addStyle(null, null);
 		StyleConstants.setIcon(style, icon);
@@ -413,11 +415,14 @@ public class Client implements ChatEventListener {
 	    System.err.println("Exception in inserting text and icons: " + e);
 	}
 	
-		//EditorKit setzen und Smiley einfügen
+	
+		//TODO: Auskommentierter Code by Chris in separater Klasse abspeichern, da sehr nice <3
+	
+		//EditorKit setzen und Smiley einfügen///////
 		//chatArea.setEditorKit(eKit);
 		//chatArea.setText(chatArea.getText() + "<IMG SRC='http://www.zuh.net/java/img/sourire.gif' />");
     	
-    	/*neuer Versuch
+    	/*neuer Versuch///////
 	    try {
 		    where = new URL("http://www.zuh.net/java/img/sourire.gif");
 		    icon = new ImageIcon(where);
@@ -440,17 +445,17 @@ public class Client implements ChatEventListener {
 		} catch (Exception e) {
 		    System.err.println("Exception in inserting text and icons: " + e);
 		}
-		*///Ende neuer Versuch
+		*///Ende neuer Versuch///////
     	
     	
-		//effizienter bei viel text:
-/*		try {
+		///////effizienter bei viel text:///////
+		/*try {
 			chatArea.getDocument().insertString(chatArea.getDocument().getLength(), "(" + time + ")" + " " + username + ": " + message + "\n", null);
 		} catch (BadLocationException e) {
 			e.printStackTrace();
 		}*/
         
-    	
+    	///////Standard///////
     	//chatArea.setText(chatArea.getText()+ "(" + time + ")" + " " + username + ": " + message + "\n"); //NEW @Raphi: chatArea.getText()+ 
         chatField.requestFocus();
         chatFrame.setVisible(true);
@@ -547,8 +552,10 @@ public class Client implements ChatEventListener {
     class ChatListener extends MouseAdapter {
         public void mouseClicked(MouseEvent e) {
             if (e.getSource() == submitButton) {
+            	if (!chatField.getText().isEmpty()) {
                 clientCommunicator.tell(userName, chatField.getText());
                 chatField.setText("");
+            	}
                 chatField.requestFocus();
             } else if (e.getSource() == logoutButton) {
                 clientCommunicator.logout();
