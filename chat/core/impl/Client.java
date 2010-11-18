@@ -10,19 +10,29 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Vector;
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import javax.swing.text.Style;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.PropertyConfigurator;
@@ -43,11 +53,14 @@ public class Client implements ChatEventListener {
     private JFrame chatFrame;
     private JTextPane chatArea;
     private JTextField chatField;
-    private JButton submitButton, logoutButton;
+    private JButton submitButton, logoutButton, iconButton;
 	private JList jList;
 	private DefaultListModel defaultListModel;
 	private JScrollPane jScrollPane;
 	private JLabel header2;
+	private javax.swing.text.html.HTMLEditorKit eKit; //HTML-Code in JTextPane möglich
+	ImageIcon icon = null;
+	java.net.URL where = null;
 	//Login
 	private JFrame clientLoginFrame;
 	private JTextField name, ip, port;
@@ -121,7 +134,7 @@ public class Client implements ChatEventListener {
 	
 
 	//Erzeugen des Chatframes
-	private void showChatFrame() {
+	private void showChatFrame() throws MalformedURLException {
 		chatFrame = new JFrame("Client-Chatframe");
 		chatFrame.setResizable(false);
 		
@@ -133,6 +146,8 @@ public class Client implements ChatEventListener {
 		logoutButton = new JButton("Logout");
 		
 		chatArea 	= new JTextPane();
+		eKit = new javax.swing.text.html.HTMLEditorKit();
+
 		chatField 	= new JTextField(300);
 		enter(chatField, false);
 
@@ -140,7 +155,25 @@ public class Client implements ChatEventListener {
 		JScrollPane chatAreaScrollable = new JScrollPane(chatArea,
 				JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-	      
+	    // button to insert an icon
+	    where = new URL("http://www.zuh.net/java/img/sourire.gif");
+	    icon = new ImageIcon(where);
+	    iconButton = new JButton(icon);
+	    iconButton.addActionListener(new ActionListener() {
+	      public void actionPerformed(final ActionEvent event) {
+			StyledDocument doc = chatArea.getStyledDocument();
+			Style style = doc.addStyle(null, null);
+			StyleConstants.setIcon(style, icon);
+			try {
+			    doc.insertString(doc.getLength()," Schau mal ein Smiley: ",chatArea.getCharacterAttributes());
+			    doc.insertString(doc.getLength()," TEXT SHOULD BE IGNORED IN FAVOUR OF ICON ",style);
+			    doc.insertString(doc.getLength(), "\n",chatArea.getCharacterAttributes());
+			} catch (Exception e) {
+			    System.err.println("Exception in inserting text and icons: " + e);
+			}
+	      }
+	    });
+	    
 		defaultListModel = new DefaultListModel();
 	    jList = new JList();
 	    jList.setModel(defaultListModel);
@@ -151,7 +184,7 @@ public class Client implements ChatEventListener {
 		//NEW @Raphi
 		JPanel chatpanel = new JPanel();
 		chatpanel.add(jScrollPane);chatpanel.add(chatAreaScrollable);chatpanel.add(chatField);
-		chatpanel.add(submitButton);chatpanel.add(logoutButton);chatpanel.add(header2);
+		chatpanel.add(submitButton);chatpanel.add(logoutButton);chatpanel.add(header2);chatpanel.add(iconButton);
 		
 		
 		//TODO: Buttons für Kursiv, Fett usw.
@@ -165,6 +198,7 @@ public class Client implements ChatEventListener {
 		chatField.setBounds(0, 300, 396, 30);
 		submitButton.setBounds(100,330,100,30);
 		logoutButton.setBounds(200,330,100,30);
+		iconButton.setBounds(0, 330, 50, 30);
 		
 		chatArea.setEditable(false);
 		submitButton.addMouseListener(new ChatListener());
@@ -184,101 +218,10 @@ public class Client implements ChatEventListener {
 		chatFrame.setSize(400, 390);
 		chatFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         chatFrame.setVisible(true);
+        chatField.requestFocus();
+	}
         
         
-//        ActionListener al = new ActionListener() 
-//        { 
-//          @Override public void actionPerformed( ActionEvent e ) 
-//          { 
-//            if ( "Ende".equals(e.getActionCommand()) ) 
-//              System.exit( 0 ); 
-//            if ( "fett".equals(e.getActionCommand()) ) 
-//              t.setFont( font = font.deriveFont( font.getStyle() ^ Font.BOLD ) ); 
-//            else if ( "kursiv".equals(e.getActionCommand()) ) 
-//              t.setFont( font = font.deriveFont( font.getStyle() ^ Font.ITALIC ) ); 
-//          } 
-//          panel.add( button = new JToggleButton("fett") ); 
-//          button.addActionListener( al ); 
-//          button.setFont( font.deriveFont( Font.BOLD ) ); 
-//       
-//          panel.add( button = new JToggleButton("kursiv") ); 
-//          button.addActionListener( al ); 
-//          button.setFont( font.deriveFont( Font.ITALIC ) ); 
-//       
-//          panel.add( button = new JButton("Ende") ); 
-//          button.addActionListener( al ); 
-
-
-    }
-	
-	
-//        Panel usersPanel = new Panel();
-//        Color(usersPanel);
-//        usersPanel.setLayout(new BorderLayout());
-//        usersPanel.add(new Label("Current users:"), BorderLayout.NORTH);
-//        userList = new List(5, false);
-//        userList.setBackground(Color.BLACK);
-//        userList.setForeground(Color.WHITE);
-//        usersPanel.add(userList, BorderLayout.SOUTH);
-//        
-//        Panel chatPanel = new Panel();
-//        Color(chatPanel);
-//        chatPanel.setLayout(new BorderLayout());
-//        chatPanel.add(new Label("Chat:"), BorderLayout.NORTH);
-//        chatArea = new TextArea(10, 20);
-//        chatArea.setBackground(Color.BLACK);
-//        chatArea.setForeground(Color.WHITE);
-//        chatArea.setEditable(false);
-//        chatPanel.add(chatArea, BorderLayout.SOUTH);
-//        
-//        Panel ownPanel = new Panel();
-//        Color(ownPanel);
-//        ownPanel.setLayout(new BorderLayout());
-//        ownPanel.add(new Label("What I want to say:"), BorderLayout.NORTH);
-//        chatField = new TextField(30);
-//	    
-//        //enter vorrübergehen hier drin, sollte in die untere methode gehen, wenn jframes im chat sind
-//	    chatField.addKeyListener(new KeyAdapter() {
-//            public void keyPressed(KeyEvent e)
-//            {
-//                if (e.getKeyCode() == KeyEvent.VK_ENTER)
-//                {
-//                        clientCommunicator.tell(userName, chatField.getText());
-//                        chatField.setText("");
-//                }
-//            }
-//        });
-//	    
-//        ownPanel.add(chatField, BorderLayout.CENTER);
-//        ownPanel.setForeground(Color.BLACK);
-//        Panel buttonsPanel = new Panel();
-//        submitButton = new Button("submit");
-//        submitButton.addMouseListener(new ChatListener());
-//        buttonsPanel.add(submitButton);
-//        submitButton.setForeground(Color.BLACK);
-//        logoutButton = new Button("logout");
-//        logoutButton.addMouseListener(new ChatListener());
-//        buttonsPanel.add(logoutButton);
-//        logoutButton.setForeground(Color.BLACK);
-//        ownPanel.add(buttonsPanel, BorderLayout.SOUTH);
-//
-//        chatFrame = new Frame();
-//        chatFrame.setResizable(false);
-//        chatFrame.setLayout(new BorderLayout());
-//        chatFrame.add(usersPanel, BorderLayout.NORTH);
-//        chatFrame.add(chatPanel, BorderLayout.CENTER);
-//        chatFrame.add(ownPanel, BorderLayout.SOUTH);
-//	    chatFrame.addWindowListener(new WindowAdapter(){
-//	        public void windowClosing(WindowEvent we){
-//	          System.exit(0);
-//	        }
-//	      });
-//
-//        chatFrame.pack();
-//        chatFrame.setVisible(true);
-//    }
-	
-	
 	//eigene Hilfsmethode Farbe für Chat
 	private void Color(Panel ty) {
         ty.setBackground(Color.BLACK);
@@ -335,11 +278,74 @@ public class Client implements ChatEventListener {
     public void onMessage(String username, String message, String time) {
     	if(message.contains("lol")) { //TODO: Erster Test: Smileys ersetzen und Schimpfwortfilter
     		message = message.replaceAll("lol", ":D");  //Funktionsweise bei Laufzeit testen und ggf. ï¿½ber ENUM-Klassen steuern
-    	}
-        chatArea.setText(chatArea.getText()+ "(" + time + ")" + " " + username + ": " + message + "\n"); //NEW @Raphi: chatArea.getText()+ 
-        chatFrame.setVisible(true);
-    }
+    	    
+    		
+    		//EditorKit setzen und Smiley einfügen
+    		//chatArea.setEditorKit(eKit);
+    		//chatArea.setText(chatArea.getText() + "<IMG SRC='http://www.zuh.net/java/img/sourire.gif' />");
+    		
 
+    	}
+    	
+    	/*neuer Versuch
+	    try {
+		    where = new URL("http://www.zuh.net/java/img/sourire.gif");
+		    icon = new ImageIcon(where);
+	    	//chatArea.setCaretPosition(chatArea.getText().length()); // muss raus, try muss in schleife-algo rein
+	        //chatArea.insertIcon(icon);
+	        //chatField();
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+		
+		StyledDocument doc = chatArea.getStyledDocument();
+		Style style = doc.addStyle(null, null);
+		StyleConstants.setIcon(style, icon);
+
+		try {
+		    //chatArea.insertIcon(icon);
+		    doc.insertString(doc.getLength()," the icon should have just been inserted ",chatArea.getCharacterAttributes());
+		    doc.insertString(doc.getLength()," TEXT SHOULD BE IGNORED IN FAVOUR OF ICON ",style);
+		    //doc.insertString(doc.getLength(), "\n---\n",chatArea.getCharacterAttributes());
+		} catch (Exception e) {
+		    System.err.println("Exception in inserting text and icons: " + e);
+		}
+		*///Ende neuer Versuch
+    	
+    	
+
+    	
+		//effizienter bei viel text:
+/*		try {
+			chatArea.getDocument().insertString(chatArea.getDocument().getLength(), "(" + time + ")" + " " + username + ": " + message + "\n", null);
+		} catch (BadLocationException e) {
+			e.printStackTrace();
+		}*/
+        
+    	
+		StyledDocument doc = chatArea.getStyledDocument();
+		Style style = doc.addStyle(null, null);
+		StyleConstants.setIcon(style, icon);
+		try {
+		    doc.insertString(doc.getLength(),"(",chatArea.getCharacterAttributes());
+		    doc.insertString(doc.getLength(),time,chatArea.getCharacterAttributes());
+		    doc.insertString(doc.getLength(),")",chatArea.getCharacterAttributes());
+		    doc.insertString(doc.getLength()," ",chatArea.getCharacterAttributes());
+		    doc.insertString(doc.getLength(),username,chatArea.getCharacterAttributes());
+		    doc.insertString(doc.getLength(),": ",chatArea.getCharacterAttributes());
+		    doc.insertString(doc.getLength(),message,chatArea.getCharacterAttributes());
+		    doc.insertString(doc.getLength(), "\n",chatArea.getCharacterAttributes());
+		} catch (Exception e) {
+		    System.err.println("Exception in inserting text and icons: " + e);
+		}
+    	
+    	
+    	//chatArea.setText(chatArea.getText()+ "(" + time + ")" + " " + username + ": " + message + "\n"); //NEW @Raphi: chatArea.getText()+ 
+        chatField.requestFocus();
+        chatFrame.setVisible(true);
+
+    }
+    
 
     //Userliste wird an fillUserList weitergegeben
     public void onUserListUpdate(String[] userList) {
@@ -364,6 +370,7 @@ public class Client implements ChatEventListener {
     public void onAction(int actionId, String reserved) {
         if (actionId == ChatAction.CHATACTION_USERNAME_SCHON_VERGEBEN) {
             chatArea.setText("Der Username ist schon vergeben. Bitte loggen Sie sich aus und starten Sie die Anwendung neu!");
+            chatField.requestFocus();
         }
     }
 
@@ -415,7 +422,12 @@ public class Client implements ChatEventListener {
             if (ok) {
             int portNumber = Integer.parseInt(userPort);
             clientLoginFrame.dispose();
-            showChatFrame();
+            try {
+				showChatFrame();
+			} catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
             login(userName,userIP,portNumber);
             }
         }
@@ -427,6 +439,7 @@ public class Client implements ChatEventListener {
             if (e.getSource() == submitButton) {
                 clientCommunicator.tell(userName, chatField.getText());
                 chatField.setText("");
+                chatField.requestFocus();
             } else if (e.getSource() == logoutButton) {
                 clientCommunicator.logout();
 				chatFrame.dispose();
