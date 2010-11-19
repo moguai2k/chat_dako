@@ -312,81 +312,100 @@ public class Client implements ChatEventListener {
     
     
     //eigene Hilfsmethode Smiley-Check
-    private void smileyCheckAndMessageOutput (String text) {
-    	
+	private void smileyCheckAndMessageOutput(String text) {
+
 		StyledDocument doc = chatArea.getStyledDocument();
 		Style style = doc.addStyle(null, null);
-    	
-    	if (this.smileys) { //wenn smileys aktiviert
 
-    		StyleConstants.setIcon(style, icon);
-		
-		//Check ob EIN Smiley vorhanden ist, welches ersetzt werden muss:
-		if (text.contains("lol") || 
-				text.contains(";)") || 
-					text.contains(":)") || 
-						text.contains(";-)") ||
-							text.contains(":-)") ||
-								text.contains(":D")) {
-			
-			//Falls ja, alle Smileys nacheinander durchsuchen und durch Bild ersetzen
-			for(int i = 1; i < 7; i++) {
-			
-				String smiley = "";
-				int pause = 0;
-				
-				switch (i) {
-					case 1:  smiley = "lol"; pause = 3;  break;
-					case 2:  smiley = ";)"; pause = 2; break;
-					case 3:  smiley = ":)"; pause = 2; break;
-					case 4:  smiley = ";-)"; pause = 3; break;
-					case 5:  smiley = ":-)"; pause = 3; break;
-					case 6:  smiley = ":D"; pause = 2; break;
-				}
-				
-				int count = ContainsCount(smiley, text);
-				
-				//Texte werden solange auseinander geschnitten bis alle Smileys ersetzt wurden
-				for (int j = 0; j < count; j++) {
-				//while (text.contains(smiley)) {
-					String eins;
-					String zwei;
-			
-					int start = 0;
-					int position = text.indexOf(smiley);
-					int ende = text.length();
-			
-					eins = text.substring(start,position);
-					zwei = text.substring(position+pause,ende);
-					
-					//text = eins + "bild" + zwei; 
-					try {
-					    doc.insertString(doc.getLength(),eins,chatArea.getCharacterAttributes());
-					    smiley();
-					    doc.insertString(doc.getLength(),zwei,chatArea.getCharacterAttributes());
-					} catch (Exception e) {
-					    System.err.println("Exception in inserting text and icons: " + e);
+		if (this.smileys) { // wenn smileys aktiviert
+
+			StyleConstants.setIcon(style, icon);
+
+			// Check ob EIN Smiley vorhanden ist, welches ersetzt werden muss:
+			if (text.contains("lol") || 
+					text.contains(";)") || 
+						text.contains(":)") || 
+							text.contains(";-)") || 
+								text.contains(":-)") || 
+									text.contains(":D")) {
+
+				// Falls ja, alle Smileys nacheinander durchsuchen und durch
+				// Bild ersetzen
+				for (int i = 1; i < 7; i++) {
+
+					String smiley = "";
+					int pause = 0;
+
+					switch (i) {
+					case 1:
+						smiley = "lol";
+						pause = 3;
+						break;
+					case 2:
+						smiley = ";)";
+						pause = 2;
+						break;
+					case 3:
+						smiley = ":)";
+						pause = 2;
+						break;
+					case 4:
+						smiley = ";-)";
+						pause = 3;
+						break;
+					case 5:
+						smiley = ":-)";
+						pause = 3;
+						break;
+					case 6:
+						smiley = ":D";
+						pause = 2;
+						break;
 					}
-					
+
+					int count = ContainsCount(smiley, text);
+
+					// Texte werden solange auseinander geschnitten bis alle
+					// Smileys ersetzt wurden
+					for (int j = 0; j < count; j++) {
+						// while (text.contains(smiley)) {
+						String eins = "";
+						String zwei = "";
+
+						int start = 0;
+						int position = text.indexOf(smiley);
+						int ende = text.length();
+
+						eins = text.substring(start, position);
+						zwei = text.substring(position + pause, ende);
+
+						// text = eins + "bild" + zwei;
+						try {
+							doc.insertString(doc.getLength(), eins, chatArea.getCharacterAttributes());
+							smiley();
+							doc.insertString(doc.getLength(), zwei, chatArea.getCharacterAttributes());
+						} catch (Exception e) {
+							System.err.println("Exception in inserting text and icons: " + e);
+						}
+
+					}
+				}
+			} else {
+				try {
+					doc.insertString(doc.getLength(), text, chatArea.getCharacterAttributes());
+				} catch (Exception e) {
+					System.err.println("Exception in inserting text and icons: " + e);
 				}
 			}
 		}
 		else {
 			try {
-			    doc.insertString(doc.getLength(),text,chatArea.getCharacterAttributes());
+				doc.insertString(doc.getLength(), text, chatArea.getCharacterAttributes());
 			} catch (Exception e) {
-			    System.err.println("Exception in inserting text and icons: " + e);
+				System.err.println("Exception in inserting text and icons: " + e);
 			}
 		}
-    	}
-    	{
-			try {
-			    doc.insertString(doc.getLength(),text,chatArea.getCharacterAttributes());
-			} catch (Exception e) {
-			    System.err.println("Exception in inserting text and icons: " + e);
-			}
-    	}
-    }
+	}
     
 
     //Nachricht und Name werden empfangen und zusammen mit der Serverzeit im Chat eingetragen
