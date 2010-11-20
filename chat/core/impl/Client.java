@@ -27,6 +27,8 @@ import javax.swing.JTextPane;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.MutableAttributeSet;
+import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
@@ -60,6 +62,7 @@ public class Client implements ChatEventListener {
 	private ImageIcon icon = null;
 	private java.net.URL sourire = null;
 	private boolean smileys = false;
+	private StyledDocument doc;
 	//Login
 	private JFrame clientLoginFrame;
 	private JTextField name, ip, port;
@@ -156,16 +159,17 @@ public class Client implements ChatEventListener {
 		sourire = new URL("http://www.friegel-design.de/dl/dakosmileys/sourire.gif");
 	    icon = new ImageIcon(sourire);
 	    iconButton = new JButton(icon);
-	    //iconButton.setText("aus");
 	    iconButton.addActionListener(new ActionListener() {
 	      public void actionPerformed(final ActionEvent event) {
-	    	  if (smileys) { //Button laggt, daher verkehrte welt :D
+	    	  if (smileys) { //Button laggt, daher verkehrte Welt :D
 	    		  iconButton.setText("aus");
 	    		  smileys = false;
+	    		  chatField.requestFocus();
 	    	  }
 	    	  else { 
 		    	  iconButton.setText("an");
 	    		  smileys = true;
+	    		  chatField.requestFocus();
 	    	  }
 	      }
 	    });
@@ -194,15 +198,7 @@ public class Client implements ChatEventListener {
 		submitButton.addMouseListener(new ChatListener());
 		logoutButton.addMouseListener(new ChatListener());
 		
-		//TODO: Buttons für Kursiv, Fett usw. - wenn überhaupt?!?!?
-//        chatpanel.add( button = new JToggleButton("fett") ); 
-//        button.addActionListener( al ); 
-//        button.setFont( font.deriveFont( Font.BOLD ) ); 
-//     
-//        panel.add( button = new JToggleButton("kursiv") ); 
-//        button.addActionListener( al ); 
-//        button.setFont( font.deriveFont( Font.ITALIC ) ); 
-
+		doc = chatArea.getStyledDocument();
         chatFrame.pack();
 		chatFrame.add(chatpanel);
 		chatpanel.setLayout(null);
@@ -211,15 +207,8 @@ public class Client implements ChatEventListener {
         chatFrame.setVisible(true);
         chatField.requestFocus(); //Setzt den Cursor in das ChatField
 	}
-        
-        
-	//eigene Hilfsmethode Farbe für Chat
-	private void Color(Panel ty) {
-        ty.setBackground(Color.BLACK);
-        ty.setForeground(Color.WHITE);
-	}
-	
 
+	
 	//eigene Hilfsmethode Enter-Taste
     private void enter(JTextField label, final boolean login) {
 	    label.addKeyListener(new KeyAdapter() {
@@ -240,6 +229,21 @@ public class Client implements ChatEventListener {
             }
         });
 	}
+    
+    
+    //eigene Hilfsmethode um Nicknames + Datum fett zu machen
+    private void formatSelectedText(String username) {
+        final MutableAttributeSet attributeSet = new SimpleAttributeSet();
+        StyleConstants.setBold(attributeSet, true);
+        
+        int nameLenght = username.length();
+
+        final int startPos = 0;
+        final int endPos = 8 + nameLenght + 1;
+
+        final StyledDocument doc = (StyledDocument) chatArea.getDocument();
+        doc.setCharacterAttributes(startPos, endPos - startPos, attributeSet, true);
+    }
     
     
     //Hilfsmethode zum Check der IP-Adresse - IP-Pattern aus http://forums.sun.com/thread.jspa?threadID=584205&start=15&tstart=0
@@ -272,12 +276,10 @@ public class Client implements ChatEventListener {
 		try {
 			sourire = new URL("http://www.friegel-design.de/dl/dakosmileys/sourire.gif");
 	    	icon = new ImageIcon(sourire);
-			StyledDocument doc = chatArea.getStyledDocument();
 			Style style = doc.addStyle(null, null);
 			StyleConstants.setIcon(style, icon);
 			doc.insertString(doc.getLength(),"",chatArea.getCharacterAttributes());
 			doc.insertString(doc.getLength()," TEXT SHOULD BE IGNORED IN FAVOUR OF ICON ",style);
-			//doc.insertString(doc.getLength(), "\n",chatArea.getCharacterAttributes());
 		} catch (BadLocationException e) {
 			e.printStackTrace();
 		}
@@ -287,8 +289,9 @@ public class Client implements ChatEventListener {
     }
     
     
-    //eigene Hilfsmethode "Wie oft im String?"
-	public int ContainsCount(String SearchPhrase, String SearchText) {
+    //eigene Hilfsmethode "Wie oft im String?" 		
+    //TODO: Auskommentierter Code by Chris in separater Klasse abspeichern, da sehr nice und aufwändig war <3
+/*	public int ContainsCount(String SearchPhrase, String SearchText) {
 		String Remains = SearchText;
 		int NewIndex = 0;
 		int Count = 0;
@@ -308,99 +311,99 @@ public class Client implements ChatEventListener {
 
 		}
 		return Count;
-		}
+		}*/
+	
+	
+	//eigene Hilfsmethode: Smileys drin?
+	private boolean containsSmileys(String text) {
+		return (text.contains("=)") ||  //Evtl noch durch String-Array ersetzen.
+					text.contains(";)") || 
+						text.contains(":-D") || 
+							text.contains(";-)") || 
+								text.contains(":-)") ||
+									text.contains(":D") || 
+										text.contains(":)")		);
+	}
     
     
     //eigene Hilfsmethode Smiley-Check
-	private void smileyCheckAndMessageOutput(String text) {
+	private String smileyCheck(String text) {
 
-		StyledDocument doc = chatArea.getStyledDocument();
-		Style style = doc.addStyle(null, null);
+		if ((this.smileys) && containsSmileys(text)) {// wenn Smileys aktiviert AND iein Smiley vor kommt
 
-		if (this.smileys) { // wenn smileys aktiviert
-
-			StyleConstants.setIcon(style, icon);
-
-			// Check ob EIN Smiley vorhanden ist, welches ersetzt werden muss:
-			if (text.contains("lol") || 
-					text.contains(";)") || 
-						text.contains(":)") || 
-							text.contains(";-)") || 
-								text.contains(":-)") || 
-									text.contains(":D")) {
-
-				// Falls ja, alle Smileys nacheinander durchsuchen und durch
-				// Bild ersetzen
+			String smiley = "";
+			
+			// Falls ja, alle Smileys nacheinander durchsuchen und durch
+			// Bild ersetzen
 				for (int i = 1; i < 7; i++) {
-
-					String smiley = "";
-					int pause = 0;
-
-					switch (i) {
+					
+					switch (i) { //Evtl noch durch String-Array ersetzen.
 					case 1:
-						smiley = "lol";
-						pause = 3;
+						smiley = "=\\)"; // ":)" nicht möglich sonst regex.PatternSyntaxException, daher DoppelSlash
 						break;
 					case 2:
-						smiley = ";)";
-						pause = 2;
+						smiley = ";\\)";
 						break;
 					case 3:
-						smiley = ":)";
-						pause = 2;
+						smiley = ":-D";
 						break;
 					case 4:
-						smiley = ";-)";
-						pause = 3;
+						smiley = ";-\\)";
 						break;
 					case 5:
-						smiley = ":-)";
-						pause = 3;
+						smiley = ":-\\)";
 						break;
 					case 6:
 						smiley = ":D";
-						pause = 2;
 						break;
 					}
-
-					int count = ContainsCount(smiley, text);
-
-					// Texte werden solange auseinander geschnitten bis alle
-					// Smileys ersetzt wurden
-					for (int j = 0; j < count; j++) {
-						// while (text.contains(smiley)) {
-						String eins = "";
-						String zwei = "";
-
-						int start = 0;
-						int position = text.indexOf(smiley);
-						int ende = text.length();
-
-						eins = text.substring(start, position);
-						zwei = text.substring(position + pause, ende);
-
-						// text = eins + "bild" + zwei;
-						try {
-							doc.insertString(doc.getLength(), eins, chatArea.getCharacterAttributes());
-							smiley();
-							doc.insertString(doc.getLength(), zwei, chatArea.getCharacterAttributes());
-						} catch (Exception e) {
-							System.err.println("Exception in inserting text and icons: " + e);
-						}
-
-					}
+					text = text.replaceAll(smiley,  ":\\)"); //alle Smileys die zu ersetzen sind gleich "machen"
 				}
-			} else {
-				try {
-					doc.insertString(doc.getLength(), text, chatArea.getCharacterAttributes());
-				} catch (Exception e) {
-					System.err.println("Exception in inserting text and icons: " + e);
-				}
+				return text;
+			} 
+		else { //falls keine Smileys drin oder nicht aktiviert sind
+			try {
+				doc.insertString(doc.getLength(), text, chatArea.getCharacterAttributes());
+			} catch (Exception e) {
+				System.err.println("Exception in inserting text and icons: " + e);
 			}
+			return null;
+		}
+	}
+	
+	
+	//eigene Hilfsmethode: rekrusives abschneiden und schreiben der Nachricht mit Smileys
+	private void messageCutAndPrint(String textPart) {
+		
+		if (containsSmileys(textPart)) {
+		String smiley = ":)";
+		int pause = 2; //Whitespace, welcher anstelle Smiley entfernt werden muss
+		
+			String eins = "";
+			String zwei = "";
+
+			int start = 0;
+			int position = textPart.indexOf(smiley);
+			int ende = textPart.length();
+
+			//Nachricht in zwei Hälften schneiden, wobei das Smiley abgeschnitten wird
+			eins = textPart.substring(start, position);
+			zwei = textPart.substring(position + pause, ende);
+
+			// text = eins + "bild" + zwei;
+			try {
+				doc.insertString(doc.getLength(), eins, chatArea.getCharacterAttributes()); //von links nach rechts printen bis Smiley und wieder recursiv
+				smiley(); //Smiley printen
+			} catch (Exception e) {
+				System.err.println("Exception in inserting text and icons: " + e);
+			}
+			
+			// Texte werden solange auseinander geschnitten bis alle Smileys ersetzt wurden
+			messageCutAndPrint(zwei);
 		}
 		else {
 			try {
-				doc.insertString(doc.getLength(), text, chatArea.getCharacterAttributes());
+				doc.insertString(doc.getLength(), textPart, chatArea.getCharacterAttributes());
 			} catch (Exception e) {
 				System.err.println("Exception in inserting text and icons: " + e);
 			}
@@ -411,7 +414,6 @@ public class Client implements ChatEventListener {
     //Nachricht und Name werden empfangen und zusammen mit der Serverzeit im Chat eingetragen
     public void onMessage(String username, String message, String time) {
  
-		StyledDocument doc = chatArea.getStyledDocument();
 		Style style = doc.addStyle(null, null);
 		StyleConstants.setIcon(style, icon);
 		try {
@@ -421,12 +423,17 @@ public class Client implements ChatEventListener {
 		    doc.insertString(doc.getLength()," ",chatArea.getCharacterAttributes());
 		    doc.insertString(doc.getLength(),username,chatArea.getCharacterAttributes());
 		    doc.insertString(doc.getLength(),": ",chatArea.getCharacterAttributes());
-		    //doc.insertString(doc.getLength(),message,chatArea.getCharacterAttributes());
+		    //doc.insertString(doc.getLength(),message,chatArea.getCharacterAttributes()); //Nachricht direkt unbehandelt posten
 		} catch (Exception e) {
 		    System.err.println("Exception in inserting text and icons: " + e);
 		}
     	
-    	smileyCheckAndMessageOutput(message);
+		//Checken ob Nachricht ein Smiley enthält
+		String SmileyChecked = smileyCheck(message);
+		
+		//Wenn Smileys drin sind, dann ab zur CutterMethode
+		if(SmileyChecked != null)
+			messageCutAndPrint(SmileyChecked); 
 	
     	try {	
     		doc.insertString(doc.getLength(), "\n",chatArea.getCharacterAttributes());
@@ -434,8 +441,11 @@ public class Client implements ChatEventListener {
 	    System.err.println("Exception in inserting text and icons: " + e);
 	}
 	
+		//Datum + Name fett machen
+		formatSelectedText(username);
 	
-		//TODO: Auskommentierter Code by Chris in separater Klasse abspeichern, da sehr nice <3
+	
+		//TODO: Auskommentierter Code by Chris in separater Klasse abspeichern, da sehr nice und aufwändig war <3
 	
 		//EditorKit setzen und Smiley einfügen///////
 		//chatArea.setEditorKit(eKit);
