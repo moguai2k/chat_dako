@@ -3,7 +3,7 @@ package core.impl;
 import java.awt.AWTException;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Panel;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -27,12 +27,10 @@ import javax.swing.JTextPane;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.PropertyConfigurator;
@@ -56,13 +54,14 @@ public class Client implements ChatEventListener {
     private JButton submitButton, logoutButton, iconButton;
 	private JList jList;
 	private DefaultListModel defaultListModel;
-	private JScrollPane jScrollPane;
+	private JScrollPane jScrollPaneList, chatAreaScrollable;
 	private JLabel header2;
 	//private javax.swing.text.html.HTMLEditorKit eKit; //HTML-Code in JTextPane möglich
 	private ImageIcon icon = null;
 	private java.net.URL sourire = null;
 	private boolean smileys = false;
 	private StyledDocument doc;
+    private SimpleAttributeSet attributeSet;
 	//Login
 	private JFrame clientLoginFrame;
 	private JTextField name, ip, port;
@@ -150,8 +149,7 @@ public class Client implements ChatEventListener {
 		chatField 	= new JTextField(300);
 		enter(chatField, false);
 
-		//TODO: Vertiakeles Autoscrollen
-		JScrollPane chatAreaScrollable = new JScrollPane(chatArea,
+		chatAreaScrollable = new JScrollPane(chatArea,
 				JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		
@@ -178,16 +176,16 @@ public class Client implements ChatEventListener {
 	    jList = new JList();
 	    jList.setModel(defaultListModel);
 	    
-	    jScrollPane = new JScrollPane(jList);
-	    jScrollPane.setViewportView(jList);
+	    jScrollPaneList = new JScrollPane(jList);
+	    jScrollPaneList.setViewportView(jList);
 		
 		JPanel chatpanel = new JPanel();
-		chatpanel.add(jScrollPane);chatpanel.add(chatAreaScrollable);chatpanel.add(chatField);
+		chatpanel.add(jScrollPaneList);chatpanel.add(chatAreaScrollable);chatpanel.add(chatField);
 		chatpanel.add(submitButton);chatpanel.add(logoutButton);chatpanel.add(header2);chatpanel.add(iconButton);
 		
 		//Netz-Elemente, von oben Links beginnend(int x, int y, int width, int height) 
 		header2.setBounds(20,20,100,50); //NEW @Raphi
-		jScrollPane.setBounds(150,20,220,80);
+		jScrollPaneList.setBounds(150,20,220,80);
 		chatAreaScrollable.setBounds(0,120,396,180); //NEW @Raphi
 		chatField.setBounds(0,300,396,30);
 		submitButton.setBounds(100,330,100,30);
@@ -231,19 +229,20 @@ public class Client implements ChatEventListener {
 	}
     
     
-    //eigene Hilfsmethode um Nicknames + Datum fett zu machen
-    private void formatSelectedText(String username) {
-        final MutableAttributeSet attributeSet = new SimpleAttributeSet();
+    //TODO: eigene Hilfsmethode um Nicknames + Datum fett zu machen 
+    /*private void formatSelectedText(String username, int startPos) {
+        attributeSet = new SimpleAttributeSet();
         StyleConstants.setBold(attributeSet, true);
         
         int nameLenght = username.length();
+        int beBoldLength = 8 + nameLenght + 1;
+        
+        if(startPos != 0) 
+        	startPos = startPos + 2;
 
-        final int startPos = 0;
-        final int endPos = 8 + nameLenght + 1;
-
-        final StyledDocument doc = (StyledDocument) chatArea.getDocument();
-        doc.setCharacterAttributes(startPos, endPos - startPos, attributeSet, true);
-    }
+        doc = (StyledDocument) chatArea.getDocument();
+        doc.setCharacterAttributes(startPos, beBoldLength, attributeSet, true); //StartPosi, Länge der Fettzuwerdenden, Fettattribut, true^^
+    }*/
     
     
     //Hilfsmethode zum Check der IP-Adresse - IP-Pattern aus http://forums.sun.com/thread.jspa?threadID=584205&start=15&tstart=0
@@ -413,6 +412,7 @@ public class Client implements ChatEventListener {
 
     //Nachricht und Name werden empfangen und zusammen mit der Serverzeit im Chat eingetragen
     public void onMessage(String username, String message, String time) {
+    	int startCaret = chatArea.getText().length(); //erstes Zeichen der neuen Zeile, damit man weiß ab wann fett gemacht werden muss
  
 		Style style = doc.addStyle(null, null);
 		StyleConstants.setIcon(style, icon);
@@ -441,15 +441,15 @@ public class Client implements ChatEventListener {
 	    System.err.println("Exception in inserting text and icons: " + e);
 	}
 	
-		//Datum + Name fett machen
-		formatSelectedText(username);
-	
+		//TODO: Datum + Name fett machen
+		//formatSelectedText(username, startCaret);
+		
 	
 		//TODO: Auskommentierter Code by Chris in separater Klasse abspeichern, da sehr nice und aufwändig war <3
 	
 		//EditorKit setzen und Smiley einfügen///////
 		//chatArea.setEditorKit(eKit);
-		//chatArea.setText(chatArea.getText() + "<IMG SRC='http://www.zuh.net/java/img/sourire.gif' />");
+		//chatArea.setText("<IMG SRC='http://www.zuh.net/java/img/sourire.gif' />");
     	
     	/*neuer Versuch///////
 	    try {
@@ -484,12 +484,23 @@ public class Client implements ChatEventListener {
 			e.printStackTrace();
 		}*/
         
+
     	///////Standard///////
     	//chatArea.setText(chatArea.getText()+ "(" + time + ")" + " " + username + ": " + message + "\n"); //NEW @Raphi: chatArea.getText()+ 
+		
+		autoscroll();
         chatField.requestFocus();
         chatFrame.setVisible(true);
 
+        //jScrollPane.getVerticalScrollBar().getModel().setValue(0);  
     }
+    
+    
+    //eigene Hilfsmethode um automatisch nach unten zu scrollen
+	public void autoscroll() {
+		Point point = new Point( 0, (int)(chatArea.getSize().getHeight()) );
+		chatAreaScrollable.getViewport().setViewPosition( point );
+	}
     
 
     //Userliste wird an fillUserList weitergegeben
