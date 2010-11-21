@@ -1,17 +1,11 @@
 package lwtrt.impl;
 
-import udp.wrapper.UdpSocketWrapper;
 import lwtrt.pdu.LWTRTPdu;
 import lwtrt.LWTRTConnection;
 import lwtrt.ex.LWTRTException;
 import lwtrt.impl.LWTRTHelper;
 
 import java.io.IOException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.Vector;
 
 import org.apache.commons.logging.Log;
@@ -29,27 +23,22 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 	private int remotePort;
 
 	private long sequenceNumber;
+	
+	private LWTRTServiceImpl service;
 
-	// UDP-Wrapper zum Senden der Protocol Data Units
-	private UdpSocketWrapper wrapper;
-	// Puffer für empfangene PDU´s
-	public Vector<LWTRTPdu> recvCache = new Vector<LWTRTPdu>();
 	// Puffer für Pings
-	public Vector<LWTRTPdu> pingCache = new Vector<LWTRTPdu>();
-	// Eimer PDU`s
-	public Vector<LWTRTPdu> trunk = new Vector<LWTRTPdu>();
+	private Vector<LWTRTPdu> pingCache = new Vector<LWTRTPdu>();
 	//Response Trunk
-	public Vector<LWTRTPdu> responeTrunk = new Vector<LWTRTPdu>();
+	private Vector<LWTRTPdu> responeTrunk = new Vector<LWTRTPdu>();
 	
 	// Konstruktor
-	public LWTRTConnectionImpl(String localAddress, int localPort, String remoteAddress, int remotePort, UdpSocketWrapper wrapper) {
+	public LWTRTConnectionImpl(String localAddress, int localPort, String remoteAddress, int remotePort, 
+			LWTRTServiceImpl service) {
 		this.localAddress = localAddress;
 		this.localPort = localPort;
 		this.remoteAddress = remoteAddress;
 		this.remotePort = remotePort;
-		this.wrapper = wrapper;
-		LWTRTConnectionRecvThread recvThread = new LWTRTConnectionRecvThread(this);
-		recvThread.start();
+		this.service = service;
 		this.sequenceNumber = 1;	
 	}
 	
@@ -95,15 +84,24 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 		this.sequenceNumber = sequenceNumber;
 	}
 	
-	public UdpSocketWrapper getWrapper() {
-		return wrapper;
+	public Vector<LWTRTPdu> getResponeTrunk() {
+		return responeTrunk;
 	}
 
-	public void setWrapper(UdpSocketWrapper wrapper) {
-		this.wrapper = wrapper;
+	public void setResponeTrunk(Vector<LWTRTPdu> responeTrunk) {
+		this.responeTrunk = responeTrunk;
+	}
+	
+	public Vector<LWTRTPdu> getPingCache() {
+		return pingCache;
+	}
+
+	public void setPingCache(Vector<LWTRTPdu> pingCache) {
+		this.pingCache = pingCache;
 	}
 	
 // Ende Getter + Setter
+	
 
 	@Override
 	public void disconnect() throws LWTRTException {
@@ -112,7 +110,7 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 		pdu.setRemoteAddress(remoteAddress);
 		pdu.setRemotePort(remotePort);
 		try {
-			wrapper.send(pdu);
+			service.getWrapper().send(pdu);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -139,7 +137,7 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 		pdu.setRemoteAddress(remoteAddress);
 		pdu.setRemotePort(remotePort);
 		try {
-			wrapper.send(pdu);
+			service.getWrapper().send(pdu);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -156,7 +154,7 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 		this.sequenceNumber++;
 		try {
 			//log.debug("Sende chatPDU -- Versuch: " +i);
-			wrapper.send(pdu);
+			service.getWrapper().send(pdu);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -179,18 +177,18 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 			// Falls nicht, wird das Paket nochmal geschickt, und der timer nochmal um 2000 Millisekunden hochgesetzt
 			// Die Counter Variable dient dazu, dass das Paket maximal 5 mal gesendet wird.
 			if(milli < System.currentTimeMillis()) {
-				milli = System.currentTimeMillis() + 2000;
+				milli = System.currentTimeMillis() + 10000;
 				counter++;
-				log.debug("Paket gesendet - Response kam nach 2 Sekunden nicht an - Paket wird nochmal geschickt. Anzahl der geschickten Pakete: "+ counter);
+				log.debug("Paket gesendet - Response kam nach 10 Sekunden nicht an - " +
+						"Paket wird nochmal geschickt. Anzahl der geschickten Pakete: "+ counter);
 				//Paket wird nochmal gesendet.
 				try {
-					wrapper.send(pdu);
+					service.getWrapper().send(pdu);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-				if(counter > 4) {
-					// TODO Hier müsste dann eine Meldung dem Nutzer ausgegeben werden, dass sein Paket nicht ankam
-					// Alternativ gleich disconnecten
+				if(counter > 2) {
+					System.exit(0);
 				}
 			}
 		}
@@ -199,14 +197,14 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 	@Override
 	public Object receive() throws LWTRTException {
 		while (true) {
-			if (!trunk.isEmpty()) {
-				LWTRTPdu pdu = trunk.firstElement();
-				trunk.remove(pdu);
+			if (!LWTRTHelper.getTrunk().isEmpty()) {
+				LWTRTPdu pdu = LWTRTHelper.getTrunk().firstElement();
+				LWTRTHelper.getTrunk().remove(pdu);
 				log.debug("PDU abgearbeitet und aus Trunk entfernt");
 				return pdu.getUserData();
 			}
 			try {
-				Thread.sleep(10);
+				Thread.sleep(50);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}	
@@ -221,7 +219,7 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 		pdu.setRemotePort(remotePort);
 		pdu.setSequenceNumber(this.sequenceNumber);
 		try {
-			wrapper.send(pdu);
+			service.getWrapper().send(pdu);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

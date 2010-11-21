@@ -3,8 +3,7 @@ package lwtrt.impl;
 //Hashmap für die Sockets. Aus dem Beispiel entnommen.
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Calendar;
-import java.util.Timer;
-import java.awt.event.ActionListener;
+import java.util.Vector;
 import java.io.IOException;
 import java.net.SocketException;
 
@@ -24,14 +23,41 @@ public class LWTRTServiceImpl implements LWTRTService {
 	protected static ConcurrentHashMap<Integer, UdpSocketWrapper> socketMap = new ConcurrentHashMap<Integer, UdpSocketWrapper>();
 	protected static ConcurrentHashMap<Integer, LWTRTConnectionImpl> connectionMap = new ConcurrentHashMap<Integer, LWTRTConnectionImpl>();
 	
+	private UdpSocketWrapper wrapper;
+	private Vector<LWTRTPdu> connectionRequests = new Vector<LWTRTPdu>();
 	private int listenPort;
 	private String localAddress = LWTRTHelper.fetchLocalAddress();
 	private long sequenceNumber = 0;
+	private boolean serverRunning = false;
 	
+	public Vector<LWTRTPdu> getConnectionRequests() {
+		return connectionRequests;
+	}
+
+	public void setConnectionRequests(Vector<LWTRTPdu> connectionRequests) {
+		this.connectionRequests = connectionRequests;
+	}
+
+	public int getListenPort() {
+		return listenPort;
+	}
+
+	public void setListenPort(int listenPort) {
+		this.listenPort = listenPort;
+	}
+
+	public UdpSocketWrapper getWrapper() {
+		return wrapper;
+	}
+
+	public void setWrapper(UdpSocketWrapper wrapper) {
+		this.wrapper = wrapper;
+	}
+
 	@Override
 	public void register(int listenPort) throws LWTRTException {
 		try {
-			UdpSocketWrapper wrapper = new UdpSocketWrapper(listenPort);
+			wrapper = new UdpSocketWrapper(listenPort);
 			LWTRTServiceImpl.socketMap.put(listenPort, wrapper);
 			log.debug("Listenport: " +listenPort+ " wurde registriert.");
 			log.debug("UDP-Wrapper erstellt. Hashcode: " +LWTRTServiceImpl.socketMap.get((Integer) listenPort));
@@ -45,7 +71,6 @@ public class LWTRTServiceImpl implements LWTRTService {
 	@Override
 	public void unregister() throws LWTRTException {
 		try {
-			UdpSocketWrapper wrapper = socketMap.get(listenPort);
 			socketMap.remove(listenPort);
 			wrapper.close();
 			log.debug("Unregister port:" +listenPort+ " und aus der socketMap entfernt");
@@ -88,78 +113,107 @@ public class LWTRTServiceImpl implements LWTRTService {
 		} 
 		
 		LWTRTConnectionImpl connection =  new LWTRTConnectionImpl(localAddress, listenPort,
-				conRecv.getRemoteAddress(), conRecv.getRemotePort(), wrapper);
-		connectionMap.put(listenPort, connection);
-		LWTRTServiceRecvThread thread = new LWTRTServiceRecvThread(connection);
+				conRecv.getRemoteAddress(), conRecv.getRemotePort(), this);
+		connectionMap.put(conRecv.getRemotePort(), connection);
+		LWTRTServiceRecvThread thread = new LWTRTServiceRecvThread();
 		thread.start();
+		LWTRTConnectionRecvThread handleThread = new LWTRTConnectionRecvThread(this);
+		handleThread.start();
 		return connection;
 	}
 
 	@Override
-	public LWTRTConnection accept() throws LWTRTException {
+	public LWTRTConnection accept() throws LWTRTException {	
 		LWTRTPdu recvPdu = new LWTRTPdu();
 		UdpSocketWrapper wrapper = LWTRTServiceImpl.socketMap.get((Integer) listenPort);
-		while (true) {
-			try {
-				wrapper.receive(recvPdu);
+		LWTRTConnectionImpl connection;
+		if (!serverRunning) {
+			while (true) {
+				try {
+					wrapper.receive(recvPdu);
+				}
+				catch (IOException e) {
+					e.printStackTrace();
+				}
+				if (recvPdu.getOpId() == LWTRTPdu.OPID_CONNECT_REQ) {
+					log.debug("Connection Request PDU empfangen. Hash: " +recvPdu);
+					LWTRTPdu respPdu = new LWTRTPdu();
+					respPdu.setOpId(LWTRTPdu.OPID_CONNECT_RSP);
+					respPdu.setRemoteAddress(recvPdu.getRemoteAddress());
+					respPdu.setRemotePort(recvPdu.getRemotePort());
+					respPdu.setSequenceNumber(recvPdu.getSequenceNumber());
+					log.debug("LocalAddress: " +localAddress+ " Listenport: " +listenPort);
+					log.debug("RemoteAddress: " +recvPdu.getRemoteAddress()+ " RemotePort: " +recvPdu.getRemotePort());
+					try {
+						wrapper.send(respPdu);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					// Connection erstellen und in einer Map speichern
+					connection = new LWTRTConnectionImpl(localAddress, listenPort, 
+							recvPdu.getRemoteAddress(), recvPdu.getRemotePort(), this);
+					log.debug("Connection erstellt zu: " +recvPdu.getRemoteAddress()+ ", Remoteport: " +recvPdu.getRemotePort());
+					LWTRTServiceImpl.connectionMap.put(recvPdu.getRemotePort(), connection);
+					break;
+				}
 			}
-			catch (IOException e) {
-				e.printStackTrace();
-			}
-			if (recvPdu.getOpId() == LWTRTPdu.OPID_CONNECT_REQ) {
-				log.debug("Connection Request PDU empfangen. Hash: " +recvPdu);
-				break;
-			}
+		} else {
+			while (true) {
+				if (!connectionRequests.isEmpty()) {
+					recvPdu = connectionRequests.firstElement();
+					connectionRequests.remove(recvPdu);
+					log.debug("Connection Request PDU empfangen. Hash: " +recvPdu);
+					LWTRTPdu respPdu = new LWTRTPdu();
+					respPdu.setOpId(LWTRTPdu.OPID_CONNECT_RSP);
+					respPdu.setRemoteAddress(recvPdu.getRemoteAddress());
+					respPdu.setRemotePort(recvPdu.getRemotePort());
+					respPdu.setSequenceNumber(recvPdu.getSequenceNumber());
+					log.debug("LocalAddress: " +localAddress+ " Listenport: " +listenPort);
+					log.debug("RemoteAddress: " +recvPdu.getRemoteAddress()+ " RemotePort: " +recvPdu.getRemotePort());
+					try {
+						wrapper.send(respPdu);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					// Connection erstellen und in einer Map speichern
+					connection = new LWTRTConnectionImpl(localAddress, listenPort, 
+							recvPdu.getRemoteAddress(), recvPdu.getRemotePort(), this);
+					log.debug("Connection erstellt zu: " +recvPdu.getRemoteAddress()+ ", Remoteport: " +recvPdu.getRemotePort());
+					LWTRTServiceImpl.connectionMap.put(recvPdu.getRemotePort(), connection);
+					break;
+				}
+			}		
 		}
-		LWTRTPdu respPdu = new LWTRTPdu();
-		respPdu.setOpId(LWTRTPdu.OPID_CONNECT_RSP);
-		respPdu.setRemoteAddress(recvPdu.getRemoteAddress());
-		respPdu.setRemotePort(recvPdu.getRemotePort());
-		respPdu.setSequenceNumber(recvPdu.getSequenceNumber());
-		log.debug("LocalAddress: " +localAddress+ " Listenport: " +listenPort);
-		log.debug("RemoteAddress: " +recvPdu.getRemoteAddress()+ " RemotePort: " +recvPdu.getRemotePort());
-		try {
-			wrapper.send(respPdu);
-		} catch (IOException e) {
-			e.printStackTrace();
+		if (!serverRunning) {
+			LWTRTServiceRecvThread thread = new LWTRTServiceRecvThread();
+			LWTRTConnectionRecvThread handleThread = new LWTRTConnectionRecvThread(this);
+			thread.start();
+			handleThread.start();
+			serverRunning = true;
 		}
-		// Connection erstellen und in einer Map speichern
-		LWTRTConnectionImpl connection = new LWTRTConnectionImpl(localAddress, listenPort, 
-				recvPdu.getRemoteAddress(), recvPdu.getRemotePort(), wrapper);
-		log.debug("Connection erstellt zu: " +recvPdu.getRemoteAddress()+ ", Remoteport: " +recvPdu.getRemotePort());
-		LWTRTServiceImpl.connectionMap.put(recvPdu.getRemotePort(), connection);
-		// Service Receive Thread starten
-		LWTRTServiceRecvThread thread = new LWTRTServiceRecvThread(connection);
-		thread.start();
-		
 		return connection;
 	}
 	
 	public class LWTRTServiceRecvThread extends Thread {
 		
-		LWTRTConnectionImpl connection;
-
-		public LWTRTServiceRecvThread(LWTRTConnectionImpl connection) {
-			this.connection = connection;
-		}
+		UdpSocketWrapper wrapper = socketMap.get((listenPort));
 
 		@Override
 		public void run() {
-			log.debug("--LWTRTService Receive Thread gestartet: " + connection.getLocalPort() +"--");
-			synchronized (connection.getWrapper()) {
+			log.debug("--LWTRTConnection Receive Thread gestartet: " +listenPort+ "--");
+			synchronized (wrapper) {
 				while (true) {
 					LWTRTPdu recvPdu = new LWTRTPdu();
 					try {
-						this.connection.getWrapper().receive(recvPdu);
+						this.wrapper.receive(recvPdu);
 					} catch (IOException e) {
 						e.printStackTrace();
 						this.stop();
 					}
-					this.connection.recvCache.add(recvPdu);
+					LWTRTHelper.getRecvCache().add(recvPdu);
 					log.debug("PDU in Receive-Cache gespeichert. Hash:  " +recvPdu);
 					try{
 						Thread.sleep(20);
-						//log.debug("SleepRECEIVETHREAD 20");
 					} catch (InterruptedException e){
 						log.debug(e);
 					}
