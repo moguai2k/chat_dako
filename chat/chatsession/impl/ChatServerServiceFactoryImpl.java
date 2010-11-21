@@ -22,6 +22,7 @@ public class ChatServerServiceFactoryImpl implements ChatServerServiceFactory {
 	private static Log log = LogFactory.getLog(ChatServerServiceFactoryImpl.class);
 	
 	LWTRTServiceImpl lwtrtService = new LWTRTServiceImpl();
+	ChatServerServiceImpl chatService;
 
 	public void register(int port) throws ChatServiceException {
 		try {
@@ -40,7 +41,7 @@ public class ChatServerServiceFactoryImpl implements ChatServerServiceFactory {
 		} catch (Exception e) {
 			throw new ChatServiceException("Problem beim Verbindungsaufbau:" +e);
 		}
-		ChatServerServiceImpl chatService = new ChatServerServiceImpl();
+		chatService = new ChatServerServiceImpl();
 		chatService.setConnection(connection);
 		return chatService;
 	}
