@@ -32,7 +32,7 @@ public class ServerCommunicator extends Thread implements ChatServerListener {
 		try {
 			chatServerService.registerChatSessionListener(this);
 			try {
-				Thread.sleep(2000);
+				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -43,6 +43,7 @@ public class ServerCommunicator extends Thread implements ChatServerListener {
 	}
 
 	public void sendToEveryone(ChatMessage message) {
+		log.debug("Bin mal hier");
 		Enumeration<String> keys = sessions.keys();
 		for (Entry<String, ChatServerService> entry : sessions.entrySet()) {
 			String user = entry.getKey();
