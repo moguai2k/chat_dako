@@ -27,7 +27,7 @@ import javax.swing.JTextPane;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.SimpleAttributeSet;
+//import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
@@ -61,7 +61,7 @@ public class Client implements ChatEventListener {
 	private java.net.URL sourire = null;
 	private boolean smileys = false;
 	private StyledDocument doc;
-    private SimpleAttributeSet attributeSet;
+    //private SimpleAttributeSet attributeSet;
 	//Login
 	private JFrame clientLoginFrame;
 	private JTextField name, ip, port;
@@ -229,7 +229,7 @@ public class Client implements ChatEventListener {
 	}
     
     
-    //TODO: eigene Hilfsmethode um Nicknames + Datum fett zu machen 
+    //eigene Hilfsmethode um Nicknames + Datum fett zu machen 
     /*private void formatSelectedText(String username, int startPos) {
         attributeSet = new SimpleAttributeSet();
         StyleConstants.setBold(attributeSet, true);
@@ -412,7 +412,7 @@ public class Client implements ChatEventListener {
 
     //Nachricht und Name werden empfangen und zusammen mit der Serverzeit im Chat eingetragen
     public void onMessage(String username, String message, String time) {
-    	int startCaret = chatArea.getText().length(); //erstes Zeichen der neuen Zeile, damit man weiﬂ ab wann fett gemacht werden muss
+    	//int startCaret = chatArea.getText().length(); //erstes Zeichen der neuen Zeile, damit man weiﬂ ab wann fett gemacht werden muss
  
 		Style style = doc.addStyle(null, null);
 		StyleConstants.setIcon(style, icon);
@@ -608,7 +608,8 @@ public class Client implements ChatEventListener {
     
     //LoginTO
 	public void login(String userName, String remoteAdress, int remotePort) {
-		System.out.println(userName + remoteAdress + remotePort);
+		log.debug(userName + " meldet sich im Chat an mit Remote-Addy: " +  remoteAdress + " und Port: "+ remotePort);
+		System.out.println();
 		ChatClientServiceFactoryImpl clServFac = new ChatClientServiceFactoryImpl();	
 		try {
 			chatClientService = clServFac.register(50000); //Registriet mal fest 50000 als Listener
