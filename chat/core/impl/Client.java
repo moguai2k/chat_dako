@@ -56,7 +56,7 @@ public class Client implements ChatEventListener {
 	private DefaultListModel defaultListModel;
 	private JScrollPane jScrollPaneList, chatAreaScrollable;
 	private JLabel header2;
-	//private javax.swing.text.html.HTMLEditorKit eKit; //HTML-Code in JTextPane möglich
+	//private javax.swing.text.html.HTMLEditorKit eKit; //HTML-Code in JTextPane mï¿½glich
 	private ImageIcon icon = null;
 	private java.net.URL sourire = null;
 	private boolean smileys = false;
@@ -75,7 +75,7 @@ public class Client implements ChatEventListener {
 		clientLoginFrame = new JFrame("Client-Login");
 		clientLoginFrame.setResizable(false);
 		
-		downButton = new JButton("Chat schließen");
+		downButton = new JButton("Chat schlieï¿½en");
 		name = new JTextField();
 		ip = new JTextField();
 		port = new JTextField();
@@ -241,7 +241,7 @@ public class Client implements ChatEventListener {
         	startPos = startPos + 2;
 
         doc = (StyledDocument) chatArea.getDocument();
-        doc.setCharacterAttributes(startPos, beBoldLength, attributeSet, true); //StartPosi, Länge der Fettzuwerdenden, Fettattribut, true^^
+        doc.setCharacterAttributes(startPos, beBoldLength, attributeSet, true); //StartPosi, Lï¿½nge der Fettzuwerdenden, Fettattribut, true^^
     }*/
     
     
@@ -289,7 +289,7 @@ public class Client implements ChatEventListener {
     
     
     //eigene Hilfsmethode "Wie oft im String?" 		
-    //TODO: Auskommentierter Code by Chris in separater Klasse abspeichern, da sehr nice und aufwändig war <3
+    //TODO: Auskommentierter Code by Chris in separater Klasse abspeichern, da sehr nice und aufwï¿½ndig war <3
 /*	public int ContainsCount(String SearchPhrase, String SearchText) {
 		String Remains = SearchText;
 		int NewIndex = 0;
@@ -338,7 +338,7 @@ public class Client implements ChatEventListener {
 					
 					switch (i) { //Evtl noch durch String-Array ersetzen.
 					case 1:
-						smiley = "=\\)"; // ":)" nicht möglich sonst regex.PatternSyntaxException, daher DoppelSlash
+						smiley = "=\\)"; // ":)" nicht mï¿½glich sonst regex.PatternSyntaxException, daher DoppelSlash
 						break;
 					case 2:
 						smiley = ";\\)";
@@ -385,7 +385,7 @@ public class Client implements ChatEventListener {
 			int position = textPart.indexOf(smiley);
 			int ende = textPart.length();
 
-			//Nachricht in zwei Hälften schneiden, wobei das Smiley abgeschnitten wird
+			//Nachricht in zwei Hï¿½lften schneiden, wobei das Smiley abgeschnitten wird
 			eins = textPart.substring(start, position);
 			zwei = textPart.substring(position + pause, ende);
 
@@ -412,7 +412,7 @@ public class Client implements ChatEventListener {
 
     //Nachricht und Name werden empfangen und zusammen mit der Serverzeit im Chat eingetragen
     public void onMessage(String username, String message, String time) {
-    	//int startCaret = chatArea.getText().length(); //erstes Zeichen der neuen Zeile, damit man weiß ab wann fett gemacht werden muss
+    	//int startCaret = chatArea.getText().length(); //erstes Zeichen der neuen Zeile, damit man weiï¿½ ab wann fett gemacht werden muss
  
 		Style style = doc.addStyle(null, null);
 		StyleConstants.setIcon(style, icon);
@@ -428,7 +428,7 @@ public class Client implements ChatEventListener {
 		    System.err.println("Exception in inserting text and icons: " + e);
 		}
     	
-		//Checken ob Nachricht ein Smiley enthält
+		//Checken ob Nachricht ein Smiley enthï¿½lt
 		String SmileyChecked = smileyCheck(message);
 		
 		//Wenn Smileys drin sind, dann ab zur CutterMethode
@@ -445,9 +445,9 @@ public class Client implements ChatEventListener {
 		//formatSelectedText(username, startCaret);
 		
 	
-		//TODO: Auskommentierter Code by Chris in separater Klasse abspeichern, da sehr nice und aufwändig war <3
+		//TODO: Auskommentierter Code by Chris in separater Klasse abspeichern, da sehr nice und aufwï¿½ndig war <3
 	
-		//EditorKit setzen und Smiley einfügen///////
+		//EditorKit setzen und Smiley einfï¿½gen///////
 		//chatArea.setEditorKit(eKit);
 		//chatArea.setText("<IMG SRC='http://www.zuh.net/java/img/sourire.gif' />");
     	
@@ -512,7 +512,8 @@ public class Client implements ChatEventListener {
     
     //aktualisiert die Userliste
     private void fillUserList(Vector<String> names) {
-    	jList.removeAll();
+    	//jList.removeAll();
+    	defaultListModel.clear();
     	for (int i = 0; i < names.size(); i++) {
             if (names.get(i).equals(userName)) {
             	defaultListModel.addElement(new String("<" + names.get(i) + ">"));
