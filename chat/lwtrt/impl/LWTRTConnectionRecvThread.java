@@ -44,7 +44,8 @@ public class LWTRTConnectionRecvThread extends Thread {
 									e.printStackTrace();
 								}
 								LWTRTHelper.getRecvCache().remove(pdu);
-								this.stop(); break;	
+								//this.stop(); 
+								break;	
 							case LWTRTPdu.OPID_DISCONNECT_RSP:
 								connection.getResponeTrunk().add(pdu);
 								log.debug("PDU in Response-Cache gespeichert. Hash:  " +pdu);

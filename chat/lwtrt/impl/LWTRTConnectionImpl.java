@@ -188,7 +188,7 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 					e.printStackTrace();
 				}
 				if(counter > 2) {
-					System.exit(0);
+					this.disconnect();
 				}
 			}
 		}
