@@ -83,7 +83,7 @@ public abstract class BaseServiceImpl implements BaseSessionService {
 		}
 		
 		@Override
-	    public void run() {
+	    public synchronized void run() {
 			try {
 				while (!isInterrupted()) {
 					Object pdu = connection.receive();

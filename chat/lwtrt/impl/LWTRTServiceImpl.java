@@ -154,7 +154,12 @@ public class LWTRTServiceImpl implements LWTRTService {
 							recvPdu.getRemoteAddress(), recvPdu.getRemotePort(), this);
 					log.debug("Connection erstellt zu: " +recvPdu.getRemoteAddress()+ ", Remoteport: " +recvPdu.getRemotePort());
 					LWTRTServiceImpl.connectionMap.put(recvPdu.getRemotePort(), connection);
-					break;
+					LWTRTServiceRecvThread thread = new LWTRTServiceRecvThread();
+					LWTRTConnectionRecvThread handleThread = new LWTRTConnectionRecvThread(this);
+					thread.start();
+					handleThread.start();
+					serverRunning = true;
+					return connection;
 				}
 			}
 		} else {
@@ -180,18 +185,10 @@ public class LWTRTServiceImpl implements LWTRTService {
 							recvPdu.getRemoteAddress(), recvPdu.getRemotePort(), this);
 					log.debug("Connection erstellt zu: " +recvPdu.getRemoteAddress()+ ", Remoteport: " +recvPdu.getRemotePort());
 					LWTRTServiceImpl.connectionMap.put(recvPdu.getRemotePort(), connection);
-					break;
+					return connection;
 				}
 			}		
 		}
-		if (!serverRunning) {
-			LWTRTServiceRecvThread thread = new LWTRTServiceRecvThread();
-			LWTRTConnectionRecvThread handleThread = new LWTRTConnectionRecvThread(this);
-			thread.start();
-			handleThread.start();
-			serverRunning = true;
-		}
-		return connection;
 	}
 	
 	public class LWTRTServiceRecvThread extends Thread {

@@ -30,20 +30,26 @@ public class ServerCommunicator extends Thread implements ChatServerListener {
 	public ServerCommunicator(ChatServerService chatServerService) {
 		this.chatServerService = chatServerService;
 		try {
-			chatServerService.registerChatSessionListener(this);
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			onLogin(chatServerService.getUserName());
+			chatServerService.registerChatSessionListener(this);		
 		} catch (ChatServiceException e) {
 			log.error(e);
+		}
+		while (true) {
+			//log.debug(chatServerService.getUserName());
+			if (chatServerService.getUserName() != null) {
+				onLogin(chatServerService.getUserName());
+				break;
+			}
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
 	public void sendToEveryone(ChatMessage message) {
-		log.debug("Bin mal hier");
 		Enumeration<String> keys = sessions.keys();
 		for (Entry<String, ChatServerService> entry : sessions.entrySet()) {
 			String user = entry.getKey();
@@ -69,6 +75,7 @@ public class ServerCommunicator extends Thread implements ChatServerListener {
 
 		for (Entry<String, ChatServerService> entry : sessions.entrySet()) {
 			try {
+				log.debug("USERLISTUPDATE!!!!! " +entry.getValue().getUserName());
 				entry.getValue().sendUserList(userList);
 			} catch (ChatServiceException e) {
 				// Session ist nicht mehr valide --> ausloggen
@@ -84,6 +91,7 @@ public class ServerCommunicator extends Thread implements ChatServerListener {
 	}
 
 	public void onLogin(String username) {
+		log.debug("ON LOGIN" + username);
 		if (!sessions.containsKey(username)) {
 			sessions.put(username, chatServerService);
 			sendUserlistUpdate();

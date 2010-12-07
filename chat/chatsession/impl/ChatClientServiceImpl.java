@@ -71,8 +71,7 @@ public class ChatClientServiceImpl extends BaseServiceImpl implements ChatClient
 	
 	@Override
 	public void registerChatSessionListener(ChatClientListener listener) throws ChatServiceException {
-
-		log.debug ("-- ChatSessionListner registriert");
+		log.debug ("-- ChatSessionListner registriert -- ");
 		this.listener = listener;
 		try {
 			super.startThread();
@@ -80,17 +79,18 @@ public class ChatClientServiceImpl extends BaseServiceImpl implements ChatClient
 			e.printStackTrace();
 		}
 		
+		// Create-Session Request
 		ChatPdu pdu = new ChatPdu();
 		pdu.setOpId(ChatPdu.ChatOpId.createSession_req_PDU);
 		pdu.setName(super.userName);
 		try {
+			log.debug("Sende USERNAME: " +super.getUserName());
 			super.connection.send(pdu);
 		} catch (LWTRTException e) {
 			e.printStackTrace();
 		}
 		
 	}
-
 	
 	@Override
 	public void destroy() throws ChatServiceException {
