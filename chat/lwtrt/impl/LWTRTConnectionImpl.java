@@ -30,6 +30,8 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 	private Vector<LWTRTPdu> pingCache = new Vector<LWTRTPdu>();
 	//Response Trunk
 	private Vector<LWTRTPdu> responeTrunk = new Vector<LWTRTPdu>();
+	// Trunk für data
+	private Vector<LWTRTPdu> dataTrunk = new Vector<LWTRTPdu>();
 	
 	// Konstruktor
 	public LWTRTConnectionImpl(String localAddress, int localPort, String remoteAddress, int remotePort, 
@@ -46,6 +48,14 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 	
 	public String getLocalAddress() {
 		return localAddress;
+	}
+
+	public Vector<LWTRTPdu> getDataTrunk() {
+		return dataTrunk;
+	}
+
+	public void setDataTrunk(Vector<LWTRTPdu> dataTrunk) {
+		this.dataTrunk = dataTrunk;
 	}
 
 	public void setLocalAddress(String localAddress) {
@@ -197,17 +207,18 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 	@Override
 	public Object receive() throws LWTRTException {
 		while (true) {
-			if (!LWTRTHelper.getTrunk().isEmpty()) {
-				LWTRTPdu pdu = LWTRTHelper.getTrunk().firstElement();
-				LWTRTHelper.getTrunk().remove(pdu);
+			if (!this.dataTrunk.isEmpty()) {
+				LWTRTPdu pdu = this.dataTrunk.firstElement();
+				this.dataTrunk.remove(pdu);
 				log.debug("PDU abgearbeitet und aus Trunk entfernt");
 				return pdu.getUserData();
 			}
 			try {
 				Thread.sleep(50);
 			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}	
+			}
 		}
 	}
 

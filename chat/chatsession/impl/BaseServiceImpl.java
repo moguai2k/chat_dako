@@ -1,5 +1,6 @@
 package chatsession.impl;
 
+
 import lwtrt.LWTRTConnection;
 import lwtrt.ex.LWTRTException;
 import lwtrt.impl.LWTRTConnectionImpl;
@@ -83,18 +84,19 @@ public abstract class BaseServiceImpl implements BaseSessionService {
 		}
 		
 		@Override
-	    public synchronized void run() {
+	    public void run() {
 			try {
-				while (!isInterrupted()) {
-					Object pdu = connection.receive();
-	                if (pdu instanceof ChatPdu)
-	                	baseService.handleChatPdu((ChatPdu) pdu);
-	            }
+				//synchronized (connection.receive()) {
+					while (!isInterrupted()) {
+						Object pdu = connection.receive();
+		                if (pdu instanceof ChatPdu)
+		                	baseService.handleChatPdu((ChatPdu) pdu);
+		            }
+				//}	
 	        } catch (LWTRTException e) {
 	            log.error(e);
 	        }
 		}
 	}
-	
 	
 }

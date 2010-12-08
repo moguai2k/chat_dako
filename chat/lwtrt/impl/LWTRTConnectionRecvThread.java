@@ -24,7 +24,7 @@ public class LWTRTConnectionRecvThread extends Thread {
 			synchronized (LWTRTHelper.getRecvCache()) {
 				if (!LWTRTHelper.getRecvCache().isEmpty()) {
 						LWTRTPdu pdu = LWTRTHelper.getRecvCache().firstElement();
-						LWTRTConnectionImpl connection = service.connectionMap.get(pdu.getRemotePort());
+						LWTRTConnectionImpl connection = LWTRTServiceImpl.connectionMap.get(pdu.getRemotePort());
 						switch (pdu.getOpId()) {
 							case LWTRTPdu.OPID_CONNECT_REQ: 
 								LWTRTHelper.getRecvCache().remove(pdu);
@@ -64,7 +64,7 @@ public class LWTRTConnectionRecvThread extends Thread {
 								} catch (IOException e) {
 									e.printStackTrace();
 								}
-								LWTRTHelper.getTrunk().add(pdu);
+								connection.getDataTrunk().add(pdu);
 								log.debug("trunk.add("+pdu+")");
 								LWTRTHelper.getRecvCache().remove(pdu);
 								log.debug("recvCache.remove("+pdu+")");

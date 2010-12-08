@@ -63,6 +63,7 @@ public class ChatServerServiceImpl extends BaseServiceImpl implements
 		}
 	}
 
+	@SuppressWarnings("static-access")
 	@Override
 	public void registerChatSessionListener(ChatServerListener listener)
 			throws ChatServiceException {
