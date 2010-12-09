@@ -3,7 +3,6 @@ package chatsession.impl;
 
 import lwtrt.LWTRTConnection;
 import lwtrt.ex.LWTRTException;
-import lwtrt.impl.LWTRTConnectionImpl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -56,12 +55,15 @@ public abstract class BaseServiceImpl implements BaseSessionService {
 		if (thread == null) {
 			thread = new Threading(connection, this);
 			thread.start();
+			this.currentStatus = SessionStatus.SESSION_ACTIVE;
 		}
 	}
 	
+	@SuppressWarnings("deprecation")
 	public void stopThread() {
 		try {
 			connection.disconnect();
+			this.currentStatus = SessionStatus.SESSION_DESTROYED;
 		} catch (LWTRTException e) {
 			e.printStackTrace();
 		}

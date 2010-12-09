@@ -34,7 +34,6 @@ public class ChatClientServiceImpl extends BaseServiceImpl implements ChatClient
 		try {
 			super.setConnection(lwtrtService.connect(serverAdress, serverPort));
 			log.debug("Connection erstellt zu: " +serverAdress+ ", Remoteport: " +serverPort);
-			
 		} catch (LWTRTException e) {
 			e.printStackTrace();
 		}
@@ -79,7 +78,7 @@ public class ChatClientServiceImpl extends BaseServiceImpl implements ChatClient
 			e.printStackTrace();
 		}
 		
-		// Create-Session Request
+		// Send-Session Request
 		ChatPdu pdu = new ChatPdu();
 		pdu.setOpId(ChatPdu.ChatOpId.createSession_req_PDU);
 		pdu.setName(super.userName);
@@ -88,7 +87,6 @@ public class ChatClientServiceImpl extends BaseServiceImpl implements ChatClient
 		} catch (LWTRTException e) {
 			e.printStackTrace();
 		}
-		
 	}
 	
 	@Override
