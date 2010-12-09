@@ -76,7 +76,8 @@ public class LWTRTConnectionRecvThread extends Thread {
 								LWTRTHelper.getRecvCache().remove(pdu);
 								break;
 							case LWTRTPdu.OPID_PING_REQ:
-								break;
+								connection.getPingCache().add(pdu);
+								log.debug("PDU in Ping-Cache gespeichert. Hash: " +pdu);
 							case LWTRTPdu.OPID_PING_RSP:
 								connection.getPingCache().add(pdu);
 								LWTRTHelper.getRecvCache().remove(pdu);
