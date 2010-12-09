@@ -5,7 +5,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.Calendar;
 import java.util.Vector;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,7 +28,7 @@ public class LWTRTServiceImpl implements LWTRTService {
 	private UdpSocketWrapper wrapper;
 	private Vector<LWTRTPdu> connectionRequests = new Vector<LWTRTPdu>();
 	private int listenPort;
-	private String localAddress = LWTRTHelper.fetchLocalAddress();
+	private String localAddress = this.fetchLocalAddress();
 	private long sequenceNumber = 0;
 	private boolean serverRunning = false;
 	
@@ -189,6 +191,17 @@ public class LWTRTServiceImpl implements LWTRTService {
 				}
 			}		
 		}
+	}
+	
+	// Gibt die lokale Addresse zurück.
+	private String fetchLocalAddress() {
+		String localAddress = null;
+		try {
+			localAddress = (String)InetAddress.getLocalHost().getHostAddress();
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+		return localAddress;
 	}
 	
 	public class LWTRTServiceRecvThread extends Thread {

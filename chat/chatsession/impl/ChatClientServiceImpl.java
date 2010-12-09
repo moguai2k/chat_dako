@@ -84,7 +84,6 @@ public class ChatClientServiceImpl extends BaseServiceImpl implements ChatClient
 		pdu.setOpId(ChatPdu.ChatOpId.createSession_req_PDU);
 		pdu.setName(super.userName);
 		try {
-			log.debug("Sende USERNAME: " +super.getUserName());
 			super.connection.send(pdu);
 		} catch (LWTRTException e) {
 			e.printStackTrace();
@@ -124,10 +123,8 @@ public class ChatClientServiceImpl extends BaseServiceImpl implements ChatClient
 		}
 	}
 
-
 	@Override
 	protected void handleChatPdu(ChatPdu pdu) {
-		log.debug("Handle Chat-PDU: " +pdu.getOpId());
 		switch(pdu.getOpId()) {
 			case sendMessage_req_PDU:
 				listener.onMessageEvent((ChatMessage) pdu.getData()); break;

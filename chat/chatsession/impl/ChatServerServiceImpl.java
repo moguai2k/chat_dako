@@ -63,7 +63,6 @@ public class ChatServerServiceImpl extends BaseServiceImpl implements
 		}
 	}
 
-	@SuppressWarnings("static-access")
 	@Override
 	public void registerChatSessionListener(ChatServerListener listener)
 			throws ChatServiceException {
@@ -89,7 +88,6 @@ public class ChatServerServiceImpl extends BaseServiceImpl implements
 
 	@Override
 	protected void handleChatPdu(ChatPdu pdu) {
-		//log.debug("Handle Chat-PDU: " +pdu.getOpId());
 		switch (pdu.getOpId()) {
 			case createSession_req_PDU:
 				super.setUserName(pdu.getName()); break;

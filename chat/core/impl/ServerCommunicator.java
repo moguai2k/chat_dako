@@ -22,6 +22,7 @@ import chatsession.pdu.ChatMessage;
 import chatsession.pdu.ChatUserList;
 
 public class ServerCommunicator extends Thread implements ChatServerListener {
+	
 	private static Log log = LogFactory.getLog(ServerCommunicator.class);
 	private static ConcurrentHashMap<String, ChatServerService> sessions = new ConcurrentHashMap<String, ChatServerService>();
 	private ChatServerService chatServerService;
@@ -35,7 +36,6 @@ public class ServerCommunicator extends Thread implements ChatServerListener {
 			log.error(e);
 		}
 		while (true) {
-			//log.debug(chatServerService.getUserName());
 			if (chatServerService.getUserName() != null) {
 				onLogin(chatServerService.getUserName());
 				break;
@@ -43,7 +43,6 @@ public class ServerCommunicator extends Thread implements ChatServerListener {
 			try {
 				Thread.sleep(50);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -75,7 +74,6 @@ public class ServerCommunicator extends Thread implements ChatServerListener {
 
 		for (Entry<String, ChatServerService> entry : sessions.entrySet()) {
 			try {
-				log.debug("USERLISTUPDATE!!!!! " +entry.getValue().getUserName());
 				entry.getValue().sendUserList(userList);
 			} catch (ChatServiceException e) {
 				// Session ist nicht mehr valide --> ausloggen
@@ -91,7 +89,6 @@ public class ServerCommunicator extends Thread implements ChatServerListener {
 	}
 
 	public void onLogin(String username) {
-		log.debug("ON LOGIN" + username);
 		if (!sessions.containsKey(username)) {
 			sessions.put(username, chatServerService);
 			sendUserlistUpdate();

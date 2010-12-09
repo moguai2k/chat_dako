@@ -3,7 +3,6 @@ package lwtrt.impl;
 import lwtrt.pdu.LWTRTPdu;
 import lwtrt.LWTRTConnection;
 import lwtrt.ex.LWTRTException;
-import lwtrt.impl.LWTRTHelper;
 
 import java.io.IOException;
 import java.util.Vector;
@@ -46,36 +45,12 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 	
 // Getter + Setter	
 	
-	public String getLocalAddress() {
-		return localAddress;
-	}
-
-	public Vector<LWTRTPdu> getDataTrunk() {
-		return dataTrunk;
-	}
-
-	public void setDataTrunk(Vector<LWTRTPdu> dataTrunk) {
-		this.dataTrunk = dataTrunk;
-	}
-
-	public void setLocalAddress(String localAddress) {
-		this.localAddress = localAddress;
-	}
-
 	public String getRemoteAddress() {
 		return remoteAddress;
 	}
 
 	public void setRemoteAddress(String remoteAddress) {
 		this.remoteAddress = remoteAddress;
-	}
-
-	public int getLocalPort() {
-		return localPort;
-	}
-
-	public void setLocalPort(int localPort) {
-		this.localPort = localPort;
 	}
 
 	public int getRemotePort() {
@@ -86,14 +61,14 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 		this.remotePort = remotePort;
 	}
 
-	public long getSequenceNumber() {
-		return sequenceNumber;
+	public Vector<LWTRTPdu> getPingCache() {
+		return pingCache;
 	}
 
-	public void setSequenceNumber(long sequenceNumber) {
-		this.sequenceNumber = sequenceNumber;
+	public void setPingCache(Vector<LWTRTPdu> pingCache) {
+		this.pingCache = pingCache;
 	}
-	
+
 	public Vector<LWTRTPdu> getResponeTrunk() {
 		return responeTrunk;
 	}
@@ -101,13 +76,13 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 	public void setResponeTrunk(Vector<LWTRTPdu> responeTrunk) {
 		this.responeTrunk = responeTrunk;
 	}
-	
-	public Vector<LWTRTPdu> getPingCache() {
-		return pingCache;
+
+	public Vector<LWTRTPdu> getDataTrunk() {
+		return dataTrunk;
 	}
 
-	public void setPingCache(Vector<LWTRTPdu> pingCache) {
-		this.pingCache = pingCache;
+	public void setDataTrunk(Vector<LWTRTPdu> dataTrunk) {
+		this.dataTrunk = dataTrunk;
 	}
 	
 // Ende Getter + Setter
