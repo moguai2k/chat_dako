@@ -1,0 +1,6 @@
+-	When multiple threads access the same data item, such as a static field, an instance field of
+	a globally accessible object, or a shared collection, you need to make sure that they
+	coordinate their access to the data so that both see a consistent view of the data and neither
+	steps on the other's changes. The Java language provides two keywords for this purpose:
+	synchronized and volatile. We will explore the use and meaning of these keywords
+	later in this tutorial.
