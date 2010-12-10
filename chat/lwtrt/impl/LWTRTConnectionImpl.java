@@ -14,6 +14,8 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 	
 	private static Log log = LogFactory.getLog(LWTRTConnectionImpl.class);
 	
+	private final int RESENDING_TIMES = 2;
+	private final int SECONDS_RETRY = 10;
 	
 	// Instanzvariablen
 	private String localAddress;
@@ -86,7 +88,6 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 	}
 	
 // Ende Getter + Setter
-	
 
 	@Override
 	public void disconnect() throws LWTRTException {
@@ -99,20 +100,8 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		boolean received = false;
-		while(received==false) {
-			for (int i=0; i<responeTrunk.size(); i++) {
-				LWTRTPdu element = responeTrunk.get(i);
-				log.debug("Warte auf Response...");
-				if (pdu.getSequenceNumber() == element.getSequenceNumber()) {
-					log.debug("Response PDU eingetroffen und entfernt");
-					responeTrunk.remove(element);
-					received = true;
-					break;
-				}	
-			}
-		}
+		System.gc();
+		responseArrivedResend(pdu, RESENDING_TIMES, SECONDS_RETRY);
 	}
 
 	@Override
@@ -143,40 +132,7 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-			
-		int counter = 0;
-		long milli = System.currentTimeMillis() + 2000;
-		boolean received = false;
-		while(received==false) {
-			for (int i=0; i<responeTrunk.size(); i++) {
-				LWTRTPdu element = responeTrunk.get(i);
-				log.debug("Warte auf Response...");
-				if (pdu.getSequenceNumber() == element.getSequenceNumber()) {
-					log.debug("Response PDU eingetroffen und entfernt");
-					responeTrunk.remove(element);
-					received = true;
-					break;
-				}	
-			}
-			// Testen ob das Response Paket innerhalb von 2000 Millisekunden ankam.
-			// Falls nicht, wird das Paket nochmal geschickt, und der timer nochmal um 2000 Millisekunden hochgesetzt
-			// Die Counter Variable dient dazu, dass das Paket maximal 5 mal gesendet wird.
-			if(milli < System.currentTimeMillis()) {
-				milli = System.currentTimeMillis() + 10000;
-				counter++;
-				log.debug("Paket gesendet - Response kam nach 10 Sekunden nicht an - " +
-						"Paket wird nochmal geschickt. Anzahl der geschickten Pakete: "+ counter);
-				//Paket wird nochmal gesendet.
-				try {
-					service.getWrapper().send(pdu);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				if(counter > 2) {
-					this.disconnect();
-				}
-			}
-		}
+		responseArrivedResend(pdu, RESENDING_TIMES, SECONDS_RETRY);
 	}
 	
 	@Override
@@ -191,7 +147,6 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 			try {
 				Thread.sleep(50);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -207,8 +162,43 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 		try {
 			service.getWrapper().send(pdu);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+		responseArrivedResend(pdu, RESENDING_TIMES, SECONDS_RETRY);
+	}
+	
+	// Hilfsmethode
+	private void responseArrivedResend(LWTRTPdu pdu, int sendTimes, int secsToRetry) throws LWTRTException {
+		int secsRetry = secsToRetry * 1000;
+		int counter = 0;
+		long milli = System.currentTimeMillis() + secsRetry;
+		boolean received = false;
+		while(received==false) {
+			for (int i=0; i<responeTrunk.size(); i++) {
+				LWTRTPdu element = responeTrunk.get(i);
+				log.debug("Warte auf Response...");
+				if (pdu.getSequenceNumber() == element.getSequenceNumber()) {
+					log.debug("Response PDU eingetroffen und entfernt");
+					responeTrunk.remove(element);
+					received = true;
+					break;
+				}	
+			}
+			if(milli < System.currentTimeMillis()) {
+				milli = System.currentTimeMillis() + secsRetry;
+				counter++;
+				log.debug("Paket gesendet - Response kam nach " +secsRetry+ " Sekunden nicht an - " +
+						"Paket wird nochmal geschickt. Anzahl der geschickten Pakete: "+ counter);
+				try {
+					service.getWrapper().send(pdu);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				if(counter > sendTimes) {
+					log.debug("Erzwinge Exit, da kein Response empfangen wurde.");
+					System.exit(0);
+				}
+			}
 		}
 	}
 	

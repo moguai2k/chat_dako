@@ -95,7 +95,6 @@ public class ChatServerServiceImpl extends BaseServiceImpl implements
 				listener.onLogout(pdu.getName()); break;
 			case sendMessage_req_PDU:
 				ChatMessage msg = (ChatMessage) pdu.getData();
-				log.debug(msg.getMessage());
 				if (msg == null || msg.getMessage().equals(""))
 					System.out.println("Leere Nachricht, nichts passiert!"); 
 				listener.onMessageEvent(msg); break;

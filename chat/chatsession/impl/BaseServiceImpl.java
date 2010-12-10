@@ -88,13 +88,11 @@ public abstract class BaseServiceImpl implements BaseSessionService {
 		@Override
 	    public void run() {
 			try {
-				//synchronized (connection.receive()) {
-					while (!isInterrupted()) {
-						Object pdu = connection.receive();
-		                if (pdu instanceof ChatPdu)
-		                	baseService.handleChatPdu((ChatPdu) pdu);
-		            }
-				//}	
+				while (!isInterrupted()) {
+					Object pdu = connection.receive();
+	                if (pdu instanceof ChatPdu)
+	                	baseService.handleChatPdu((ChatPdu) pdu);
+	            }
 	        } catch (LWTRTException e) {
 	            log.error(e);
 	        }

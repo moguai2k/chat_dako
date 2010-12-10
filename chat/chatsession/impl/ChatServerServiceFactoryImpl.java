@@ -34,15 +34,16 @@ public class ChatServerServiceFactoryImpl implements ChatServerServiceFactory {
 	}
 	
 	public ChatServerService getSession() throws ChatServiceException {
-		
 		LWTRTConnection connection;
-		try {
-			connection = lwtrtService.accept();
-		} catch (Exception e) {
-			throw new ChatServiceException("Problem beim Verbindungsaufbau:" +e);
-		}
-		chatService = new ChatServerServiceImpl();
-		chatService.setConnection(connection);
-		return chatService;
+		synchronized (lwtrtService) {
+			try {
+				connection = lwtrtService.accept();
+			} catch (Exception e) {
+				throw new ChatServiceException("Problem beim Verbindungsaufbau:" +e);
+			}
+			chatService = new ChatServerServiceImpl();
+			chatService.setConnection(connection);
+			return chatService;
+		}		
 	}
 }

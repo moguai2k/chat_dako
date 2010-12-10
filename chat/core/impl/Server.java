@@ -22,9 +22,10 @@ public class Server {
 	//Attribute//
 	private static Log log = LogFactory.getLog(Server.class);
 	static ChatServerServiceFactory factory;
+	private ServerCommunicator communicator;
 	private JFrame consoleFrame;
 	private JTextField port;
-	private JButton loginButton, logoutButton;
+	private JButton loginButton, logoutButton, sendUserlist;
 	private JLabel header;
 	private JLabel label;
 	private Thread thread;
@@ -35,6 +36,18 @@ public class Server {
 	
 	//Server-Frame
 	public void showServerFrame(){
+		// Tore eingefügt
+		sendUserlist = new JButton("sendUserList");
+		sendUserlist.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				communicator.sendUserlistUpdate();
+				
+			}
+		});
+		// bis hier. Testweise, da Userlists manchmal bißchen verkacken. Also neu senden.
+		
 		consoleFrame = new JFrame("Chat-Server-Console");
 		consoleFrame.setResizable(false);
 		logoutButton = new JButton("Server herunterfahren");
@@ -53,8 +66,10 @@ public class Server {
 		label = new JLabel("Bitte Server-Port eingeben:");
 		JPanel panel = new JPanel();
 		panel.add(header);panel.add(port);panel.add(label);panel.add(jScrollPane);
-		panel.add(loginButton);panel.add(logoutButton);
-		
+		panel.add(loginButton);panel.add(logoutButton); 
+		// Tore
+		panel.add(sendUserlist);
+		//
 		logoutButton.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent event){
             	servLogout();
@@ -68,7 +83,9 @@ public class Server {
 		port.setText("50000");
 		loginButton.setBounds(170,500,180,30);
 		logoutButton.setBounds(350,500,180,30);
-		
+		// auch Tore
+		sendUserlist.setBounds(530,500,120,30);
+		//
         loginButton.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent event){
             	loginButton.setText("Server neustarten");
@@ -192,7 +209,7 @@ public class Server {
 				try {
 					while (true) {
 						ChatServerService service = factory.getSession();
-						if (service != null) {ServerCommunicator communicator = new ServerCommunicator(service);}
+						if (service != null) {communicator = new ServerCommunicator(service);}
 					}
 				} 
 				catch (Exception e) {

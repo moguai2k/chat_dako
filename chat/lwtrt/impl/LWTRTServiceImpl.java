@@ -22,11 +22,15 @@ public class LWTRTServiceImpl implements LWTRTService {
 	
 	// Instanzvariablen
 	private static Log log = LogFactory.getLog(LWTRTServiceImpl.class);
-	protected static ConcurrentHashMap<Integer, UdpSocketWrapper> socketMap = new ConcurrentHashMap<Integer, UdpSocketWrapper>();
-	protected static ConcurrentHashMap<Integer, LWTRTConnectionImpl> connectionMap = new ConcurrentHashMap<Integer, LWTRTConnectionImpl>();
+	protected volatile static ConcurrentHashMap<Integer, UdpSocketWrapper> socketMap = new ConcurrentHashMap<Integer, UdpSocketWrapper>();
+	protected volatile static ConcurrentHashMap<Integer, LWTRTConnectionImpl> connectionMap = new ConcurrentHashMap<Integer, LWTRTConnectionImpl>();
+	
+	protected volatile static Vector<LWTRTPdu> recvCache = new Vector<LWTRTPdu>();
+	
+	protected volatile Vector<LWTRTPdu> connectionRequests = new Vector<LWTRTPdu>();
 	
 	private UdpSocketWrapper wrapper;
-	private Vector<LWTRTPdu> connectionRequests = new Vector<LWTRTPdu>();
+	
 	private int listenPort;
 	private String localAddress = this.fetchLocalAddress();
 	private long sequenceNumber = 0;
@@ -220,7 +224,7 @@ public class LWTRTServiceImpl implements LWTRTService {
 						e.printStackTrace();
 						this.stop();
 					}
-					LWTRTHelper.getRecvCache().add(recvPdu);
+					recvCache.add(recvPdu);
 					log.debug("PDU in Receive-Cache gespeichert. Hash:  " +recvPdu);
 					try{
 						Thread.sleep(20);
