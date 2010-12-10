@@ -11,6 +11,7 @@ ISSUES:
 -	Der Ausfall eines Partners sollte erkannt werden und es sollte auf eine derartige Ausnahme
 	sinnvoll reagiert werden. Ein Garbage-Collection zur Bereinigung der client- und serverseitigen
 	Datenstrukturen (Kontextbereinigung) ist zu realisieren.
+	MÜSSTE PASSEN!!
 
 
 
