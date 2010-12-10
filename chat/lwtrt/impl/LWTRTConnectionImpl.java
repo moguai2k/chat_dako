@@ -95,26 +95,21 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 		pdu.setOpId(LWTRTPdu.OPID_DISCONNECT_REQ);
 		pdu.setRemoteAddress(remoteAddress);
 		pdu.setRemotePort(remotePort);
+		pdu.setSequenceNumber(sequenceNumber);
 		try {
 			service.getWrapper().send(pdu);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		System.gc();
 		responseArrivedResend(pdu, RESENDING_TIMES, SECONDS_RETRY);
 	}
 
 	@Override
 	public void acceptDisconnection() throws LWTRTException {
-		LWTRTPdu pdu = new LWTRTPdu();
-		pdu.setOpId(LWTRTPdu.OPID_DISCONNECT_RSP);
-		pdu.setRemoteAddress(remoteAddress);
-		pdu.setRemotePort(remotePort);
-		try {
-			service.getWrapper().send(pdu);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		log.debug("Ein Client hat sich abgemeldet. Garbage-Collection wurde gestartet.");
+		long time = System.currentTimeMillis();
+		System.gc();
+		log.debug("Es dauerte " +(System.currentTimeMillis()-time)+ " ms.");
 	}
 
 	@Override

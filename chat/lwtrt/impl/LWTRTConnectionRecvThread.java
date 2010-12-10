@@ -1,6 +1,8 @@
 package lwtrt.impl;
 
 import java.io.IOException;
+
+import lwtrt.ex.LWTRTException;
 import lwtrt.pdu.LWTRTPdu;
 
 import org.apache.commons.logging.Log;
@@ -30,7 +32,7 @@ public class LWTRTConnectionRecvThread extends Thread {
 								service.getConnectionRequests().add(pdu);
 								break;
 							case LWTRTPdu.OPID_CONNECT_RSP: LWTRTServiceImpl.recvCache.remove(pdu); break;
-							case LWTRTPdu.OPID_DISCONNECT_REQ:
+							case LWTRTPdu.OPID_DISCONNECT_REQ:			
 								LWTRTPdu respDisc = new LWTRTPdu();
 								respDisc.setSequenceNumber(pdu.getSequenceNumber());
 								respDisc.setRemoteAddress(connection.getRemoteAddress());
@@ -43,7 +45,12 @@ public class LWTRTConnectionRecvThread extends Thread {
 									e.printStackTrace();
 								}
 								LWTRTServiceImpl.recvCache.remove(pdu);
-								//this.stop(); 
+								try {
+									connection.acceptDisconnection();
+								} catch (LWTRTException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}
 								break;	
 							case LWTRTPdu.OPID_DISCONNECT_RSP:
 								connection.getResponeTrunk().add(pdu);
