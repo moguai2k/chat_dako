@@ -1,0 +1,37 @@
+ISSUES:
+- 	Entwickeln Sie auch geeignete Unit-Tests auf Basis von JUnit.
+
+-	Eine Timerüberwachung für jede Nachricht ist einzubauen. Nach Ablauf von n Sekunden
+	(Wartezeiten sind in der Spezifikation festgelegt) ohne Bestätigung kann entweder die Nachricht
+	oder die Bestätigung verloren gegangen sein und es wird eine Neuübertragung ausgeführt.
+	Nach k-maliger Wiederholung (in der Spezifikation genau festgelegt) einer Nachricht
+	wird die Übertragung eingestellt und ein Fehler nach oben gemeldet.
+	GELÖST!!!!
+ 
+-	Der Ausfall eines Partners sollte erkannt werden und es sollte auf eine derartige Ausnahme
+	sinnvoll reagiert werden. Ein Garbage-Collection zur Bereinigung der client- und serverseitigen
+	Datenstrukturen (Kontextbereinigung) ist zu realisieren.
+
+
+
+TESTEN:
+- auf mehreren Rechnern!!!
+
+
+GENERELLES:
+Als Dokumentation sind maximal 10 Seiten in einer Powerpoint-Datei zur Erläuterung der Architektur
+und der wichtigsten Designentscheidungen abzugeben. Bitte viele Bilder verwenden.
+
+Der Sourcecode ist ausreichend nach Java-Standard zu dokumentieren. Die gesamte Dokumentation
+zu den Sourcen sollte im Coding untergebracht werden.
+
+Der komplette Sourcecode und die Präsentationsunterlagen sind in elektronischer Form im ZIPFormat
+per E-Mail an die zuständigen Dozenten zu senden.
+
+Die Vorstellung der Ergebnisse (Workshop) erfolgt im Rahmen einer Diskussion mit den Dozenten
+im Team (ca. 30 bis 40 Minuten). Als Diskussionsgrundlagen sind vor allem die lauffähigen
+Chat-Anwendungen und die vorbereiteten Powerpoint-Folien (Handout) zu nutzen.
+
+Es muss klar ersichtlich sein, welches Teammitglied sich mit welchen Arbeiten im Team befasst
+hat. Dies sollte während des Workshops kurz dargelegt werden. Jedes Teammitglied muss seinen
+Teil selbstständig verteidigen können.
