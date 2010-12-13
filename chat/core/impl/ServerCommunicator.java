@@ -92,6 +92,17 @@ public class ServerCommunicator extends Thread implements ChatServerListener {
 		if (!sessions.containsKey(username)) {
 			sessions.put(username, chatServerService);
 			sendUserlistUpdate();
+			try {
+				Thread.sleep(20);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			ChatMessage msg = new ChatMessage();
+			msg.setUsername("SERVER");
+			msg.setTime(getTime());
+			msg.setMessage(username.toUpperCase()+" IST DEM CHAT BEIGETRETEN");
+			sendToEveryone(msg);
 		} else {
 			ChatAction action = new ChatAction(
 					ChatAction.CHATACTION_USERNAME_SCHON_VERGEBEN);
@@ -108,6 +119,11 @@ public class ServerCommunicator extends Thread implements ChatServerListener {
 		log.trace("Logging out " + username);
 		if (sessions.containsKey(username)) {
 			sessions.remove(username);
+			ChatMessage msg = new ChatMessage();
+			msg.setUsername("SERVER");
+			msg.setTime(getTime());
+			msg.setMessage(username.toUpperCase()+" VERLÄSST DEN CHAT");
+			sendToEveryone(msg);
 			sendUserlistUpdate();
 		}
 	}

@@ -169,7 +169,7 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 		long milli = System.currentTimeMillis() + secsRetry;
 		boolean received = false;
 		while(received==false) {
-			for (int i=0; i<responeTrunk.size(); i++) {
+			for (int i=1; i<responeTrunk.size(); i++) {
 				LWTRTPdu element = responeTrunk.get(i);
 				log.debug("Warte auf Response...");
 				if (pdu.getSequenceNumber() == element.getSequenceNumber()) {
