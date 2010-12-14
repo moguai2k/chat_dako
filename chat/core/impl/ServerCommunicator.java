@@ -41,7 +41,7 @@ public class ServerCommunicator extends Thread implements ChatServerListener {
 				break;
 			}
 			try {
-				Thread.sleep(50);
+				Thread.sleep(20);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -92,12 +92,6 @@ public class ServerCommunicator extends Thread implements ChatServerListener {
 		if (!sessions.containsKey(username)) {
 			sessions.put(username, chatServerService);
 			sendUserlistUpdate();
-			try {
-				Thread.sleep(20);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 			ChatMessage msg = new ChatMessage();
 			msg.setUsername("SERVER");
 			msg.setTime(getTime());

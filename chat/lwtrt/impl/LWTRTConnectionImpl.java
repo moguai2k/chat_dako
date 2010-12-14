@@ -166,7 +166,7 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 	private void responseArrivedResend(LWTRTPdu pdu, int sendTimes, int secsToRetry) throws LWTRTException {
 		int secsRetry = secsToRetry * 1000;
 		int counter = 0;
-		long milli = System.currentTimeMillis() + secsRetry;
+		long milli = System.currentTimeMillis() + 500;
 		boolean received = false;
 		while(received==false) {
 			for (int i=1; i<responeTrunk.size(); i++) {
