@@ -37,7 +37,7 @@ public class Server {
 	//Server-Frame
 	public void showServerFrame(){
 		// Tore eingefügt
-		sendUserlist = new JButton("sendUserList");
+		sendUserlist = new JButton("Liste aktualis.");
 		sendUserlist.addActionListener(new ActionListener() {
 			
 			@Override
@@ -46,7 +46,7 @@ public class Server {
 				
 			}
 		});
-		// bis hier. Testweise, da Userlists manchmal bißchen verkacken. Also neu senden.
+		// bis hier. Testweise, da Userlists manchmal bisschen verkacken. Also neu senden.
 		
 		consoleFrame = new JFrame("Chat-Server-Console");
 		consoleFrame.setResizable(false);

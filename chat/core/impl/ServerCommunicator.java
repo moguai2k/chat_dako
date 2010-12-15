@@ -116,7 +116,7 @@ public class ServerCommunicator extends Thread implements ChatServerListener {
 			ChatMessage msg = new ChatMessage();
 			msg.setUsername("SERVER");
 			msg.setTime(getTime());
-			msg.setMessage(username.toUpperCase()+" VERLÄSST DEN CHAT");
+			msg.setMessage(username.toUpperCase()+" VERL" + "\u00C4" + "SST DEN CHAT");
 			sendToEveryone(msg);
 			sendUserlistUpdate();
 		}
