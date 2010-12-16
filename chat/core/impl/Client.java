@@ -56,7 +56,7 @@ public class Client implements ChatEventListener {
 	private DefaultListModel defaultListModel;
 	private JScrollPane jScrollPaneList, chatAreaScrollable;
 	private JLabel header2;
-	//private javax.swing.text.html.HTMLEditorKit eKit; //HTML-Code in JTextPane m�glich
+	//private javax.swing.text.html.HTMLEditorKit eKit; //HTML-Code in JTextPane möglich
 	private ImageIcon icon = null;
 	private java.net.URL sourire = null;
 	private boolean smileys = false;
@@ -75,7 +75,7 @@ public class Client implements ChatEventListener {
 		clientLoginFrame = new JFrame("Client-Login");
 		clientLoginFrame.setResizable(false);
 		
-		downButton = new JButton("Chat schlie�en");
+		downButton = new JButton("Chat schließen");
 		name = new JTextField();
 		ip = new JTextField();
 		port = new JTextField();
@@ -136,14 +136,14 @@ public class Client implements ChatEventListener {
 
 	//Erzeugen des Chatframes
 	private void showChatFrame() throws MalformedURLException {
-		chatFrame = new JFrame("Client-Chatframe");
+		chatFrame = new JFrame("Chat-Client");
 		chatFrame.setResizable(false);
 		
 		header2 = new JLabel("Chat");
 		header2.setFont(new Font("Impact", Font.BOLD,40));
 		
-		submitButton = new JButton("Submit");
-		logoutButton = new JButton("Logout");
+		submitButton = new JButton("Absenden");
+		logoutButton = new JButton("Schließen");
 		
 		chatArea 	= new JTextPane();
 		chatField 	= new JTextField(300);
@@ -241,7 +241,7 @@ public class Client implements ChatEventListener {
         	startPos = startPos + 2;
 
         doc = (StyledDocument) chatArea.getDocument();
-        doc.setCharacterAttributes(startPos, beBoldLength, attributeSet, true); //StartPosi, L�nge der Fettzuwerdenden, Fettattribut, true^^
+        doc.setCharacterAttributes(startPos, beBoldLength, attributeSet, true); //StartPosi, Länge der Fettzuwerdenden, Fettattribut, true^^
     }*/
     
     
@@ -412,7 +412,7 @@ public class Client implements ChatEventListener {
 
     //Nachricht und Name werden empfangen und zusammen mit der Serverzeit im Chat eingetragen
     public void onMessage(String username, String message, String time) {
-    	//int startCaret = chatArea.getText().length(); //erstes Zeichen der neuen Zeile, damit man wei� ab wann fett gemacht werden muss
+    	//int startCaret = chatArea.getText().length(); //erstes Zeichen der neuen Zeile, damit man weiß ab wann fett gemacht werden muss
  
 		Style style = doc.addStyle(null, null);
 		StyleConstants.setIcon(style, icon);
@@ -428,7 +428,7 @@ public class Client implements ChatEventListener {
 		    System.err.println("Exception in inserting text and icons: " + e);
 		}
     	
-		//Checken ob Nachricht ein Smiley enth�lt
+		//Checken ob Nachricht ein Smiley enthält
 		String SmileyChecked = smileyCheck(message);
 		
 		//Wenn Smileys drin sind, dann ab zur CutterMethode

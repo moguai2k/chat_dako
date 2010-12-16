@@ -25,30 +25,31 @@ public class Server {
 	private ServerCommunicator communicator;
 	private JFrame consoleFrame;
 	private JTextField port;
-	private JButton loginButton, logoutButton, sendUserlist;
+	private JButton loginButton, logoutButton;// sendUserlist;
 	private JLabel header;
 	private JLabel label;
 	private Thread thread;
 	private static JList jList;
 	private static DefaultListModel defaultListModel;
 	private JScrollPane jScrollPane;
+	private boolean runs = false; //rennt der Server?
 
 	
 	//Server-Frame
 	public void showServerFrame(){
 		// Tore eingefügt
-		sendUserlist = new JButton("Liste aktualis.");
-		sendUserlist.addActionListener(new ActionListener() {
+		//sendUserlist = new JButton("Liste aktualis.");
+		//sendUserlist.addActionListener(new ActionListener() {
 			
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				communicator.sendUserlistUpdate();
-				
-			}
-		});
+			//@Override
+			//public void actionPerformed(ActionEvent event) {
+			//	communicator.sendUserlistUpdate();
+			//	
+			//}
+		// });
 		// bis hier. Testweise, da Userlists manchmal bisschen verkacken. Also neu senden.
 		
-		consoleFrame = new JFrame("Chat-Server-Console");
+		consoleFrame = new JFrame("Chat-Server");
 		consoleFrame.setResizable(false);
 		logoutButton = new JButton("Server herunterfahren");
 		port = new JTextField();
@@ -68,7 +69,7 @@ public class Server {
 		panel.add(header);panel.add(port);panel.add(label);panel.add(jScrollPane);
 		panel.add(loginButton);panel.add(logoutButton); 
 		// Tore
-		panel.add(sendUserlist);
+		// panel.add(sendUserlist);
 		//
 		logoutButton.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent event){
@@ -84,12 +85,16 @@ public class Server {
 		loginButton.setBounds(170,500,180,30);
 		logoutButton.setBounds(350,500,180,30);
 		// auch Tore
-		sendUserlist.setBounds(530,500,120,30);
+		// sendUserlist.setBounds(530,500,120,30);
 		//
         loginButton.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent event){
-            	loginButton.setText("Server neustarten");
-        		serverStart();
+            	if(!runs) {
+                	loginButton.setText("Server läuft!");
+                	loginButton.disable();
+            		serverStart();
+            	}
+            	runs = true;
             }
         });
         
