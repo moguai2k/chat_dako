@@ -20,7 +20,7 @@ public class LWTRTConnectionRecvThread extends Thread {
 	}
 	
 	public void run() {
-		log.debug("LWTRTConnection Handle-Thread gestartet auf Port: " +service.getListenPort() + " gestartet.");
+		log.debug("--LWTRTConnection Handle-Thread gestartet auf Port: " +service.getListenPort() + " gestartet.--");
 		while (true) {
 			synchronized (LWTRTServiceImpl.recvCache) {
 				if (!LWTRTServiceImpl.recvCache.isEmpty()) {

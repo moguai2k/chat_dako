@@ -122,6 +122,7 @@ public class ChatClientServiceImpl extends BaseServiceImpl implements ChatClient
 
 	@Override
 	protected void handleChatPdu(ChatPdu pdu) {
+		log.debug("Behandle gerade folgende pduID: " +pdu.getOpId());
 		switch(pdu.getOpId()) {
 			case sendMessage_req_PDU:
 				listener.onMessageEvent((ChatMessage) pdu.getData()); break;

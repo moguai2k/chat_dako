@@ -224,7 +224,7 @@ public class LWTRTServiceImpl implements LWTRTService {
 
 		@Override
 		public void run() {
-			log.debug("--LWTRTConnection Receive Thread gestartet: " +listenPort+ "--");
+			log.debug("--LWTRTConnection Receive Thread auf: " +listenPort+ " gestartet.--");
 			synchronized (wrapper) {
 				while (true) {
 					LWTRTPdu recvPdu = new LWTRTPdu();
