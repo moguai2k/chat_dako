@@ -88,6 +88,7 @@ public class ChatServerServiceImpl extends BaseServiceImpl implements
 
 	@Override
 	protected void handleChatPdu(ChatPdu pdu) {
+		log.debug("Behandle gerade folgende pduID: " +pdu.getOpId());
 		switch (pdu.getOpId()) {
 			case createSession_req_PDU:
 				super.setUserName(pdu.getName()); break;

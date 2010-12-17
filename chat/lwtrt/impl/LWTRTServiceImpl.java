@@ -35,7 +35,16 @@ public class LWTRTServiceImpl implements LWTRTService {
 	private String localAddress = this.fetchLocalAddress();
 	private long sequenceNumber = 0;
 	private boolean serverRunning = false;
+	private boolean isServer = true;
 	
+	public boolean isServer() {
+		return isServer;
+	}
+
+	public void setServer(boolean isServer) {
+		this.isServer = isServer;
+	}
+
 	public Vector<LWTRTPdu> getConnectionRequests() {
 		return connectionRequests;
 	}
@@ -165,6 +174,7 @@ public class LWTRTServiceImpl implements LWTRTService {
 					thread.start();
 					handleThread.start();
 					serverRunning = true;
+					isServer  = true;
 					return connection;
 				}
 			}

@@ -20,7 +20,7 @@ public class LWTRTConnectionRecvThread extends Thread {
 	}
 	
 	public void run() {
-		log.debug("LWTRTConnection Handle Thread gestartet: " + service.getListenPort());
+		log.debug("LWTRTConnection Handle-Thread gestartet auf Port: " +service.getListenPort() + " gestartet.");
 		while (true) {
 			synchronized (LWTRTServiceImpl.recvCache) {
 				if (!LWTRTServiceImpl.recvCache.isEmpty()) {
@@ -48,7 +48,6 @@ public class LWTRTConnectionRecvThread extends Thread {
 								try {
 									connection.acceptDisconnection();
 								} catch (LWTRTException e1) {
-									// TODO Auto-generated catch block
 									e1.printStackTrace();
 								}
 								break;	
@@ -90,7 +89,7 @@ public class LWTRTConnectionRecvThread extends Thread {
 								break;
 					} // end-switch
 				} // end-if 
-			} // synchronized
+			} // end-synchronized
 			try {
 				Thread.sleep(50);
 			} catch (InterruptedException e) {

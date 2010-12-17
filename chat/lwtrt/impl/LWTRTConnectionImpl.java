@@ -12,29 +12,34 @@ import org.apache.commons.logging.LogFactory;
 
 public class LWTRTConnectionImpl implements LWTRTConnection {
 	
+	// Log
 	private static Log log = LogFactory.getLog(LWTRTConnectionImpl.class);
 	
+	// 2x neu sende, jeweils 10 Sekunden warten.
 	private final int RESENDING_TIMES = 2;
 	private final int SECONDS_RETRY = 10;
 	
-	// Instanzvariablen
+	// Lokale Adresse und Port + Remoteadresse und Port.
+	// Die lokale wird in einer Connection mal mitgespeicher, obwohl Sie eigentlich garnicht verwendet wird.
 	private String localAddress;
 	private String remoteAddress;
 	private int localPort;
 	private int remotePort;
 
+	// Genaue Identität eines Pakets.
 	private long sequenceNumber;
 	
+	// Das zugehörige Service-Objekt.
 	private LWTRTServiceImpl service;
 
 	// Puffer für Pings
 	private Vector<LWTRTPdu> pingCache = new Vector<LWTRTPdu>();
-	//Response Trunk
+	// Response Trunk
 	private Vector<LWTRTPdu> responeTrunk = new Vector<LWTRTPdu>();
 	// Trunk für data
 	private Vector<LWTRTPdu> dataTrunk = new Vector<LWTRTPdu>();
 	
-	// Konstruktor
+	// Alles wichtige wird initialisiert.
 	public LWTRTConnectionImpl(String localAddress, int localPort, String remoteAddress, int remotePort, 
 			LWTRTServiceImpl service) {
 		this.localAddress = localAddress;
@@ -101,15 +106,18 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		responseArrivedResend(pdu, RESENDING_TIMES, SECONDS_RETRY);
+		responseArrivedResend(pdu);
 	}
 
 	@Override
 	public void acceptDisconnection() throws LWTRTException {
-		log.debug("Ein Client hat sich abgemeldet. Garbage-Collection wurde gestartet.");
-		long time = System.currentTimeMillis();
-		System.gc();
-		log.debug("Es dauerte " +(System.currentTimeMillis()-time)+ " ms.");
+		if (service.isServer()) {
+			log.debug("Ein Client hat sich abgemeldet. Garbage-Collection wurde gestartet.");
+			long time = System.currentTimeMillis();
+			System.gc();
+			log.debug("Es dauerte " +(System.currentTimeMillis()-time)+ " ms.");
+		}
+		else service.unregister();	
 	}
 
 	@Override
@@ -127,7 +135,7 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		responseArrivedResend(pdu, RESENDING_TIMES, SECONDS_RETRY);
+		responseArrivedResend(pdu);
 	}
 	
 	@Override
@@ -159,14 +167,17 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		responseArrivedResend(pdu, RESENDING_TIMES, SECONDS_RETRY);
+		responseArrivedResend(pdu);
 	}
 	
-	// Hilfsmethode
-	private void responseArrivedResend(LWTRTPdu pdu, int sendTimes, int secsToRetry) throws LWTRTException {
-		int secsRetry = secsToRetry * 1000;
-		int counter = 0;
-		long milli = System.currentTimeMillis() + 500;
+	// Hilfsmethode für den Empfang eines Responses. Es wird auf ein Paket mit der selben sequencenumber gewartet.
+	// Wenn es nach zuerst 1 Sekunde dann 10 Sekunden nicht da ist, wird nochmal gesendet. Nach RESENDING_TIMES mal und
+	// keinem passenden Response, wird das Programm beendet.
+	private void responseArrivedResend(LWTRTPdu pdu) throws LWTRTException {
+		int millisRetry = SECONDS_RETRY * 1000;
+		int counter = 1;
+		long milli = System.currentTimeMillis() + 1000;
+		int seconds = 1;
 		boolean received = false;
 		while(received==false) {
 			for (int i=1; i<responeTrunk.size(); i++) {
@@ -180,19 +191,21 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 				}	
 			}
 			if(milli < System.currentTimeMillis()) {
-				milli = System.currentTimeMillis() + secsRetry;
-				counter++;
-				log.debug("Paket gesendet - Response kam nach " +secsRetry+ " Sekunden nicht an - " +
+				log.debug("Paket gesendet - Response kam nach " +seconds+ " Sekunde/n nicht an - " +
 						"Paket wird nochmal geschickt. Anzahl der geschickten Pakete: "+ counter);
+				milli = System.currentTimeMillis() + millisRetry;
+				seconds = SECONDS_RETRY;
 				try {
 					service.getWrapper().send(pdu);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-				if(counter > sendTimes) {
+				if(counter >= RESENDING_TIMES) {
 					log.debug("Erzwinge Exit, da kein Response empfangen wurde.");
+					service.unregister();
 					System.exit(0);
 				}
+				counter++;
 			}
 		}
 	}
