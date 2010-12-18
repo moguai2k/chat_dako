@@ -13,6 +13,7 @@ import chatsession.pdu.ChatPdu;
 public abstract class BaseServiceImpl implements BaseSessionService {
 	private static Log log = LogFactory.getLog(BaseServiceImpl.class);
 	
+	
 	protected Threading thread;
 	protected LWTRTConnection connection;
 	protected SessionStatus currentStatus = SessionStatus.NO_SESSION;

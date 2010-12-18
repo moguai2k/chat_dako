@@ -10,7 +10,6 @@ import chatsession.pdu.ChatMessage;
 import chatsession.pdu.ChatPdu;
 import chatsession.pdu.ChatUserList;
 import lwtrt.impl.LWTRTServiceImpl;
-import lwtrt.LWTRTConnection;
 import lwtrt.ex.LWTRTException;
 
 /**

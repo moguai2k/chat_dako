@@ -121,6 +121,8 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 		else service.unregister();	
 	}
 
+	// Hiermit können jetzt Data-Objekte verschickt werden.
+	// Sequencenumber wird bei jedem Aufruf inkrementiert um Eindeutigkeit generell zu gewährleisten.
 	@Override
 	public void send(Object chatPdu) throws LWTRTException {		
 		LWTRTPdu pdu = new LWTRTPdu();
