@@ -15,10 +15,12 @@ import lwtrt.impl.LWTRTServiceImpl;
 
 public class ChatClientServiceFactoryImpl implements ChatClientServiceFactory {
 	
-	// Log
+	//Attribute//
 	private static Log log = LogFactory.getLog(BaseServiceImpl.class);
 	protected LWTRTServiceImpl lwtrtService = new LWTRTServiceImpl();
 	
+	
+	//Empfangenen Port registrieren
 	@Override
 	public ChatClientService register(int port) throws ChatServiceException {
 		try {

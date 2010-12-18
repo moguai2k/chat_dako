@@ -21,34 +21,23 @@ public class Server {
 	
 	//Attribute//
 	private static Log log = LogFactory.getLog(Server.class);
-	static ChatServerServiceFactory factory;
+	private static ChatServerServiceFactory factory;
 	private ServerCommunicator communicator;
+	private boolean runs = false; //rennt der Server?
+	//Console-Frames
 	private JFrame consoleFrame;
 	private JTextField port;
-	private JButton loginButton, logoutButton;// sendUserlist;
+	private JButton loginButton, logoutButton;
 	private JLabel header;
 	private JLabel label;
 	private Thread thread;
 	private static JList jList;
 	private static DefaultListModel defaultListModel;
 	private JScrollPane jScrollPane;
-	private boolean runs = false; //rennt der Server?
 
 	
-	//Server-Frame
+	//Console-Frame
 	public void showServerFrame(){
-		// Tore eingefügt
-		//sendUserlist = new JButton("Liste aktualis.");
-		//sendUserlist.addActionListener(new ActionListener() {
-			
-			//@Override
-			//public void actionPerformed(ActionEvent event) {
-			//	communicator.sendUserlistUpdate();
-			//	
-			//}
-		// });
-		// bis hier. Testweise, da Userlists manchmal bisschen verkacken. Also neu senden.
-		
 		consoleFrame = new JFrame("Chat-Server");
 		consoleFrame.setResizable(false);
 		logoutButton = new JButton("Server herunterfahren");
@@ -68,25 +57,21 @@ public class Server {
 		JPanel panel = new JPanel();
 		panel.add(header);panel.add(port);panel.add(label);panel.add(jScrollPane);
 		panel.add(loginButton);panel.add(logoutButton); 
-		// Tore
-		// panel.add(sendUserlist);
-		//
+
 		logoutButton.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent event){
             	servLogout();
             }
         });
 
-		header.setBounds(30,20,280,80); //(int x, int y, int width, int height) 
+		//Jframe-Netz (int x, int y, int width, int height) 
+		header.setBounds(30,20,280,80);
 		label.setBounds(120,445,250,60);
 		port.setBounds(280,460,100,30);
 		jScrollPane.setBounds(20,100,690,330);
 		port.setText("50000");
 		loginButton.setBounds(170,500,180,30);
 		logoutButton.setBounds(350,500,180,30);
-		// auch Tore
-		// sendUserlist.setBounds(530,500,120,30);
-		//
         loginButton.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent event){
             	if(!runs) {
@@ -119,11 +104,10 @@ public class Server {
 	}
 
 	
-    //Ctor, Logdatei einstellen + Loginframe anzeigen
+    //Ctor: Logdatei einstellen + Frame anzeigen
     public Server() throws InterruptedException {
         PropertyConfigurator.configureAndWatch("log4j.properties", 60 * 1000);
         showServerFrame();
-        //Thread.sleep( 100 );
     }
 
     
@@ -143,7 +127,7 @@ public class Server {
     }
     
     
-    //Server starten
+    //Server starten (Port wird auf Schreibweise gecheckt + ServerLogin-Methode gestartet)
     private void serverStart() {
 		int serverPort = 0;
 		
@@ -161,7 +145,7 @@ public class Server {
     }
     
     
-    //Server-Login
+    //Server-Login (Port registrieren und Thread für Console starten)
     private void servLogin(int serverport) {   	
     	try {
         	factory = new ChatServerServiceFactoryImpl();
@@ -173,10 +157,10 @@ public class Server {
 
     	StartStopThread();
 
-}
+    }
 	
     
-	//Logout-Methode
+	//Logout-Methode (keine wirkliche Logout-Methode, Console abschießen träfe besser)
 	public void servLogout() {
 		try {
 			consoleFrame.dispose();
@@ -187,7 +171,7 @@ public class Server {
 	}
 
 
-	//Hilfsmethode
+	//Hilfsmethode: String auf Zahlen prüfen
     public boolean containsOnlyNumbers(String str) {
         if (str == null || str.length() == 0)
             return false;
@@ -199,7 +183,7 @@ public class Server {
     }
     
     
-    //Threading ServerGui
+    //Threading für ServerGui bzw. Jliste und Horchmethode
 	public void StartStopThread()
 	{
 	if (thread == null)
@@ -212,9 +196,9 @@ public class Server {
 			public void run()
 			{
 				try {
-					while (true) {
+					while (true) { //horchen pssst...
 						ChatServerService service = factory.getSession();
-						if (service != null) {communicator = new ServerCommunicator(service);}
+						if (service != null) {setCommunicator(new ServerCommunicator(service));}
 					}
 				} 
 				catch (Exception e) {
@@ -231,4 +215,17 @@ public class Server {
 		thread.interrupt();
 	}
 	}
+
+
+	//Getter & Setter
+	public void setCommunicator(ServerCommunicator communicator) {
+		this.communicator = communicator;
+	}
+
+
+	public ServerCommunicator getCommunicator() {
+		return communicator;
+	}
+	
+	
 } //Server

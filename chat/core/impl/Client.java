@@ -35,9 +35,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.PropertyConfigurator;
 import core.ChatEventListener;
-import chatsession.ChatClientService;
 import chatsession.ex.ChatServiceException;
-import chatsession.impl.ChatClientServiceFactoryImpl;
 import chatsession.pdu.ChatAction;
 
 public class Client implements ChatEventListener {
@@ -56,11 +54,11 @@ public class Client implements ChatEventListener {
 	private JScrollPane jScrollPaneList, chatAreaScrollable;
 	private JLabel header2;
 	//private javax.swing.text.html.HTMLEditorKit eKit; //HTML-Code in JTextPane möglich
+    //private SimpleAttributeSet attributeSet;
 	private ImageIcon icon = null;
 	private java.net.URL sourire = null;
 	private boolean smileys = false;
 	private StyledDocument doc;
-    //private SimpleAttributeSet attributeSet;
 	//Login
 	private JFrame clientLoginFrame;
 	private JTextField name, ip, port;
@@ -99,21 +97,18 @@ public class Client implements ChatEventListener {
         });
 		
 		header.setBounds(30,20,280,80); //(int x, int y, int width, int height) 
-		
 		labelName.setBounds(120,80,250,60);
 		name.setBounds(280,95,100,30);
-		name.setText("");
-		
 		labelIP.setBounds(120,120,250,60);
 		ip.setBounds(280,135,100,30);
-		ip.setText("127.0.0.1");
-		
 		labelPORT.setBounds(120,160,250,60);
 		port.setBounds(280,175,100,30);
-		port.setText("50000");
-		
 		loginButton.setBounds(170,220,180,30);
 		downButton.setBounds(350,220,180,30);
+		
+		name.setText("");
+		port.setText("50000");
+		ip.setText("127.0.0.1");
 		
         loginButton.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent event){
@@ -158,7 +153,7 @@ public class Client implements ChatEventListener {
 	    iconButton = new JButton(icon);
 	    iconButton.addActionListener(new ActionListener() {
 	      public void actionPerformed(final ActionEvent event) {
-	    	  if (smileys) { //Button laggt, daher verkehrte Welt :D
+	    	  if (smileys) {
 	    		  iconButton.setText("aus");
 	    		  smileys = false;
 	    		  chatField.requestFocus();
@@ -327,7 +322,7 @@ public class Client implements ChatEventListener {
     //eigene Hilfsmethode Smiley-Check
 	private String smileyCheck(String text) {
 
-		if ((this.smileys) && containsSmileys(text)) {// wenn Smileys aktiviert AND iein Smiley vor kommt
+		if ((this.smileys) && containsSmileys(text)) {// wenn Smileys aktiviert AND iein Smiley vorkommt
 
 			String smiley = "";
 			
@@ -384,7 +379,7 @@ public class Client implements ChatEventListener {
 			int position = textPart.indexOf(smiley);
 			int ende = textPart.length();
 
-			//Nachricht in zwei H�lften schneiden, wobei das Smiley abgeschnitten wird
+			//Nachricht in zwei Hälften schneiden, wobei das Smiley abgeschnitten wird
 			eins = textPart.substring(start, position);
 			zwei = textPart.substring(position + pause, ende);
 
@@ -525,7 +520,7 @@ public class Client implements ChatEventListener {
     //Wenn der Name schon vorhanden ist -> Errormeldung im Chat
     public void onAction(int actionId, String reserved) {
         if (actionId == ChatAction.CHATACTION_USERNAME_SCHON_VERGEBEN) {
-            chatArea.setText("Der Username ist schon vergeben. Bitte loggen Sie sich aus und starten Sie die Anwendung neu!");
+            chatArea.setText("Der Username ist schon vergeben. Bitte loggen Sie sich aus und starten Sie die Anwendung mit einem anderen Namen neu!");
             chatField.requestFocus();
         }
     }
@@ -588,7 +583,7 @@ public class Client implements ChatEventListener {
         }
     
     
-    //Methode Login und Logout zust�ndig
+    //Methode Login und Logout zuständig
     class ChatListener extends MouseAdapter {
         public void mouseClicked(MouseEvent e) {
             if (e.getSource() == submitButton) {

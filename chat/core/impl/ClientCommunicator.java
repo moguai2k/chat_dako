@@ -17,6 +17,8 @@ public class ClientCommunicator implements ChatClientListener {
 	private ChatClientService chatClientService;
 	private Client client;
 	
+	
+	//Ctor
 	public ClientCommunicator(Client client, String remoteAdress, int remotePort, String userName) throws ChatServiceException {
 		ChatClientServiceFactoryImpl clServFac = new ChatClientServiceFactoryImpl();	
 		chatClientService = clServFac.register(50000); //Registriet mal fest 50000 als Listener
@@ -25,11 +27,11 @@ public class ClientCommunicator implements ChatClientListener {
 		try {
 			chatClientService.registerChatSessionListener(this);
 		} catch (ChatServiceException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
 	}
 
+	
 	//Test via ActionID auf Name-schon-vorhanden
 	public void onActionEvent(ChatAction action) {
 		client.onAction(action.getOpId(), action.getReserved());
@@ -42,13 +44,13 @@ public class ClientCommunicator implements ChatClientListener {
 	}
 
 
-	//Nachricht wird empfahngen - Weitergabe von Name und Nachricht an Client
+	//Nachricht wird empfahngen - Weitergabe von Name, Zeit und Nachricht an Client
 	public void onMessageEvent(ChatMessage message) {
 		client.onMessage(message.getUsername(), message.getMessage(), message.getTime());
 	}
 	
 	
-	//Logout-Methode
+	//Logout-Methode, wenn jemand den "Chat schließen" (aka "sich ausloggen") möchte
 	public void logout() {
 		try {
 			chatClientService.destroy();

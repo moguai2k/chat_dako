@@ -11,15 +11,17 @@ import chatsession.ex.ChatServiceException;
 import chatsession.pdu.ChatPdu;
 
 public abstract class BaseServiceImpl implements BaseSessionService {
+	
+	//Attribute//
 	private static Log log = LogFactory.getLog(BaseServiceImpl.class);
-	
-	
 	protected Threading thread;
 	protected LWTRTConnection connection;
 	protected SessionStatus currentStatus = SessionStatus.NO_SESSION;
 	protected String userName;
 	protected ChatPdu chatPdu;
 
+	
+	//Session-Enums
 	public enum SessionStatus {
 		NO_SESSION(1), SESSION_ACTIVE(2), SESSION_DESTROYED(3);
 		int code;
@@ -29,24 +31,11 @@ public abstract class BaseServiceImpl implements BaseSessionService {
 		}
 	}
 
-	public String getUserName() {
-		return userName;
-	}
-
-	public void setUserName(String username) {
-		this.userName = username;
-	}
-
-	public LWTRTConnection getConnection() {
-		return connection;
-	}
-
-	public void setConnection(LWTRTConnection connection) {
-		this.connection = connection;
-	}
 	
 	protected abstract void handleChatPdu(ChatPdu pdu);
 	
+	
+	//Thread starten
 	public void startThread() throws ChatServiceException {
 		if (connection == null) {
 			throw new ChatServiceException(
@@ -59,6 +48,8 @@ public abstract class BaseServiceImpl implements BaseSessionService {
 		}
 	}
 	
+	
+	//Thread stoppen
 	@SuppressWarnings("deprecation")
 	public void stopThread() {
 		try {
@@ -74,6 +65,8 @@ public abstract class BaseServiceImpl implements BaseSessionService {
 		}
 	}
 	
+	
+	//Thread-RUNit
 	public class Threading extends Thread {
 		LWTRTConnection connection;
 		BaseServiceImpl baseService;
@@ -103,6 +96,24 @@ public abstract class BaseServiceImpl implements BaseSessionService {
 	            log.error(e);
 	        }
 		}
+	}
+	
+	
+	//Getter & Setter
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String username) {
+		this.userName = username;
+	}
+
+	public LWTRTConnection getConnection() {
+		return connection;
+	}
+
+	public void setConnection(LWTRTConnection connection) {
+		this.connection = connection;
 	}
 	
 }

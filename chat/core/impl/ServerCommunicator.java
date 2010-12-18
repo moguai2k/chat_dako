@@ -23,11 +23,13 @@ import chatsession.pdu.ChatUserList;
 
 public class ServerCommunicator extends Thread implements ChatServerListener {
 	
+	//Attribute//
 	private static Log log = LogFactory.getLog(ServerCommunicator.class);
 	private static ConcurrentHashMap<String, ChatServerService> sessions = new ConcurrentHashMap<String, ChatServerService>();
 	private ChatServerService chatServerService;
 
 
+	//Ctor
 	public ServerCommunicator(ChatServerService chatServerService) {
 		this.chatServerService = chatServerService;
 		try {
@@ -48,6 +50,8 @@ public class ServerCommunicator extends Thread implements ChatServerListener {
 		}
 	}
 
+	
+	//Schickt die modifizierte Chatnachricht an alle Chatter
 	public void sendToEveryone(ChatMessage message) {
 		Enumeration<String> keys = sessions.keys();
 		for (Entry<String, ChatServerService> entry : sessions.entrySet()) {
@@ -62,6 +66,8 @@ public class ServerCommunicator extends Thread implements ChatServerListener {
 		}
 	}
 
+	
+	//Hält die Chat-Benutzerliste up2date
 	public void sendUserlistUpdate() {
 		Enumeration<String> keys = sessions.keys();
 		ArrayList<String> list = new ArrayList<String>();
@@ -77,17 +83,21 @@ public class ServerCommunicator extends Thread implements ChatServerListener {
 				entry.getValue().sendUserList(userList);
 			} catch (ChatServiceException e) {
 				// Session ist nicht mehr valide --> ausloggen
-				log.error("Error sending to " + entry.getKey()
-						+ ", logging out " + entry.getKey());
+				log.error("Error sending to " + entry.getKey() + ", logging out " + entry.getKey());
 				onLogout(entry.getKey());
 			}
 		}
 	}
-
+	
+	
+	//unwichtig für Server
 	@Override
 	public void onActionEvent(ChatAction action) {
+		
 	}
-
+	
+	
+	//Wird nach eienr createSession PDU aufgerufen, überprüft ob Username bereits vorhanden und informiert die anderen "Chatter" über den Neuankömmling 
 	public void onLogin(String username) {
 		if (!sessions.containsKey(username)) {
 			sessions.put(username, chatServerService);
@@ -108,6 +118,8 @@ public class ServerCommunicator extends Thread implements ChatServerListener {
 		}
 	}
 
+	
+	//Logout-Methode: Wird aufgerufen wenn ein "Chatter" sich ausloggt (Eingang von destroySession PDU)
 	@Override
 	public void onLogout(String username) {
 		log.trace("Logging out " + username);
@@ -122,6 +134,8 @@ public class ServerCommunicator extends Thread implements ChatServerListener {
 		}
 	}
 
+	
+	//Wird beim Erhalt von einer ChatMessage aufgerufen und fügt die Zeit hinzu
 	@Override
 	public void onMessageEvent(ChatMessage message) {
 		if (message.getMessage() != null) {
@@ -130,7 +144,8 @@ public class ServerCommunicator extends Thread implements ChatServerListener {
 		}
 	}
 	
-	// Gibt die Zeit zurück HH:mm:ss
+	
+	//Hilfsmethode: Gibt die Zeit zurück HH:mm:ss
 	private static String getTime() {
 		Date now = Calendar.getInstance().getTime();
 		SimpleDateFormat format = new SimpleDateFormat ("HH:mm");

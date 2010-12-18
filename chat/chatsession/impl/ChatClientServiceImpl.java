@@ -19,13 +19,17 @@ import lwtrt.ex.LWTRTException;
  * @version 1.0.0
  */
 public class ChatClientServiceImpl extends BaseServiceImpl implements ChatClientService {
+	//Attribute//
 	private static Log log = LogFactory.getLog(ChatClientServiceImpl.class);
 	protected ChatClientListener listener;
 	protected LWTRTServiceImpl lwtrtService;
 	
+	
+	//Ctor
 	public ChatClientServiceImpl(LWTRTServiceImpl lwtrtService) {
 		this.lwtrtService = lwtrtService;
 	}
+	
 	
 	@Override
 	public void create(String serverAdress, int serverPort, String name) throws ChatServiceException {
@@ -38,15 +42,16 @@ public class ChatClientServiceImpl extends BaseServiceImpl implements ChatClient
 		}
 	}
 	
+	
 	@Override
 	public void sendMessage(ChatMessage message) throws ChatServiceException {
-		ChatPdu pdu = new ChatPdu();
-		pdu.setOpId(ChatPdu.ChatOpId.sendMessage_req_PDU);
-		pdu.setName(message.getUsername());
-		pdu.setData(message);
-		log.debug("<< Name ("+message.getUsername()+") + Nachricht ("+message.getMessage()+") weitergegeben >>");
+		ChatPdu pdu = new ChatPdu(); //neue PDU 
+		pdu.setOpId(ChatPdu.ChatOpId.sendMessage_req_PDU); //passende ID zugeordnet
+		pdu.setName(message.getUsername()); //Username gesetzt
+		pdu.setData(message); //Nachricht dazugepackt
+		log.debug("<< Name ("+message.getUsername()+") + Nachricht ("+message.getMessage()+") weitergegeben >>"); //Daten an Server-Console gesandt
 		try {
-			super.connection.send(pdu);
+			super.connection.send(pdu); //Päckchen senden
 		} catch (LWTRTException e) {
 			e.printStackTrace();
 		}
@@ -88,6 +93,7 @@ public class ChatClientServiceImpl extends BaseServiceImpl implements ChatClient
 		}
 	}
 	
+	
 	@Override
 	public void destroy() throws ChatServiceException {
 		ChatPdu pdu = new ChatPdu();
@@ -119,6 +125,7 @@ public class ChatClientServiceImpl extends BaseServiceImpl implements ChatClient
 		}
 	}
 
+	
 	@Override
 	protected void handleChatPdu(ChatPdu pdu) {
 		log.debug("Behandle gerade folgende pduID: " +pdu.getOpId());
