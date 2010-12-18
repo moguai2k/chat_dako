@@ -1,5 +1,11 @@
 package lwtrt.impl;
-
+/*
+ * Thread für die Bearbeitung der empfangenen Pakete im recvCache.
+ * Synchronisiert mit dem Vector recvCache. Zu jedem Paket wird die passende Connection
+ * anhand des Remoteports des empfangenen PDU´s aus der connectioMap geholt und dann wird einfach anhand der pduID
+ * weiterentschieden was jetzt passieren soll. Dieser Thread wird auch im Server nur einmal gestartet!
+ * 
+ */
 import java.io.IOException;
 
 import lwtrt.ex.LWTRTException;

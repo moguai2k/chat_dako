@@ -1,6 +1,5 @@
 package chatsession.impl;
 
-
 import lwtrt.LWTRTConnection;
 import lwtrt.ex.LWTRTException;
 
@@ -74,13 +73,13 @@ public abstract class BaseServiceImpl implements BaseSessionService {
 		}
 	}
 	
-	
 	public class Threading extends Thread {
 		LWTRTConnection connection;
 		BaseServiceImpl baseService;
 		
 		public Threading (LWTRTConnection connection, BaseServiceImpl baseService) {
-			log.debug("--BaseService RecvThread gestartet--");
+			log.debug("--BaseService RecvThread für connection-Hash: "
+					+connection.hashCode()+ " gestartet--");
 			this.connection = connection;
 			this.baseService = baseService;
 		}
@@ -92,7 +91,13 @@ public abstract class BaseServiceImpl implements BaseSessionService {
 					Object pdu = connection.receive();
 	                if (pdu instanceof ChatPdu)
 	                	baseService.handleChatPdu((ChatPdu) pdu);
-	            }
+	                try {
+						Thread.sleep(25);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+	            }		
 	        } catch (LWTRTException e) {
 	            log.error(e);
 	        }

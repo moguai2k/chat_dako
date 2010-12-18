@@ -20,23 +20,35 @@ import lwtrt.ex.LWTRTException;
 
 public class LWTRTServiceImpl implements LWTRTService {
 	
-	// Instanzvariablen
+	// Log
 	private static Log log = LogFactory.getLog(LWTRTServiceImpl.class);
+	
+	// Sockets (Wrapper)
 	protected volatile static ConcurrentHashMap<Integer, UdpSocketWrapper> socketMap = new ConcurrentHashMap<Integer, UdpSocketWrapper>();
+	// Alle Connections in einer Map.
 	protected volatile static ConcurrentHashMap<Integer, LWTRTConnectionImpl> connectionMap = new ConcurrentHashMap<Integer, LWTRTConnectionImpl>();
 	
+	// Jedes empfangene Paket kommt erstmal hier rein.
 	protected volatile static Vector<LWTRTPdu> recvCache = new Vector<LWTRTPdu>();
 	
+	// Connectionrequests werden hier gespeichert. (Serverseitig)
 	protected volatile Vector<LWTRTPdu> connectionRequests = new Vector<LWTRTPdu>();
 	
+	// Der Wrapper zum senden/empfangen. Jedes Serviceobjekt hat genau einen!
 	private UdpSocketWrapper wrapper;
 	
+	// Der registrierte listenport.
 	private int listenPort;
-	private String localAddress = this.fetchLocalAddress();
+	// Über die Hilfsmethode fetchLocalAddress wird hier die Lokale Adresse als String gespeichert. Final!
+	private final String localAddress = this.fetchLocalAddress();
+	// Sequencenumber im Serviceobjekt.
 	private long sequenceNumber = 0;
-	private boolean serverRunning = false;
-	private boolean isServer = true;
 	
+	// Unterscheidungen zwischen Client und Server.
+	private boolean serverRunning = false;
+	private boolean isServer = false;
+	
+	// Getter + Setter
 	public boolean isServer() {
 		return isServer;
 	}
@@ -69,6 +81,11 @@ public class LWTRTServiceImpl implements LWTRTService {
 		this.wrapper = wrapper;
 	}
 
+	// Registriert einen Port. Erstellt Wrapper und speichert ihn in der socketMap.
+	// Wenn ein Port schon registriert wurde, wird automatisch inkrementiert und nochmal
+	// versucht bis ein freier Port gefunden wurde. (quasi Server hat bei lokalem Testen fest die 50000,
+	// Client versucht auch die 50000, belegt, also nimmt er als listenport die 50001. Jeder weitere Client simultan,
+	// der User hat damit nichts zu tun. Nur der Port des Servers muss bekannt sein.)
 	@Override
 	public void register(int listenPort) throws LWTRTException {
 		try {
@@ -83,6 +100,7 @@ public class LWTRTServiceImpl implements LWTRTService {
 		}
 	}
 
+	// Port aus der Map raus und wrapper schließen.
 	@Override
 	public void unregister() throws LWTRTException {
 		try {
@@ -93,7 +111,10 @@ public class LWTRTServiceImpl implements LWTRTService {
 			e.printStackTrace();
 		}
 	}
-
+	
+	// Client versucht einen Connect zu einer Zieladresse. Pdu wird weggeschickt und es wird auf ein ResponsePDU
+	// gewartet. Über die Calendarklasse wird 10 Sekunden auf Response gewartet und eventuell nochmal geschickt.
+	// Kommt Response zurück wird Verbindung aufgebaut.
 	@Override
 	public LWTRTConnection connect(String remoteAddress, int remotePort) throws LWTRTException {
 		
@@ -101,7 +122,8 @@ public class LWTRTServiceImpl implements LWTRTService {
 		LWTRTPdu conReq = new LWTRTPdu(LWTRTPdu.OPID_CONNECT_REQ, remotePort, remoteAddress, this.sequenceNumber, null);
 		LWTRTPdu conRecv = new LWTRTPdu();
 		
-		// Schleife für 2 Wiederholungen
+		// Schleife für 2 Wiederholungen. Nicht ganz sicher ob so optimal. Haben ein wenig ausprobiert,
+		// Lösung in ConnectionImpl etwas anders. (Alternative wäre ein Timer gewesen).
 		for (int i=1; i<=2; i++) {
 			try {
 				wrapper.send(conReq);
@@ -126,22 +148,25 @@ public class LWTRTServiceImpl implements LWTRTService {
 				break; //For
 			}
 		} 
-		
+		// Neue Connection erstellen. Ab in die connectionmap. Passende Threads starten und connection zurückgeben.
+		// Das ganze ist jetzt Clientseitig ausgelegt!
 		LWTRTConnectionImpl connection =  new LWTRTConnectionImpl(localAddress, listenPort,
 				conRecv.getRemoteAddress(), conRecv.getRemotePort(), this);
 		connectionMap.put(conRecv.getRemotePort(), connection);
-		LWTRTServiceRecvThread thread = new LWTRTServiceRecvThread();
-		thread.start();
+		LWTRTServiceRecvThread recvThread = new LWTRTServiceRecvThread();
+		recvThread.start();
 		LWTRTConnectionRecvThread handleThread = new LWTRTConnectionRecvThread(this);
 		handleThread.start();
 		return connection;
 	}
 
+	// Serverseitig... accept muss also ständig auf connectionrequests warten.
 	@Override
 	public LWTRTConnection accept() throws LWTRTException {	
 		LWTRTPdu recvPdu = new LWTRTPdu();
 		UdpSocketWrapper wrapper = LWTRTServiceImpl.socketMap.get((Integer) listenPort);
 		LWTRTConnectionImpl connection;
+		// 1. Fall: Server hat noch keine Connection aufgebaut. Simultan zu connect nur in while!
 		if (!serverRunning) {
 			while (true) {
 				try {
@@ -179,6 +204,13 @@ public class LWTRTServiceImpl implements LWTRTService {
 				}
 			}
 		} else {
+			// etwas redundant, aber dafür deutlich.
+			// 2. Fall: Der Server läuft schon, muss aber trotzdem auf connections warten.
+			// Es wird ständig in einem Vector geschaut, ob ein connectionrequest ankam und dann
+			// simultan zum 1. Fall darauf reagiert. Threads werden jetzt allerdings nicht mehr gesartet,
+			// da sie nach der ersten Connection schon laufen. Anhand der connectionMap mit den unterschiedlichen
+			// Remoteports, kann jetzt auf alle Clients reagiert werden. Jede Verbindung wird durch ein ConnectionImpl Objekt
+			// realisiert.
 			while (true) {
 				if (!connectionRequests.isEmpty()) {
 					recvPdu = connectionRequests.firstElement();
@@ -218,6 +250,10 @@ public class LWTRTServiceImpl implements LWTRTService {
 		return localAddress;
 	}
 	
+	// Innere Klasse für den generellen Receivethread. Synchronisiert mit dem passenden UDPwrapper(1 Paket nach dem anderen :)).
+	// Sobald eine Connection entstanden ist, läuft dieser Thread. Er macht nichts anderes, als die receive-Methode in
+	// der Wrapperklasse aufzurufen. Wenn ein Paket empfangen wurde, wird es im Vector des Serviceobjekts gespeichert.
+	// Kurzer Sleep nach jedem Durchlauf (Performanz).
 	public class LWTRTServiceRecvThread extends Thread {
 		
 		UdpSocketWrapper wrapper = socketMap.get((listenPort));
@@ -237,7 +273,7 @@ public class LWTRTServiceImpl implements LWTRTService {
 					recvCache.add(recvPdu);
 					log.debug("PDU in Receive-Cache gespeichert. Hash:  " +recvPdu);
 					try{
-						Thread.sleep(20);
+						Thread.sleep(25);
 					} catch (InterruptedException e){
 						log.debug(e);
 					}

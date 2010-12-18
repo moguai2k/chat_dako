@@ -44,7 +44,6 @@ public class Client implements ChatEventListener {
 	
 	//Attribute//
 	private ClientCommunicator clientCommunicator;
-	private ChatClientService chatClientService;
 	private String userName, userIP, userPort;	
 	private static Log log = LogFactory.getLog(Client.class);
 	//Chat
@@ -610,12 +609,8 @@ public class Client implements ChatEventListener {
     //LoginTO
 	public void login(String userName, String remoteAdress, int remotePort) {
 		log.debug(userName + " meldet sich im Chat an mit Remote-Addy: " +  remoteAdress + " und Port: "+ remotePort);
-		System.out.println();
-		ChatClientServiceFactoryImpl clServFac = new ChatClientServiceFactoryImpl();	
 		try {
-			chatClientService = clServFac.register(50000); //Registriet mal fest 50000 als Listener
-			chatClientService.create(remoteAdress, remotePort, userName); //Baut eine Session mit dem angegeben Partner auf
-			clientCommunicator = new ClientCommunicator(this, chatClientService, userName);
+			clientCommunicator = new ClientCommunicator(this, remoteAdress, remotePort, userName);
 			} catch (ChatServiceException e) {
 				new ChatServiceException("Verbindungsfehler.");
 			}

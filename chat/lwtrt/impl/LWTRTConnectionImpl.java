@@ -20,7 +20,8 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 	private final int SECONDS_RETRY = 10;
 	
 	// Lokale Adresse und Port + Remoteadresse und Port.
-	// Die lokale wird in einer Connection mal mitgespeicher, obwohl Sie eigentlich garnicht verwendet wird.
+	// Die lokale wird in jeder Connection mitgespeicher, obwohl Sie eigentlich garnicht benötigt wird.
+	// Ich habe da irgendwas in der Spezifikation von gelesen. Für debug und logging Zwecke vielleicht ganz sinnvoll.
 	private String localAddress;
 	private String remoteAddress;
 	private int localPort;
@@ -138,23 +139,23 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 		responseArrivedResend(pdu);
 	}
 	
+	// Der dataTrunk enthält die PDUS mit den eigentlichen Daten.
+	// Im Pdu wird der eigentliche Datenkern als Object realisiert.
+	// Diese Methode gibt auf dieser Basis die empfangenen Datenpakete 
+	// an seinen Aufrufer zurück. Wenn nichts da ist, gibts null.
 	@Override
 	public Object receive() throws LWTRTException {
-		while (true) {
-			if (!this.dataTrunk.isEmpty()) {
-				LWTRTPdu pdu = this.dataTrunk.firstElement();
-				this.dataTrunk.remove(pdu);
-				log.debug("PDU abgearbeitet und aus Trunk entfernt");
-				return pdu.getUserData();
-			}
-			try {
-				Thread.sleep(50);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+		if (!this.dataTrunk.isEmpty()) {
+			LWTRTPdu pdu = this.dataTrunk.firstElement();
+			this.dataTrunk.remove(pdu);
+			log.debug("PDU abgearbeitet und aus Trunk entfernt");
+			return pdu.getUserData();
 		}
+		else return null;
 	}
-
+	
+	// Ping realisiert, wird allerdings nicht verwendet. Hätten wir noch mehr Zeit gehabt, wären z.B. Pings
+	// alle x-Sekunden interessant gewesen (Ob der Partner noch aktiv ist).
 	@Override
 	public void ping() throws LWTRTException {	
 		LWTRTPdu pdu = new LWTRTPdu();
