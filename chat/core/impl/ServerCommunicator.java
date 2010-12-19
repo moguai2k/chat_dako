@@ -37,6 +37,8 @@ public class ServerCommunicator extends Thread implements ChatServerListener {
 		} catch (ChatServiceException e) {
 			log.error(e);
 		}
+		// erst wenn der UserName in Variable gesetzt, bitte login ausführen.
+		// Manchmal kam es zu nullpointern, da der login vor setzen des Usernames ausgeführt wurde.
 		while (true) {
 			if (chatServerService.getUserName() != null) {
 				onLogin(chatServerService.getUserName());

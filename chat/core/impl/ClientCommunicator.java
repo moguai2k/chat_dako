@@ -21,8 +21,11 @@ public class ClientCommunicator implements ChatClientListener {
 	//Ctor
 	public ClientCommunicator(Client client, String remoteAdress, int remotePort, String userName) throws ChatServiceException {
 		ChatClientServiceFactoryImpl clServFac = new ChatClientServiceFactoryImpl();	
-		chatClientService = clServFac.register(50000); //Registriet mal fest 50000 als Listener
-		chatClientService.create(remoteAdress, remotePort, userName); //Baut eine Session mit dem angegeben Partner auf
+		// Bei jedem Clienten wird erstmal als listenport die 50000 versucht, wenn der Port dann schon belegt ist,
+		// regelt die register Methode auf LWTRT-Schicht, ohne dass der User etwas damit zu tun hat.
+		chatClientService = clServFac.register(50000);
+		// Verbindung zu einem Partner wird aufgebaut.
+		chatClientService.create(remoteAdress, remotePort, userName);
 		this.client = client;
 		try {
 			chatClientService.registerChatSessionListener(this);
