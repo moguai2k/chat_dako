@@ -15,7 +15,7 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 	// Log
 	private static Log log = LogFactory.getLog(LWTRTConnectionImpl.class);
 	
-	// 2x neu sende, jeweils 10 Sekunden warten.
+	// 2x neu senden, jeweils 10 Sekunden warten.
 	private final int RESENDING_TIMES = 2;
 	private final int SECONDS_RETRY = 10;
 	
@@ -95,6 +95,7 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 	
 // Ende Getter + Setter
 
+	// disconnect-Request wird versendet.
 	@Override
 	public void disconnect() throws LWTRTException {
 		LWTRTPdu pdu = new LWTRTPdu();
@@ -110,6 +111,11 @@ public class LWTRTConnectionImpl implements LWTRTConnection {
 		responseArrivedResend(pdu);
 	}
 
+	// Baustelle... naja, wir wussten jetzt nicht genau, was mit der Methode anzufangen ist.
+	// Im Endeffekt wird sie jetzt nach einem erfolgreichen disconnect aufgerufen und macht eine
+	// GarbageCollection. (nur im Server, da der Client ja beendet wurde). Der Client soll seinen service 
+	// abmelden, jedoch ist er wahrscheinlich vorher schon geschlossen. (wie in der Email erwähnt... disconnect durch
+	// alle Schichten.)
 	@Override
 	public void acceptDisconnection() throws LWTRTException {
 		if (service.isServer()) {
