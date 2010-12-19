@@ -12,10 +12,9 @@ import chatsession.ChatServerServiceFactory;
 import chatsession.ex.ChatServiceException;
 
 /**
- * The Enum ServerSessionFactoryImpl.
- * 
- * @author Hochschule München
- * @version 1.0.0
+ * Service auf LWTRTSchicht wird erstellt. Zwei Methoden sind verfügbar. register registriert 
+ * einen listenPort. getSession wartet dann auf Verbindungsanfragen. Wenn eine Verbindung aufgebaut wurde,
+ * wird ein neues ChatServiceImpl-Objekt erstellt, neu erstellt Verbindung gesetzt und Objekt zurückgegeben.
  */
 public class ChatServerServiceFactoryImpl implements ChatServerServiceFactory {
 
@@ -35,6 +34,7 @@ public class ChatServerServiceFactoryImpl implements ChatServerServiceFactory {
 	
 	public ChatServerService getSession() throws ChatServiceException {
 		LWTRTConnection connection;
+		// Synchronisiert mit dem Service! Eine Verbindung nach der anderen!
 		synchronized (lwtrtService) {
 			try {
 				connection = lwtrtService.accept();

@@ -15,8 +15,6 @@ import lwtrt.ex.LWTRTException;
 /**
  * The Class ClientSessionImpl.
  * 
- * @author Hochschule München
- * @version 1.0.0
  */
 public class ChatClientServiceImpl extends BaseServiceImpl implements ChatClientService {
 	//Attribute//
@@ -30,19 +28,19 @@ public class ChatClientServiceImpl extends BaseServiceImpl implements ChatClient
 		this.lwtrtService = lwtrtService;
 	}
 	
-	
+	// Connection wird erstellt zu einem Partner erstellt.
 	@Override
 	public void create(String serverAdress, int serverPort, String name) throws ChatServiceException {
 		super.userName = name;
 		try {
 			super.setConnection(lwtrtService.connect(serverAdress, serverPort));
-			log.debug("Connection erstellt zu: " +serverAdress+ ", Remoteport: " +serverPort);
+			//log.debug("Connection erstellt zu: " +serverAdress+ ", Remoteport: " +serverPort);
 		} catch (LWTRTException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	
+	// Chatmessage senden
 	@Override
 	public void sendMessage(ChatMessage message) throws ChatServiceException {
 		ChatPdu pdu = new ChatPdu(); //neue PDU 
@@ -57,7 +55,7 @@ public class ChatClientServiceImpl extends BaseServiceImpl implements ChatClient
 		}
 	}
 
-	
+	// Chataction senden
 	@Override
 	public void sendAction(ChatAction action) throws ChatServiceException {
 		ChatPdu pdu = new ChatPdu();
@@ -71,7 +69,8 @@ public class ChatClientServiceImpl extends BaseServiceImpl implements ChatClient
 		}
 	}
 
-	
+	// Listener wird gestartet. Thread zum Holen der ChatPdu´s wird gestartet
+	// und ein Chatsession-Request wird an den Partner geschickt.
 	@Override
 	public void registerChatSessionListener(ChatClientListener listener) throws ChatServiceException {
 		log.debug ("-- ChatSessionListner registriert -- ");
@@ -93,7 +92,7 @@ public class ChatClientServiceImpl extends BaseServiceImpl implements ChatClient
 		}
 	}
 	
-	
+	// Verbindung soll getrennt werden.
 	@Override
 	public void destroy() throws ChatServiceException {
 		ChatPdu pdu = new ChatPdu();
@@ -125,7 +124,7 @@ public class ChatClientServiceImpl extends BaseServiceImpl implements ChatClient
 		}
 	}
 
-	
+	// Behandlung der ChatPdu auf der Ebene des Clients.
 	@Override
 	protected void handleChatPdu(ChatPdu pdu) {
 		log.debug("Behandle gerade folgende pduID: " +pdu.getOpId());

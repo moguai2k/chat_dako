@@ -1,5 +1,7 @@
 package chatsession.impl;
-
+/*
+ * Client und Server erben von dieser Klasse. Der Thread zur Behandlung der ChatPdu´s ist hier implementiert.
+ */
 import lwtrt.LWTRTConnection;
 import lwtrt.ex.LWTRTException;
 
@@ -18,7 +20,6 @@ public abstract class BaseServiceImpl implements BaseSessionService {
 	protected LWTRTConnection connection;
 	protected SessionStatus currentStatus = SessionStatus.NO_SESSION;
 	protected String userName;
-	protected ChatPdu chatPdu;
 
 	
 	//Session-Enums
@@ -31,7 +32,7 @@ public abstract class BaseServiceImpl implements BaseSessionService {
 		}
 	}
 
-	
+	// Wie werden die ChatPdu´s bearbeitet? Unterschiedliche Implementation Server/Client.
 	protected abstract void handleChatPdu(ChatPdu pdu);
 	
 	
@@ -66,7 +67,8 @@ public abstract class BaseServiceImpl implements BaseSessionService {
 	}
 	
 	
-	//Thread-RUNit
+	// Thread auf Chatsession-Schicht. Ruft ständig in der Connection receive auf und behandelt es,
+	// wenn es sich um ein Objekt der Klasse ChatPdu handelt. Kleiner Sleep nach jedem Durchlauf (performance).
 	public class Threading extends Thread {
 		LWTRTConnection connection;
 		BaseServiceImpl baseService;

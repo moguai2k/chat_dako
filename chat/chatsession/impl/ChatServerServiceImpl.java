@@ -14,18 +14,14 @@ import chatsession.pdu.ChatPdu;
 import chatsession.pdu.ChatUserList;
 import chatsession.pdu.ChatPdu.ChatOpId;
 
-/**
- * The Class ServerSessionImpl.
- * 
- * @author Hochschule München
- * @version 1.0.0
- */
-public class ChatServerServiceImpl extends BaseServiceImpl implements
-		ChatServerService {
+public class ChatServerServiceImpl extends BaseServiceImpl implements ChatServerService {
 	
+	// Log
 	private static Log log = LogFactory.getLog(ChatServerServiceImpl.class);
+	// Listener
 	ChatServerListener listener;
 
+	// Message senden.
 	@Override
 	public void sendMessage(ChatMessage message) throws ChatServiceException {
 		ChatPdu pdu = new ChatPdu();
@@ -39,6 +35,7 @@ public class ChatServerServiceImpl extends BaseServiceImpl implements
 		}
 	}
 
+	// ChatAction senden.
 	@Override
 	public void sendAction(ChatAction action) throws ChatServiceException {
 		ChatPdu pdu = new ChatPdu();
@@ -51,6 +48,7 @@ public class ChatServerServiceImpl extends BaseServiceImpl implements
 		}
 	}
 
+	// Userliste senden.
 	@Override
 	public void sendUserList(ChatUserList userlist) throws ChatServiceException {
 		ChatPdu pdu = new ChatPdu();
@@ -63,19 +61,16 @@ public class ChatServerServiceImpl extends BaseServiceImpl implements
 		}
 	}
 
+	// Listener registrieren und Thread zur Behandlung der ChatPdu´s starten.
 	@Override
 	public void registerChatSessionListener(ChatServerListener listener)
 			throws ChatServiceException {
 		this.listener = listener;
-		log.debug("ChatSessionListener registriert.");
+		log.debug("--ChatSessionListener registriert.--");
 		super.startThread();
 	}
-
-	public String getUserName() {
-		return super.getUserName();
-	}
 	
-
+	// Server beenden.
 	@Override
 	public void destroy() throws ChatServiceException {
 		try {
@@ -86,6 +81,7 @@ public class ChatServerServiceImpl extends BaseServiceImpl implements
 		log.debug("Session von " +super.userName+ " beendet");	
 	}
 
+	// Behandlung der ChatPdu auf Seite des Servers.
 	@Override
 	protected void handleChatPdu(ChatPdu pdu) {
 		log.debug("Behandle gerade folgende pduID: " +pdu.getOpId());
